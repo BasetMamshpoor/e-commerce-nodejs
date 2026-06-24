@@ -1,0 +1,1063 @@
+// ============================================================================
+// schema.prisma — اسکیمای کامل دیتابیس فروشگاه اینترنتی
+// ----------------------------------------------------------------------------
+// نکات کلی:
+// - تمام مقادیر مالی (قیمت، تخفیف، موجودی کیف پول و ...) به صورت Int و در
+//   واحد «تومان» در نظر گرفته شده‌اند. اگر مبالغ بسیار بزرگ (بیش از ۲٫۱ میلیارد)
+//   دارید، این فیلدها را به BigInt تغییر دهید.
+// - شناسه‌ها (id) از نوع cuid() هستند تا هم در سمت کلاینت قابل تولید باشند و هم
+//   ترتیب‌پذیر و یکتا باشند.
+// - برای جلوگیری از وابستگی سخت به یک رکورد در حال تغییر (مثل آدرس یا تنوع
+//   محصول که ممکن است بعداً ویرایش/حذف شود)، در سفارش‌ها از «اسنپ‌شات» داده
+//   (snapshot) استفاده شده تا تاریخچه سفارش هرگز تغییر نکند.
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql" // در صورت نیاز می‌توانید به mysql تغییر دهید
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum Role {
+  ADMIN
+  EDITOR
+  SUPPORT
+  CUSTOMER
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
+}
+
+enum AttributeInputType {
+  TEXT
+  COLOR
+  SELECT
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+enum OtpChannel {
+  SMS
+  EMAIL
+}
+
+enum OtpPurpose {
+  REGISTER
+  LOGIN
+  RESET_PASSWORD
+  VERIFY_PHONE
+  VERIFY_EMAIL
+  CHANGE_PHONE
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURN_REQUESTED
+  RETURNED
+  REFUNDED
+  FAILED
+}
+
+enum PaymentMethod {
+  GATEWAY
+  WALLET
+  MIXED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum TransactionType {
+  ORDER_PAYMENT
+  WALLET_CHARGE
+  REFUND
+}
+
+enum CancellationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ReturnStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RECEIVED
+  REFUNDED
+}
+
+enum WalletTransactionType {
+  DEPOSIT
+  WITHDRAW
+  PURCHASE
+  REFUND
+  ADMIN_ADJUST
+}
+
+enum TicketStatus {
+  OPEN
+  ANSWERED
+  CLOSED
+  PENDING_CUSTOMER
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum SenderType {
+  USER
+  ADMIN
+}
+
+enum CommentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum NotificationType {
+  ORDER
+  SYSTEM
+  TICKET
+  PROMOTION
+  WALLET
+  COMMENT
+}
+
+enum BannerPosition {
+  HOME_MAIN
+  HOME_MIDDLE
+  CATEGORY_TOP
+  SIDEBAR
+}
+
+// ============================================================================
+// 11 + 25. کاربران، احراز هویت و امنیت
+// ============================================================================
+
+model User {
+  id              String    @id @default(cuid())
+  fullName        String?
+  email           String?   @unique
+  phone           String?   @unique
+  password        String? // برای کاربرانی که فقط با OTP وارد می‌شوند می‌تواند خالی باشد
+  role            Role      @default(CUSTOMER)
+  avatarId        String?
+  avatar          Media?    @relation("UserAvatar", fields: [avatarId], references: [id])
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+
+  // کنترل‌های امنیتی (آیتم ۲۵)
+  isBlocked     Boolean   @default(false)
+  blockedReason String?
+  blockedAt     DateTime?
+  lastLoginAt   DateTime?
+  lastLoginIp   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  addresses          Address[]
+  sessions           UserSession[]
+  otpCodes           OtpCode[]
+  loginAttempts      LoginAttempt[]
+  wallet             Wallet?
+  cart               Cart?
+  wishlists          Wishlist[]
+  productComparisons ProductComparison[]
+  orders             Order[]
+  comments           Comment[]
+  commentLikes       CommentLike[]
+  tickets            Ticket[]
+  ticketMessages     TicketMessage[]
+  notifications      Notification[]
+  discountCodeUsers  DiscountCodeUser[]
+  discountCodeUsages DiscountCodeUsage[]
+  transactions       Transaction[]
+  uploadedMedia      Media[]             @relation("UploadedMedia")
+  createdProducts    Product[]           @relation("ProductCreatedBy")
+  auditLogs          AuditLog[]
+
+  @@index([role])
+}
+
+// آدرس‌های کاربر — همراه با موقعیت روی نقشه (آیتم ۱۸)
+model Address {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String? // مثل «خانه»، «محل کار»
+  receiverName  String
+  receiverPhone String
+  province      String
+  city          String
+  postalCode    String?
+  fullAddress   String
+  lat           Float? // موقعیت دریافت‌شده از نقشه
+  lng           Float?
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  orders Order[]
+
+  @@index([userId])
+}
+
+// نشست‌های فعال کاربر — برای محدودسازی تعداد نشست‌ها و شناسایی دستگاه/IP (آیتم ۲۵)
+model UserSession {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token          String    @unique
+  ip             String?
+  userAgent      String?
+  deviceName     String?
+  isActive       Boolean   @default(true)
+  lastActivityAt DateTime  @default(now())
+  createdAt      DateTime  @default(now())
+  expiresAt      DateTime?
+
+  @@index([userId])
+}
+
+// تلاش‌های ورود — مبنای محدودسازی نرخ درخواست و شناسایی حملات Brute-force (آیتم ۲۵)
+model LoginAttempt {
+  id           String   @id @default(cuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id])
+  identifier   String // شماره موبایل یا ایمیل واردشده
+  ip           String?
+  userAgent    String?
+  isSuccessful Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([identifier])
+  @@index([ip])
+}
+
+// IP های مسدودشده (آیتم ۲۵)
+model BlockedIp {
+  id        String    @id @default(cuid())
+  ip        String    @unique
+  reason    String?
+  blockedAt DateTime  @default(now())
+  expiresAt DateTime?
+}
+
+// کدهای یک‌بارمصرف برای ثبت‌نام/ورود/فراموشی رمز با پیامک یا ایمیل (آیتم ۱۱)
+model OtpCode {
+  id         String     @id @default(cuid())
+  userId     String?
+  user       User?      @relation(fields: [userId], references: [id])
+  identifier String // شماره موبایل یا ایمیل
+  channel    OtpChannel
+  purpose    OtpPurpose
+  code       String
+  attempts   Int        @default(0)
+  isUsed     Boolean    @default(false)
+  expiresAt  DateTime
+  createdAt  DateTime   @default(now())
+
+  @@index([identifier, purpose])
+}
+
+// ============================================================================
+// ۱۷. بخش رسانه‌ها (مدیریت فایل‌های آپلودی)
+// ============================================================================
+
+model Media {
+  id            String   @id @default(cuid())
+  url           String
+  type          MediaType @default(IMAGE)
+  mimeType      String?
+  size          Int? // بایت
+  alt           String?
+  uploadedById  String?
+  uploadedBy    User?    @relation("UploadedMedia", fields: [uploadedById], references: [id])
+  createdAt     DateTime @default(now())
+
+  avatarOf           User[]               @relation("UserAvatar")
+  productImages      ProductImage[]
+  variantImages      ProductVariantImage[]
+  categories         Category[]
+  brands             Brand[]
+  shippingCompanies  ShippingCompany[]
+  banners            Banner[]
+  popups             Popup[]
+  ticketAttachments  TicketAttachment[]
+  commentAttachments CommentAttachment[]
+  returnImages       OrderReturnImage[]
+
+  @@index([type])
+}
+
+// ============================================================================
+// ۲۱. دسته‌بندی، برند و ویژگی‌ها
+// ============================================================================
+
+// دسته‌بندی چندلایه (درختی) — آیتم ۳
+model Category {
+  id              String     @id @default(cuid())
+  name            String
+  slug            String     @unique
+  description     String?
+  imageId         String?
+  image           Media?     @relation(fields: [imageId], references: [id])
+  parentId        String?
+  parent          Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children        Category[] @relation("CategoryHierarchy")
+  order           Int        @default(0)
+  isActive        Boolean    @default(true)
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  products      ProductCategory[]
+  discountCodes DiscountCodeCategory[]
+  attributes    CategoryAttribute[]
+
+  @@index([parentId])
+}
+
+// برند — آیتم ۲۱
+model Brand {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  description     String?
+  logoId          String?
+  logo            Media?   @relation(fields: [logoId], references: [id])
+  isActive        Boolean  @default(true)
+  metaTitle       String?
+  metaDescription String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  products Product[]
+}
+
+// ویژگی‌های قابل تعریف (رنگ، جنس، سایز، کشور سازنده و ...) — آیتم ۱ و ۲۱
+model Attribute {
+  id           String             @id @default(cuid())
+  name         String
+  slug         String             @unique
+  inputType    AttributeInputType @default(SELECT)
+  isFilterable Boolean            @default(true) // در فیلترهای صفحه فروشگاه نمایش داده شود؟
+  isVariant    Boolean            @default(true) // در ساخت تنوع محصول استفاده می‌شود؟
+  createdAt    DateTime           @default(now())
+
+  values     AttributeValue[]
+  categories CategoryAttribute[]
+}
+
+model AttributeValue {
+  id          String    @id @default(cuid())
+  attributeId String
+  attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  value       String // مثلا «قرمز»، «پنبه»، «۴۲»، «ایران»
+  colorHex    String? // فقط برای ویژگی‌های رنگی
+  order       Int       @default(0)
+
+  variantValues ProductVariantAttributeValue[]
+
+  @@unique([attributeId, value])
+}
+
+// تعیین می‌کند کدام ویژگی‌ها برای کدام دسته‌بندی معنی دارند (مثلا «سایز کفش» فقط در دسته کفش)
+model CategoryAttribute {
+  id          String    @id @default(cuid())
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  attributeId String
+  attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, attributeId])
+}
+
+// ============================================================================
+// ۱ + ۲ + ۲۴. محصولات، تنوع‌ها (Variants) و تکست ادیتور
+// ============================================================================
+
+model Product {
+  id               String        @id @default(cuid())
+  name             String
+  slug             String        @unique
+  brandId          String?
+  brand            Brand?        @relation(fields: [brandId], references: [id])
+  shortDescription String?
+  description      String? // خروجی HTML تکست ادیتور — آیتم ۲۴
+  status           ProductStatus @default(DRAFT)
+  isFeatured       Boolean       @default(false)
+  viewCount        Int           @default(0)
+
+  // فیلدهای denormalize شده — هر بار که تنوع‌های محصول (variants) تغییر
+  // می‌کند (ایجاد/ویرایش/حذف)، این مقادیر در سرویس مربوطه بازمحاسبه و
+  // به‌روزرسانی می‌شوند. دلیل: مرتب‌سازی/فیلتر بر اساس قیمت یا موجودی
+  // مستقیماً روی محصولات بسیار سریع‌تر و مطمئن‌تر از join زنده با variants
+  // در هر کوئری لیست محصولات صفحه فروشگاه است.
+  minPrice          Int     @default(0) // کمترین قیمت بین تنوع‌های فعال
+  maxPrice          Int     @default(0) // بیشترین قیمت بین تنوع‌های فعال
+  isInStock         Boolean @default(false) // آیا حداقل یک تنوع فعال موجودی دارد
+  hasActiveDiscount Boolean @default(false) // آیا حداقل یک تنوع تخفیف فعال دارد
+
+  // سئو — آیتم ۲۳
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  structuredData  Json? // override دستی برای Schema.org در صورت نیاز
+
+  createdById String?
+  createdBy   User?    @relation("ProductCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  categories       ProductCategory[]
+  variants         ProductVariant[]
+  images           ProductImage[]
+  wishlists        Wishlist[]
+  comments         Comment[]
+  discountCodes    DiscountCodeProduct[]
+  productViews     ProductView[]
+  comparisonItems  ProductComparisonItem[]
+
+  @@index([brandId])
+  @@index([status])
+  @@index([isFeatured])
+  @@index([minPrice])
+  @@index([isInStock])
+}
+
+// محصول می‌تواند در چند دسته‌بندی همزمان قرار بگیرد
+model ProductCategory {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, categoryId])
+}
+
+// تصاویر عمومی محصول (مستقل از تنوع‌ها)
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  mediaId   String
+  media     Media   @relation(fields: [mediaId], references: [id])
+  order     Int     @default(0)
+  isMain    Boolean @default(false)
+
+  @@index([productId])
+}
+
+// تنوع کالا: هر ترکیب رنگ/سایز/... با قیمت، موجودی و تخفیف مجزا — آیتم ۲
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku       String  @unique
+
+  price          Int // قیمت پایه این تنوع (تومان)
+  compareAtPrice Int? // قیمت قبل از تخفیف برای نمایش خط‌خورده
+
+  // تخفیف مخصوص همین تنوع کالا
+  discountType    DiscountType?
+  discountValue   Int?
+  discountStartAt DateTime?
+  discountEndAt   DateTime?
+
+  stock    Int     @default(0)
+  weight   Float? // برای محاسبه هزینه ارسال
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attributeValues ProductVariantAttributeValue[]
+  images          ProductVariantImage[]
+  cartItems       CartItem[]
+  orderItems      OrderItem[]
+
+  @@index([productId])
+  @@index([price])
+}
+
+// پیوند هر تنوع به مقادیر ویژگی‌ها (مثلا رنگ=قرمز + سایز=L)
+model ProductVariantAttributeValue {
+  id               String         @id @default(cuid())
+  variantId        String
+  variant          ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  attributeValueId String
+  attributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id], onDelete: Cascade)
+
+  @@unique([variantId, attributeValueId])
+}
+
+// تصاویر مخصوص هر تنوع (مثلا عکس‌های جدا برای هر رنگ)
+model ProductVariantImage {
+  id        String         @id @default(cuid())
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  mediaId   String
+  media     Media          @relation(fields: [mediaId], references: [id])
+  order     Int            @default(0)
+}
+
+// بازدید محصول — برای نمودارهای آنالیزی (آیتم ۱۶)
+model ProductView {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// ۵ + ۶. لیست علاقه‌مندی و مقایسه محصولات
+// ============================================================================
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+// لیست مقایسه — هم برای کاربر مهمان (sessionToken) و هم کاربر عضو
+model ProductComparison {
+  id           String   @id @default(cuid())
+  userId       String?  @unique
+  user         User?    @relation(fields: [userId], references: [id])
+  sessionToken String?  @unique // برای کاربران مهمان (ذخیره در کوکی)
+  createdAt    DateTime @default(now())
+
+  items ProductComparisonItem[]
+}
+
+model ProductComparisonItem {
+  id           String            @id @default(cuid())
+  comparisonId String
+  comparison   ProductComparison @relation(fields: [comparisonId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([comparisonId, productId])
+}
+
+// ============================================================================
+// ۷. سبد خرید (مهمان + احراز هویت‌شده)
+// ============================================================================
+
+model Cart {
+  id          String   @id @default(cuid())
+  userId      String?  @unique
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guestToken  String?  @unique // سبد خرید کاربر مهمان، ذخیره‌شده در کوکی/لوکال‌استوریج
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items CartItem[]
+
+  @@index([guestToken])
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, variantId])
+}
+
+// ============================================================================
+// ۴. کد تخفیف (با تمام محدودیت‌های درخواستی)
+// ============================================================================
+
+model DiscountCode {
+  id                String       @id @default(cuid())
+  code              String       @unique
+  type              DiscountType
+  value             Int // درصد یا مبلغ ثابت بسته به type
+  maxDiscountAmount Int? // سقف تخفیف برای نوع درصدی
+  minCartAmount     Int? // حداقل مبلغ سبد خرید برای فعال‌شدن کد
+
+  maxUsage        Int? // حداکثر تعداد استفاده کلی از کد
+  maxUsagePerUser Int? // حداکثر تعداد استفاده هر کاربر از کد
+  usageCount      Int  @default(0) // شمارنده کل استفاده‌ها (برای سرعت بیشتر)
+
+  startsAt  DateTime? // محدودیت زمانی فعال بودن کد
+  expiresAt DateTime?
+  isActive  Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // در صورت خالی بودن این روابط، یعنی محدودیتی روی محصول/دسته/کاربر وجود ندارد
+  products   DiscountCodeProduct[]
+  categories DiscountCodeCategory[]
+  users      DiscountCodeUser[]
+  usages     DiscountCodeUsage[]
+  orders     Order[]
+}
+
+// کد تخفیف مخصوص چند محصول خاص
+model DiscountCodeProduct {
+  id             String       @id @default(cuid())
+  discountCodeId String
+  discountCode   DiscountCode @relation(fields: [discountCodeId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([discountCodeId, productId])
+}
+
+// کد تخفیف مخصوص چند دسته‌بندی خاص
+model DiscountCodeCategory {
+  id             String       @id @default(cuid())
+  discountCodeId String
+  discountCode   DiscountCode @relation(fields: [discountCodeId], references: [id], onDelete: Cascade)
+  categoryId     String
+  category       Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([discountCodeId, categoryId])
+}
+
+// کد تخفیف مخصوص چند کاربر خاص
+model DiscountCodeUser {
+  id             String       @id @default(cuid())
+  discountCodeId String
+  discountCode   DiscountCode @relation(fields: [discountCodeId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([discountCodeId, userId])
+}
+
+// تاریخچه واقعی استفاده از کد تخفیف — مبنای محاسبه maxUsage و maxUsagePerUser
+model DiscountCodeUsage {
+  id              String       @id @default(cuid())
+  discountCodeId  String
+  discountCode    DiscountCode @relation(fields: [discountCodeId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User         @relation(fields: [userId], references: [id])
+  orderId         String       @unique
+  order           Order        @relation(fields: [orderId], references: [id])
+  discountAmount  Int
+  usedAt          DateTime     @default(now())
+
+  @@index([discountCodeId, userId])
+}
+
+// ============================================================================
+// ۹. شرکت‌های ارسال‌کننده
+// ============================================================================
+
+model ShippingCompany {
+  id               String   @id @default(cuid())
+  name             String
+  logoId           String?
+  logo             Media?   @relation(fields: [logoId], references: [id])
+  description      String?
+  baseCost         Int      @default(0)
+  estimatedDaysMin Int?
+  estimatedDaysMax Int?
+  isActive         Boolean  @default(true)
+
+  orders Order[]
+}
+
+// ============================================================================
+// ۸. درگاه‌های پرداخت و تراکنش‌ها
+// ============================================================================
+
+model PaymentGateway {
+  id       String  @id @default(cuid())
+  name     String
+  slug     String  @unique
+  isActive Boolean @default(true)
+  config   Json? // merchantId و سایر تنظیمات اتصال به درگاه
+
+  transactions Transaction[]
+}
+
+// هر تراکنش پولی: پرداخت سفارش از درگاه، شارژ کیف پول یا بازگشت وجه
+model Transaction {
+  id           String          @id @default(cuid())
+  orderId      String?
+  order        Order?          @relation(fields: [orderId], references: [id])
+  gatewayId    String?
+  gateway      PaymentGateway? @relation(fields: [gatewayId], references: [id])
+  userId       String
+  user         User            @relation(fields: [userId], references: [id])
+  type         TransactionType
+  amount       Int
+  status       PaymentStatus   @default(PENDING)
+  refId        String? // شماره مرجع درگاه
+  trackingCode String?         @unique
+  createdAt    DateTime        @default(now())
+
+  @@index([orderId])
+  @@index([userId])
+}
+
+// ============================================================================
+// ۱۰. سفارش‌ها، لغو و مرجوعی
+// ============================================================================
+
+model Order {
+  id          String  @id @default(cuid())
+  orderNumber String  @unique
+  userId      String
+  user        User    @relation(fields: [userId], references: [id])
+
+  // آدرس به صورت اسنپ‌شات ذخیره می‌شود تا حتی با تغییر/حذف آدرس اصلی،
+  // سفارش‌های قبلی دست‌نخورده بمانند
+  addressId        String?
+  address          Address?         @relation(fields: [addressId], references: [id])
+  shippingAddress  Json? // کپی کامل آدرس در لحظه ثبت سفارش (حتی اگر آدرس اصلی بعداً تغییر/حذف شود)
+
+  shippingCompanyId String?
+  shippingCompany   ShippingCompany? @relation(fields: [shippingCompanyId], references: [id])
+  shippingCost      Int              @default(0)
+
+  subtotal      Int // جمع کل قبل از تخفیف و هزینه ارسال
+  discountAmount Int   @default(0)
+  taxAmount      Int   @default(0)
+  totalAmount    Int
+
+  discountCodeId String?
+  discountCode   DiscountCode? @relation(fields: [discountCodeId], references: [id])
+
+  paymentMethod PaymentMethod @default(GATEWAY)
+  status        OrderStatus   @default(PENDING_PAYMENT)
+  paidAt        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items         OrderItem[]
+  transactions  Transaction[]
+  statusHistory OrderStatusHistory[]
+  cancellation  OrderCancellation?
+  returns       OrderReturn[]
+  discountUsage DiscountCodeUsage?
+  tickets       Ticket[]
+  walletTransactions WalletTransaction[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id        String         @id @default(cuid())
+  orderId   String
+  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+
+  // اسنپ‌شات اطلاعات کالا در لحظه خرید (مستقل از تغییرات بعدی محصول)
+  productName       String
+  variantAttributes String? // خلاصه‌ای مثل «قرمز - سایز L»
+  price             Int // قیمت واحد در لحظه خرید
+  quantity          Int
+  discountAmount    Int            @default(0)
+
+  returns OrderReturn[]
+
+  @@index([orderId])
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  note      String?
+  createdAt DateTime    @default(now())
+}
+
+// لغو سفارش — آیتم ۱۰
+model OrderCancellation {
+  id          String              @id @default(cuid())
+  orderId     String              @unique
+  order       Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  reason      String
+  status      CancellationStatus  @default(PENDING)
+  requestedAt DateTime            @default(now())
+  reviewedAt  DateTime?
+  adminNote   String?
+}
+
+// مرجوعی سفارش — آیتم ۱۰ (می‌تواند کل سفارش یا یک آیتم خاص باشد)
+model OrderReturn {
+  id           String       @id @default(cuid())
+  orderId      String
+  order        Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItemId  String?
+  orderItem    OrderItem?   @relation(fields: [orderItemId], references: [id])
+  reason       String
+  status       ReturnStatus @default(PENDING)
+  refundAmount Int?
+  createdAt    DateTime     @default(now())
+  reviewedAt   DateTime?
+  adminNote    String?
+
+  images OrderReturnImage[]
+}
+
+model OrderReturnImage {
+  id       String      @id @default(cuid())
+  returnId String
+  return   OrderReturn @relation(fields: [returnId], references: [id], onDelete: Cascade)
+  mediaId  String
+  media    Media       @relation(fields: [mediaId], references: [id])
+}
+
+// ============================================================================
+// ۱۲. کیف پول
+// ============================================================================
+
+model Wallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id          String                @id @default(cuid())
+  walletId    String
+  wallet      Wallet                @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  type        WalletTransactionType
+  amount      Int
+  description String?
+  orderId     String?
+  order       Order?                @relation(fields: [orderId], references: [id])
+  createdAt   DateTime              @default(now())
+
+  @@index([walletId])
+}
+
+// ============================================================================
+// ۱۳. سیستم تیکتینگ
+// ============================================================================
+
+model TicketDepartment {
+  id   String @id @default(cuid())
+  name String
+
+  tickets Ticket[]
+}
+
+model Ticket {
+  id           String            @id @default(cuid())
+  userId       String
+  user         User              @relation(fields: [userId], references: [id])
+  departmentId String?
+  department   TicketDepartment? @relation(fields: [departmentId], references: [id])
+  subject      String
+  priority     TicketPriority    @default(NORMAL)
+  status       TicketStatus      @default(OPEN)
+  orderId      String? // در صورتی که تیکت مرتبط با یک سفارش خاص باشد
+  order        Order?            @relation(fields: [orderId], references: [id])
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  messages TicketMessage[]
+}
+
+model TicketMessage {
+  id         String     @id @default(cuid())
+  ticketId   String
+  ticket     Ticket     @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  senderId   String
+  sender     User       @relation(fields: [senderId], references: [id])
+  senderType SenderType
+  message    String
+  createdAt  DateTime   @default(now())
+
+  attachments TicketAttachment[]
+}
+
+model TicketAttachment {
+  id        String        @id @default(cuid())
+  messageId String
+  message   TicketMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  mediaId   String
+  media     Media         @relation(fields: [mediaId], references: [id])
+}
+
+// ============================================================================
+// ۱۴. سیستم کامنت‌های تودرتو (دیدگاه کاربران روی محصول)
+// ============================================================================
+
+model Comment {
+  id        String        @id @default(cuid())
+  productId String
+  product   Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  parentId  String?
+  parent    Comment?      @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[]     @relation("CommentReplies")
+  content   String
+  rating    Int? // امتیاز فقط روی کامنت‌های اصلی (سطح اول) معنا دارد
+  status    CommentStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  likes       CommentLike[]
+  attachments CommentAttachment[]
+
+  @@index([productId])
+  @@index([parentId])
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId])
+}
+
+model CommentAttachment {
+  id        String  @id @default(cuid())
+  commentId String
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  mediaId   String
+  media     Media   @relation(fields: [mediaId], references: [id])
+}
+
+// ============================================================================
+// ۱۵. نوتیفیکیشن‌های کاربری
+// ============================================================================
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, isRead])
+}
+
+// ============================================================================
+// ۱۹ + ۲۰. بنرها و پاپ‌آپ‌ها
+// ============================================================================
+
+model Banner {
+  id       String         @id @default(cuid())
+  title    String?
+  mediaId  String
+  media    Media          @relation(fields: [mediaId], references: [id])
+  link     String?
+  position BannerPosition
+  order    Int            @default(0)
+  isActive Boolean        @default(true)
+  startsAt DateTime?
+  endsAt   DateTime?
+}
+
+model Popup {
+  id                 String    @id @default(cuid())
+  title              String
+  content            String?
+  mediaId            String?
+  media              Media?    @relation(fields: [mediaId], references: [id])
+  link               String?
+  isActive           Boolean   @default(true)
+  startsAt           DateTime?
+  endsAt             DateTime?
+  showOncePerSession Boolean   @default(true)
+}
+
+// ============================================================================
+// تنظیمات سراسری سایت و لاگ فعالیت‌ها (پشت‌صحنه — برای آیتم‌های ۱۶ و ۲۵)
+// ============================================================================
+
+// تنظیمات کلید-مقدار قابل تغییر از پنل ادمین (نام فروشگاه، سئوی پیش‌فرض، شبکه‌های اجتماعی و ...)
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  type      String   @default("string") // string | number | boolean | json
+  updatedAt DateTime @updatedAt
+}
+
+// لاگ فعالیت‌های مهم — مبنای گزارش‌های امنیتی و برخی نمودارهای آنالیزی
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String?
+  entityId  String?
+  ip        String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+}
