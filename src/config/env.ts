@@ -43,6 +43,10 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional().default(""),
   SMTP_PASS: z.string().optional().default(""),
   SMTP_FROM: z.string().optional().default("My Shop <no-reply@example.com>"),
+
+  // رسانه (آپلود فایل) — آیتم ۱۷
+  UPLOAD_DIR: z.string().default("uploads"),
+  MAX_FILE_SIZE_MB: z.coerce.number().int().positive().default(5),
 });
 
 const parsed = envSchema.safeParse(process.env);

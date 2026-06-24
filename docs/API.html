@@ -1,0 +1,2461 @@
+<!DOCTYPE html>
+<html dir="rtl">
+
+<head>
+  <title>API</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet"
+    href="file:///c:\Users\ABM\.vscode\extensions\shd101wyy.markdown-preview-enhanced-0.8.30\crossnote\dependencies\katex\katex.min.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
+
+
+
+
+
+
+  <style>
+    html body {
+      font-family: "Vazirmatn", sans-serif;
+    }
+
+    code[class*=language-],
+    pre[class*=language-] {
+      color: #333;
+      background: 0 0;
+      font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      text-align: left;
+      white-space: pre;
+      word-spacing: normal;
+      word-break: normal;
+      word-wrap: normal;
+      line-height: 1.4;
+      -moz-tab-size: 8;
+      -o-tab-size: 8;
+      tab-size: 8;
+      -webkit-hyphens: none;
+      -moz-hyphens: none;
+      -ms-hyphens: none;
+      hyphens: none
+    }
+
+    pre[class*=language-] {
+      padding: .8em;
+      overflow: auto;
+      border-radius: 3px;
+      background: #f5f5f5
+    }
+
+    :not(pre)>code[class*=language-] {
+      padding: .1em;
+      border-radius: .3em;
+      white-space: normal;
+      background: #f5f5f5
+    }
+
+    .token.blockquote,
+    .token.comment {
+      color: #969896
+    }
+
+    .token.cdata {
+      color: #183691
+    }
+
+    .token.doctype,
+    .token.macro.property,
+    .token.punctuation,
+    .token.variable {
+      color: #333
+    }
+
+    .token.builtin,
+    .token.important,
+    .token.keyword,
+    .token.operator,
+    .token.rule {
+      color: #a71d5d
+    }
+
+    .token.attr-value,
+    .token.regex,
+    .token.string,
+    .token.url {
+      color: #183691
+    }
+
+    .token.atrule,
+    .token.boolean,
+    .token.code,
+    .token.command,
+    .token.constant,
+    .token.entity,
+    .token.number,
+    .token.property,
+    .token.symbol {
+      color: #0086b3
+    }
+
+    .token.prolog,
+    .token.selector,
+    .token.tag {
+      color: #63a35c
+    }
+
+    .token.attr-name,
+    .token.class,
+    .token.class-name,
+    .token.function,
+    .token.id,
+    .token.namespace,
+    .token.pseudo-class,
+    .token.pseudo-element,
+    .token.url-reference .token.variable {
+      color: #795da3
+    }
+
+    .token.entity {
+      cursor: help
+    }
+
+    .token.title,
+    .token.title .token.punctuation {
+      font-weight: 700;
+      color: #1d3e81
+    }
+
+    .token.list {
+      color: #ed6a43
+    }
+
+    .token.inserted {
+      background-color: #eaffea;
+      color: #55a532
+    }
+
+    .token.deleted {
+      background-color: #ffecec;
+      color: #bd2c00
+    }
+
+    .token.bold {
+      font-weight: 700
+    }
+
+    .token.italic {
+      font-style: italic
+    }
+
+    .language-json .token.property {
+      color: #183691
+    }
+
+    .language-markup .token.tag .token.punctuation {
+      color: #333
+    }
+
+    .language-css .token.function,
+    code.language-css {
+      color: #0086b3
+    }
+
+    .language-yaml .token.atrule {
+      color: #63a35c
+    }
+
+    code.language-yaml {
+      color: #183691
+    }
+
+    .language-ruby .token.function {
+      color: #333
+    }
+
+    .language-markdown .token.url {
+      color: #795da3
+    }
+
+    .language-makefile .token.symbol {
+      color: #795da3
+    }
+
+    .language-makefile .token.variable {
+      color: #183691
+    }
+
+    .language-makefile .token.builtin {
+      color: #0086b3
+    }
+
+    .language-bash .token.keyword {
+      color: #0086b3
+    }
+
+    pre[data-line] {
+      position: relative;
+      padding: 1em 0 1em 3em
+    }
+
+    pre[data-line] .line-highlight-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-color: transparent;
+      display: block;
+      width: 100%
+    }
+
+    pre[data-line] .line-highlight {
+      position: absolute;
+      left: 0;
+      right: 0;
+      padding: inherit 0;
+      margin-top: 1em;
+      background: hsla(24, 20%, 50%, .08);
+      background: linear-gradient(to right, hsla(24, 20%, 50%, .1) 70%, hsla(24, 20%, 50%, 0));
+      pointer-events: none;
+      line-height: inherit;
+      white-space: pre
+    }
+
+    pre[data-line] .line-highlight:before,
+    pre[data-line] .line-highlight[data-end]:after {
+      content: attr(data-start);
+      position: absolute;
+      top: .4em;
+      left: .6em;
+      min-width: 1em;
+      padding: 0 .5em;
+      background-color: hsla(24, 20%, 50%, .4);
+      color: #f4f1ef;
+      font: bold 65%/1.5 sans-serif;
+      text-align: center;
+      vertical-align: .3em;
+      border-radius: 999px;
+      text-shadow: none;
+      box-shadow: 0 1px #fff
+    }
+
+    pre[data-line] .line-highlight[data-end]:after {
+      content: attr(data-end);
+      top: auto;
+      bottom: .4em
+    }
+
+    html body {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #333;
+      background-color: #fff;
+      overflow: initial;
+      box-sizing: border-box;
+      word-wrap: break-word
+    }
+
+    html body>:first-child {
+      margin-top: 0
+    }
+
+    html body h1,
+    html body h2,
+    html body h3,
+    html body h4,
+    html body h5,
+    html body h6 {
+      line-height: 1.2;
+      margin-top: 1em;
+      margin-bottom: 16px;
+      color: #000
+    }
+
+    html body h1 {
+      font-size: 2.25em;
+      font-weight: 300;
+      padding-bottom: .3em
+    }
+
+    html body h2 {
+      font-size: 1.75em;
+      font-weight: 400;
+      padding-bottom: .3em
+    }
+
+    html body h3 {
+      font-size: 1.5em;
+      font-weight: 500
+    }
+
+    html body h4 {
+      font-size: 1.25em;
+      font-weight: 600
+    }
+
+    html body h5 {
+      font-size: 1.1em;
+      font-weight: 600
+    }
+
+    html body h6 {
+      font-size: 1em;
+      font-weight: 600
+    }
+
+    html body h1,
+    html body h2,
+    html body h3,
+    html body h4,
+    html body h5 {
+      font-weight: 600
+    }
+
+    html body h5 {
+      font-size: 1em
+    }
+
+    html body h6 {
+      color: #5c5c5c
+    }
+
+    html body strong {
+      color: #000
+    }
+
+    html body del {
+      color: #5c5c5c
+    }
+
+    html body a:not([href]) {
+      color: inherit;
+      text-decoration: none
+    }
+
+    html body a {
+      color: #08c;
+      text-decoration: none
+    }
+
+    html body a:hover {
+      color: #00a3f5;
+      text-decoration: none
+    }
+
+    html body img {
+      max-width: 100%
+    }
+
+    html body>p {
+      margin-top: 0;
+      margin-bottom: 16px;
+      word-wrap: break-word
+    }
+
+    html body>ol,
+    html body>ul {
+      margin-bottom: 16px
+    }
+
+    html body ol,
+    html body ul {
+      padding-left: 2em
+    }
+
+    html body ol.no-list,
+    html body ul.no-list {
+      padding: 0;
+      list-style-type: none
+    }
+
+    html body ol ol,
+    html body ol ul,
+    html body ul ol,
+    html body ul ul {
+      margin-top: 0;
+      margin-bottom: 0
+    }
+
+    html body li {
+      margin-bottom: 0
+    }
+
+    html body li.task-list-item {
+      list-style: none
+    }
+
+    html body li>p {
+      margin-top: 0;
+      margin-bottom: 0
+    }
+
+    html body .task-list-item-checkbox {
+      margin: 0 .2em .25em -1.8em;
+      vertical-align: middle
+    }
+
+    html body .task-list-item-checkbox:hover {
+      cursor: pointer
+    }
+
+    html body blockquote {
+      margin: 16px 0;
+      font-size: inherit;
+      padding: 0 15px;
+      color: #5c5c5c;
+      background-color: #f0f0f0;
+      border-left: 4px solid #d6d6d6
+    }
+
+    html body blockquote>:first-child {
+      margin-top: 0
+    }
+
+    html body blockquote>:last-child {
+      margin-bottom: 0
+    }
+
+    html body hr {
+      height: 4px;
+      margin: 32px 0;
+      background-color: #d6d6d6;
+      border: 0 none
+    }
+
+    html body table {
+      margin: 10px 0 15px 0;
+      border-collapse: collapse;
+      border-spacing: 0;
+      display: block;
+      width: 100%;
+      overflow: auto;
+      word-break: normal;
+      word-break: keep-all
+    }
+
+    html body table th {
+      font-weight: 700;
+      color: #000
+    }
+
+    html body table td,
+    html body table th {
+      border: 1px solid #d6d6d6;
+      padding: 6px 13px
+    }
+
+    html body dl {
+      padding: 0
+    }
+
+    html body dl dt {
+      padding: 0;
+      margin-top: 16px;
+      font-size: 1em;
+      font-style: italic;
+      font-weight: 700
+    }
+
+    html body dl dd {
+      padding: 0 16px;
+      margin-bottom: 16px
+    }
+
+    html body code {
+      font-size: .85em;
+      color: #000;
+      background-color: #f0f0f0;
+      border-radius: 3px;
+      padding: .2em 0
+    }
+
+    html body code::after,
+    html body code::before {
+      letter-spacing: -.2em;
+      content: '\00a0'
+    }
+
+    html body pre>code {
+      padding: 0;
+      margin: 0;
+      word-break: normal;
+      white-space: pre;
+      background: 0 0;
+      border: 0
+    }
+
+    html body .highlight {
+      margin-bottom: 16px
+    }
+
+    html body .highlight pre,
+    html body pre {
+      padding: 1em;
+      overflow: auto;
+      line-height: 1.45;
+      border: #d6d6d6;
+      border-radius: 3px
+    }
+
+    html body .highlight pre {
+      margin-bottom: 0;
+      word-break: normal
+    }
+
+    html body pre code,
+    html body pre tt {
+      display: inline;
+      max-width: initial;
+      padding: 0;
+      margin: 0;
+      overflow: initial;
+      line-height: inherit;
+      word-wrap: normal;
+      background-color: transparent;
+      border: 0
+    }
+
+    html body pre code:after,
+    html body pre code:before,
+    html body pre tt:after,
+    html body pre tt:before {
+      content: normal
+    }
+
+    html body blockquote,
+    html body dl,
+    html body ol,
+    html body p,
+    html body pre,
+    html body ul {
+      margin-top: 0;
+      margin-bottom: 16px
+    }
+
+    html body kbd {
+      color: #000;
+      border: 1px solid #d6d6d6;
+      border-bottom: 2px solid #c7c7c7;
+      padding: 2px 4px;
+      background-color: #f0f0f0;
+      border-radius: 3px
+    }
+
+    @media print {
+      html body {
+        background-color: #fff
+      }
+
+      html body h1,
+      html body h2,
+      html body h3,
+      html body h4,
+      html body h5,
+      html body h6 {
+        color: #000;
+        page-break-after: avoid
+      }
+
+      html body blockquote {
+        color: #5c5c5c
+      }
+
+      html body pre {
+        page-break-inside: avoid
+      }
+
+      html body table {
+        display: table
+      }
+
+      html body img {
+        display: block;
+        max-width: 100%;
+        max-height: 100%
+      }
+
+      html body code,
+      html body pre {
+        word-wrap: break-word;
+        white-space: pre
+      }
+    }
+
+    .markdown-preview {
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box
+    }
+
+    .markdown-preview ul {
+      list-style: disc
+    }
+
+    .markdown-preview ul ul {
+      list-style: circle
+    }
+
+    .markdown-preview ul ul ul {
+      list-style: square
+    }
+
+    .markdown-preview ol {
+      list-style: decimal
+    }
+
+    .markdown-preview ol ol,
+    .markdown-preview ul ol {
+      list-style-type: lower-roman
+    }
+
+    .markdown-preview ol ol ol,
+    .markdown-preview ol ul ol,
+    .markdown-preview ul ol ol,
+    .markdown-preview ul ul ol {
+      list-style-type: lower-alpha
+    }
+
+    .markdown-preview .newpage,
+    .markdown-preview .pagebreak {
+      page-break-before: always
+    }
+
+    .markdown-preview pre.line-numbers {
+      position: relative;
+      padding-left: 3.8em;
+      counter-reset: linenumber
+    }
+
+    .markdown-preview pre.line-numbers>code {
+      position: relative
+    }
+
+    .markdown-preview pre.line-numbers .line-numbers-rows {
+      position: absolute;
+      pointer-events: none;
+      top: 1em;
+      font-size: 100%;
+      left: 0;
+      width: 3em;
+      letter-spacing: -1px;
+      border-right: 1px solid #999;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none
+    }
+
+    .markdown-preview pre.line-numbers .line-numbers-rows>span {
+      pointer-events: none;
+      display: block;
+      counter-increment: linenumber
+    }
+
+    .markdown-preview pre.line-numbers .line-numbers-rows>span:before {
+      content: counter(linenumber);
+      color: #999;
+      display: block;
+      padding-right: .8em;
+      text-align: right
+    }
+
+    .markdown-preview .mathjax-exps .MathJax_Display {
+      text-align: center !important
+    }
+
+    .markdown-preview:not([data-for=preview]) .code-chunk .code-chunk-btn-group {
+      display: none
+    }
+
+    .markdown-preview:not([data-for=preview]) .code-chunk .status {
+      display: none
+    }
+
+    .markdown-preview:not([data-for=preview]) .code-chunk .output-div {
+      margin-bottom: 16px
+    }
+
+    .markdown-preview .md-toc {
+      padding: 0
+    }
+
+    .markdown-preview .md-toc .md-toc-details {
+      margin: 0;
+      padding: 0;
+      border: none
+    }
+
+    .markdown-preview .md-toc summary.md-toc-link-wrapper {
+      cursor: pointer;
+      list-style-position: outside
+    }
+
+    .markdown-preview .md-toc summary.md-toc-link-wrapper::marker {
+      font-size: .85em
+    }
+
+    .markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link {
+      display: inline;
+      padding: .25rem 0
+    }
+
+    .markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,
+    .markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p {
+      display: inline
+    }
+
+    .markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link {
+      font-weight: 800
+    }
+
+    .markdown-preview .md-toc .md-toc-link-wrapper[data-level='0'] {
+      margin-left: 12px
+    }
+
+    .markdown-preview .md-toc .md-toc-link-wrapper[data-level='1'] {
+      margin-left: 28px
+    }
+
+    .markdown-preview .md-toc .md-toc-link-wrapper[data-level='2'] {
+      margin-left: 44px
+    }
+
+    .markdown-preview .md-toc .md-toc-link-wrapper[data-level='3'] {
+      margin-left: 60px
+    }
+
+    .markdown-preview .md-toc .md-toc-link-wrapper[data-level='4'] {
+      margin-left: 76px
+    }
+
+    .markdown-preview .md-toc .md-toc-link-wrapper[data-level='5'] {
+      margin-left: 80px
+    }
+
+    .markdown-preview a.tag,
+    .markdown-preview a.tag:active,
+    .markdown-preview a.tag:link,
+    .markdown-preview a.tag:visited,
+    .markdown-preview span.tag:not(.token) {
+      display: inline-block;
+      background-color: var(--vscode-badge-background, rgba(127, 127, 127, .18));
+      color: var(--vscode-badge-foreground, currentColor);
+      border-radius: 2em;
+      font-size: .85em;
+      font-weight: 500;
+      padding: .05em .55em;
+      line-height: 1.5;
+      white-space: nowrap;
+      text-decoration: none;
+      text-shadow: none;
+      box-shadow: none;
+      transition: background-color .12s ease, opacity .12s ease
+    }
+
+    .markdown-preview a.tag {
+      cursor: pointer
+    }
+
+    .markdown-preview a.tag:focus,
+    .markdown-preview a.tag:hover {
+      background-color: var(--vscode-badge-background, rgba(127, 127, 127, .32));
+      color: var(--vscode-badge-foreground, currentColor);
+      opacity: .85;
+      text-decoration: none;
+      outline: 0
+    }
+
+    .markdown-preview .wikilink-embed-content {
+      border-left: 3px solid var(--vscode-textBlockQuote-border, rgba(128, 128, 128, .3));
+      background: var(--vscode-textBlockQuote-background, rgba(128, 128, 128, .05));
+      margin: .5em 0;
+      padding: .5em .75em;
+      border-radius: 0 3px 3px 0
+    }
+
+    .markdown-preview .wikilink-embed-content.wikilink-embed-error {
+      border-left-color: var(--vscode-errorForeground, #cf222e);
+      color: var(--vscode-errorForeground, #cf222e);
+      font-style: italic;
+      opacity: .8
+    }
+
+    .markdown-preview .wikilink-embed-content h1:first-child,
+    .markdown-preview .wikilink-embed-content h2:first-child,
+    .markdown-preview .wikilink-embed-content h3:first-child,
+    .markdown-preview .wikilink-embed-content h4:first-child,
+    .markdown-preview .wikilink-embed-content h5:first-child,
+    .markdown-preview .wikilink-embed-content h6:first-child {
+      margin-top: .25em
+    }
+
+    .markdown-preview .wikilink-embed-content .wikilink-embed-content {
+      margin: .25em 0;
+      padding: .25em .5em
+    }
+
+    .markdown-preview .block-id {
+      display: none
+    }
+
+    .scrollbar-style::-webkit-scrollbar {
+      width: 8px
+    }
+
+    .scrollbar-style::-webkit-scrollbar-track {
+      border-radius: 10px;
+      background-color: transparent
+    }
+
+    .scrollbar-style::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      background-color: var(--vscode-scrollbarSlider-background, rgba(150, 150, 150, .66));
+      border: 4px solid var(--vscode-scrollbarSlider-background, rgba(150, 150, 150, .66));
+      background-clip: content-box
+    }
+
+    .scrollbar-style::-webkit-scrollbar-thumb:hover {
+      background-color: var(--vscode-scrollbarSlider-hoverBackground, rgba(120, 120, 120, .66))
+    }
+
+    html body[for=html-export]:not([data-presentation-mode]) {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      margin: 0;
+      padding: 0;
+      overflow: auto
+    }
+
+    html body[for=html-export]:not([data-presentation-mode]) .markdown-preview {
+      position: relative;
+      top: 0;
+      min-height: 100vh
+    }
+
+    @media screen and (min-width:914px) {
+      html body[for=html-export]:not([data-presentation-mode]) .markdown-preview {
+        padding: 2em calc(50% - 457px + 2em)
+      }
+    }
+
+    @media screen and (max-width:914px) {
+      html body[for=html-export]:not([data-presentation-mode]) .markdown-preview {
+        padding: 2em
+      }
+    }
+
+    @media screen and (max-width:450px) {
+      html body[for=html-export]:not([data-presentation-mode]) .markdown-preview {
+        font-size: 14px !important;
+        padding: 1em
+      }
+    }
+
+    @media print {
+      html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn {
+        display: none
+      }
+    }
+
+    html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn {
+      position: fixed;
+      bottom: 8px;
+      left: 8px;
+      font-size: 28px;
+      cursor: pointer;
+      color: inherit;
+      z-index: 99;
+      width: 32px;
+      text-align: center;
+      opacity: .4
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn {
+      opacity: 1
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 300px;
+      height: 100%;
+      padding: 32px 0 48px 0;
+      font-size: 14px;
+      box-shadow: 0 0 4px rgba(150, 150, 150, .33);
+      box-sizing: border-box;
+      overflow: auto;
+      background-color: inherit
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar {
+      width: 8px
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track {
+      border-radius: 10px;
+      background-color: transparent
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      background-color: var(--vscode-scrollbarSlider-background, rgba(150, 150, 150, .66));
+      border: 4px solid var(--vscode-scrollbarSlider-background, rgba(150, 150, 150, .66));
+      background-clip: content-box
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb:hover {
+      background-color: var(--vscode-scrollbarSlider-hoverBackground, rgba(120, 120, 120, .66))
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a {
+      text-decoration: none
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc {
+      padding: 0 16px
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-details {
+      margin: 0;
+      padding: 0;
+      border: none
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link {
+      display: inline;
+      padding: .25rem 0
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p {
+      display: inline
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link {
+      font-weight: 800
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='0'] {
+      padding-left: 0
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='1'] {
+      padding-left: 16px
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='2'] {
+      padding-left: 32px
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='3'] {
+      padding-left: 48px
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='4'] {
+      padding-left: 64px
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='5'] {
+      padding-left: 80px
+    }
+
+    html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview {
+      left: 300px;
+      width: calc(100% - 300px);
+      padding: 2em calc(50% - 457px - 300px / 2);
+      margin: 0;
+      box-sizing: border-box
+    }
+
+    @media screen and (max-width:1274px) {
+      html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview {
+        padding: 2em
+      }
+    }
+
+    @media screen and (max-width:450px) {
+      html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview {
+        width: 100%
+      }
+    }
+
+    html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview {
+      left: 50%;
+      transform: translateX(-50%)
+    }
+
+    html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc {
+      display: none
+    }
+
+    /* Please visit the URL below for more information: */
+    /*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+  </style>
+  <!-- The content below will be included at the end of the <head> element. -->
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+      // your code here
+    });
+  </script>
+</head>
+
+<body for="html-export">
+  <div class="crossnote markdown-preview  ">
+
+    <h1 id="مستندات-api-فروشگاه">مستندات API فروشگاه </h1>
+    <blockquote>
+      <p>این فایل مرجع کامل تمام endpoint های بک‌اند است — برای استفاده‌ی تیم فرانت‌اند.<br>
+        <strong>قانون نگه‌داری:</strong> هر وقت یک route تغییر کرد (اضافه/حذف/تغییر ورودی-خروجی)،<br>
+        همین فایل در همان commit/پاسخ به‌روزرسانی می‌شود. این فایل تنها منبع حقیقت<br>
+        (source of truth) برای قرارداد API است، نه کدِ route ها.
+      </p>
+    </blockquote>
+    <hr>
+    <h2 id="فهرست-مطالب">فهرست مطالب </h2>
+    <ol>
+      <li><a href="#%D9%82%D8%B1%D8%A7%D8%B1%D8%AF%D8%A7%D8%AF%D9%87%D8%A7%DB%8C-%DA%A9%D9%84%DB%8C">قراردادهای کلی</a>
+      </li>
+      <li><a href="#%DB%B1-%D8%A7%D8%AD%D8%B1%D8%A7%D8%B2-%D9%87%D9%88%DB%8C%D8%AA-auth">احراز هویت (Auth)</a></li>
+      <li><a href="#%DB%B2-%D8%AF%D8%B3%D8%AA%D9%87%E2%80%8C%D8%A8%D9%86%D8%AF%DB%8C-categories">دسته‌بندی
+          (Categories)</a></li>
+      <li><a href="#%DB%B3-%D8%A8%D8%B1%D9%86%D8%AF-brands">برند (Brands)</a></li>
+      <li><a href="#%DB%B4-%D9%88%DB%8C%DA%98%DA%AF%DB%8C-attributes">ویژگی (Attributes)</a></li>
+      <li><a href="#%DB%B5-%D9%85%D8%AD%D8%B5%D9%88%D9%84%D8%A7%D8%AA-products">محصولات (Products)</a></li>
+      <li><a href="#%DB%B6-%D8%B3%D8%A8%D8%AF-%D8%AE%D8%B1%DB%8C%D8%AF-cart">سبد خرید (Cart)</a></li>
+      <li><a href="#%DB%B7-%D8%B9%D9%84%D8%A7%D9%82%D9%87%E2%80%8C%D9%85%D9%86%D8%AF%DB%8C-wishlist">علاقه‌مندی
+          (Wishlist)</a></li>
+      <li><a href="#%DB%B8-%D9%85%D9%82%D8%A7%DB%8C%D8%B3%D9%87-comparison">مقایسه (Comparison)</a></li>
+      <li><a href="#%DB%B9-%DA%A9%D8%AF-%D8%AA%D8%AE%D9%81%DB%8C%D9%81-discount-codes">کد تخفیف (Discount Codes)</a>
+      </li>
+      <li><a href="#%DB%B1%DB%B0-%D8%A2%D8%AF%D8%B1%D8%B3%E2%80%8C%D9%87%D8%A7-addresses">آدرس‌ها (Addresses)</a></li>
+      <li><a
+          href="#%DB%B1%DB%B1-%D8%B4%D8%B1%DA%A9%D8%AA%E2%80%8C%D9%87%D8%A7%DB%8C-%D8%A7%D8%B1%D8%B3%D8%A7%D9%84-shipping-companies">شرکت‌های
+          ارسال (Shipping Companies)</a></li>
+      <li><a
+          href="#%DB%B1%DB%B2-%D8%AF%D8%B1%DA%AF%D8%A7%D9%87%E2%80%8C%D9%87%D8%A7%DB%8C-%D9%BE%D8%B1%D8%AF%D8%A7%D8%AE%D8%AA-payment-gateways">درگاه‌های
+          پرداخت (Payment Gateways)</a></li>
+      <li><a href="#%DB%B1%DB%B3-%DA%A9%DB%8C%D9%81-%D9%BE%D9%88%D9%84-wallet">کیف پول (Wallet)</a></li>
+      <li><a href="#%DB%B1%DB%B4-%D8%B3%D9%81%D8%A7%D8%B1%D8%B4%E2%80%8C%D9%87%D8%A7-orders">سفارش‌ها (Orders)</a></li>
+      <li><a href="#%DB%B1%DB%B5-%D8%B1%D8%B3%D8%A7%D9%86%D9%87-media">رسانه (Media)</a></li>
+    </ol>
+    <hr>
+    <h2 id="قراردادهای-کلی">قراردادهای کلی </h2>
+    <h3 id="base-url">Base URL </h3>
+    <pre data-role="codeBlock" data-info="" class="language-text"><code>/api/v1
+</code></pre>
+    <p>(مسیر <code>GET /health</code> بیرون از <code>/api/v1</code> و بدون نیاز به هیچ‌چیز همیشه در دسترس است)</p>
+    <h3 id="پاسخ-موفق">پاسخ موفق </h3>
+    <p>همه‌ی پاسخ‌های موفق این ساختار یکدست را دارند:</p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"success"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"message"</span><span class="token operator">:</span> <span class="token string">"string"</span><span class="token punctuation">,</span>
+  <span class="token property">"data"</span><span class="token operator">:</span> <span class="token string">"هر شکلی که در هر endpoint مشخص شده"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <h3 id="پاسخ-خطا">پاسخ خطا </h3>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"success"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  <span class="token property">"message"</span><span class="token operator">:</span> <span class="token string">"پیام خطا به فارسی"</span><span class="token punctuation">,</span>
+  <span class="token property">"errors"</span><span class="token operator">:</span> <span class="token string">"اختیاری — جزئیات خطای اعتبارسنجی (zod)، فقط روی 400"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p>کدهای رایج: <code>400</code> ورودی نامعتبر/قانون کسب‌وکار، <code>401</code> نیاز به ورود، <code>403</code>
+      نبود<br>
+      دسترسی، <code>404</code> پیدا نشد، <code>409</code> تعارض (مثلاً تکراری/در حال استفاده)، <code>429</code>
+      تعداد<br>
+      درخواست زیاد.</p>
+    <h3 id="احراز-هویت">احراز هویت </h3>
+    <p>هدر زیر روی تمام مسیرهایی که «نیاز به ورود» دارند الزامی است:</p>
+    <pre data-role="codeBlock" data-info="" class="language-text"><code>Authorization: Bearer &lt;accessToken&gt;
+</code></pre>
+    <p><code>accessToken</code> از مسیرهای ورود/ثبت‌نام (بخش Auth) به‌دست می‌آید و عمر کوتاهی<br>
+      دارد (پیش‌فرض ۱۵ دقیقه)؛ با <code>refreshToken</code> آن را تازه کنید.</p>
+    <h3 id="هدر-مهمان-guest">هدر مهمان (Guest) </h3>
+    <p>مسیرهای <strong>سبد خرید</strong> و <strong>مقایسه</strong> برای کاربر مهمان (بدون ورود) هم کار می‌کنند.<br>
+      یک هدر مشترک بین این دو استفاده می‌شود:</p>
+    <pre data-role="codeBlock" data-info="" class="language-text"><code>X-Guest-Token: &lt;مقدار دلخواه شما&gt;
+</code></pre>
+    <ul>
+      <li>اگر این هدر را نفرستید، بک‌اند یک مقدار تازه می‌سازد و آن را در<br>
+        <code>data.guestToken</code> پاسخ برمی‌گرداند — آن را ذخیره (مثلاً localStorage) کنید<br>
+        و در درخواست‌های بعدی همان را بفرستید.
+      </li>
+      <li>بعد از ورود/ثبت‌نام کاربر، <code>POST /cart/merge</code> را با همین توکن بزنید تا<br>
+        سبد مهمان با سبد کاربر ادغام شود.</li>
+    </ul>
+    <h3 id="صفحهبندی-pagination">صفحه‌بندی (Pagination) </h3>
+    <p>هر endpoint که فهرست صفحه‌بندی‌شده برمی‌گرداند این ساختار را دارد:</p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"items"</span><span class="token operator">:</span> <span class="token punctuation">[</span> <span class="token comment">/* ... */</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"meta"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"total"</span><span class="token operator">:</span> <span class="token number">42</span><span class="token punctuation">,</span> <span class="token property">"page"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token property">"limit"</span><span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token property">"totalPages"</span><span class="token operator">:</span> <span class="token number">3</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p>پارامترهای query مشترک: <code>page</code> (پیش‌فرض ۱)، <code>limit</code> (پیش‌فرض ۲۰، سقف ۱۰۰).</p>
+    <h3 id="واحد-پول">واحد پول </h3>
+    <p>تمام مقادیر مالی (قیمت، تخفیف، موجودی و ...) عدد صحیح بدون اعشار و به<br>
+      <strong>تومان</strong> هستند.
+    </p>
+    <hr>
+    <h2 id="۱-احراز-هویت-auth">۱. احراز هویت (Auth) </h2>
+    <p>Base path: <code>/api/v1/auth</code></p>
+    <p>پسورد حداقل ۸ کاراکتر، شامل حداقل یک حرف و یک رقم. <code>identifier</code> می‌تواند<br>
+      ایمیل یا شماره موبایل ایران (با یا بدون <code>0</code>/<code>+98</code>/<code>0098</code> ابتدایی) باشد —<br>
+      بک‌اند خودش تشخیص می‌دهد کانال OTP باید SMS یا Email باشد.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>POST</td>
+          <td><code>/register</code></td>
+          <td>ندارد</td>
+          <td>ثبت‌نام + ارسال OTP تایید</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/register/verify-otp</code></td>
+          <td>ندارد</td>
+          <td>تایید OTP ثبت‌نام → صدور توکن</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/login</code></td>
+          <td>ندارد</td>
+          <td>ورود با رمز عبور</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/login/otp/request</code></td>
+          <td>ندارد</td>
+          <td>درخواست OTP برای ورود بدون رمز</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/login/otp/verify</code></td>
+          <td>ندارد</td>
+          <td>تایید OTP ورود → صدور توکن</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/refresh-token</code></td>
+          <td>ندارد</td>
+          <td>تازه‌سازی accessToken</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/logout</code></td>
+          <td>دارد</td>
+          <td>خروج از همین دستگاه/نشست</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/logout-all</code></td>
+          <td>دارد</td>
+          <td>خروج از تمام دستگاه‌های دیگر</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/forgot-password</code></td>
+          <td>ندارد</td>
+          <td>درخواست OTP بازیابی رمز</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/reset-password</code></td>
+          <td>ندارد</td>
+          <td>تایید OTP + ثبت رمز جدید</td>
+        </tr>
+      </tbody>
+    </table>
+    <blockquote>
+      <p>همه‌ی مسیرهای این بخش زیر یک rate-limiter سخت‌گیرانه‌تر هستند (پیش‌فرض:<br>
+        حداکثر ۱۰ درخواست در دقیقه برای هر IP).</p>
+    </blockquote>
+    <h3 id="post-register"><code>POST /register</code> </h3>
+    <p><strong>Body:</strong></p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span> <span class="token property">"fullName"</span><span class="token operator">:</span> <span class="token string">"علی رضایی"</span><span class="token punctuation">,</span> <span class="token property">"identifier"</span><span class="token operator">:</span> <span class="token string">"user@example.com"</span><span class="token punctuation">,</span> <span class="token property">"password"</span><span class="token operator">:</span> <span class="token string">"Abc12345"</span> <span class="token punctuation">}</span>
+</code></pre>
+    <p><strong>Response 201</strong> → <code>data</code>:</p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span> <span class="token property">"identifier"</span><span class="token operator">:</span> <span class="token string">"user@example.com"</span><span class="token punctuation">,</span> <span class="token property">"channel"</span><span class="token operator">:</span> <span class="token string">"EMAIL"</span><span class="token punctuation">,</span> <span class="token property">"expiresAt"</span><span class="token operator">:</span> <span class="token string">"2026-06-24T10:05:00.000Z"</span> <span class="token punctuation">}</span>
+</code></pre>
+    <p><strong>خطاها:</strong> <code>409</code> کاربری با این مشخصات قبلاً ثبت‌نام کرده.</p>
+    <h3 id="post-registerverify-otp"><code>POST /register/verify-otp</code> </h3>
+    <p><strong>Body:</strong> <code>{ "identifier": "...", "code": "12345", "deviceName": "Chrome on Windows" }</code>
+      (<code>deviceName</code> اختیاری)<br>
+      <strong>Response 200</strong> → <code>data</code>:
+    </p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"user"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"id"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"fullName"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"email"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"phone"</span><span class="token operator">:</span> <span class="token null keyword">null</span><span class="token punctuation">,</span> <span class="token property">"role"</span><span class="token operator">:</span> <span class="token string">"CUSTOMER"</span><span class="token punctuation">,</span> <span class="token property">"emailVerifiedAt"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"..."</span><span class="token operator">:</span> <span class="token string">"..."</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"accessToken"</span><span class="token operator">:</span> <span class="token string">"eyJ..."</span><span class="token punctuation">,</span>
+  <span class="token property">"refreshToken"</span><span class="token operator">:</span> <span class="token string">"eyJ..."</span><span class="token punctuation">,</span>
+  <span class="token property">"sessionId"</span><span class="token operator">:</span> <span class="token string">"..."</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p><strong>خطاها:</strong> <code>400</code> کد اشتباه/منقضی، <code>429</code> تعداد تلاش بیش از حد.</p>
+    <h3 id="post-login"><code>POST /login</code> </h3>
+    <p><strong>Body:</strong> <code>{ "identifier": "...", "password": "...", "deviceName": "..." }</code><br>
+      <strong>Response 200:</strong> همان شکل <code>verify-otp</code> بالا (<code>user</code>, <code>accessToken</code>,
+      <code>refreshToken</code>, <code>sessionId</code>)<br>
+      <strong>خطاها:</strong> <code>400</code> شناسه/رمز اشتباه، <code>403</code> حساب مسدود، <code>429</code> قفل موقت
+      بعد از تلاش‌های ناموفق پیاپی.
+    </p>
+    <h3 id="post-loginotprequest"><code>POST /login/otp/request</code> </h3>
+    <p><strong>Body:</strong> <code>{ "identifier": "..." }</code> → <strong>Response 200</strong> → <code>data</code>:
+      <code>{ identifier, channel, expiresAt }</code><br>
+      <strong>خطاها:</strong> <code>404</code> کاربر پیدا نشد، <code>403</code> حساب مسدود.
+    </p>
+    <h3 id="post-loginotpverify"><code>POST /login/otp/verify</code> </h3>
+    <p><strong>Body:</strong> <code>{ "identifier": "...", "code": "...", "deviceName": "..." }</code> → خروجی مثل
+      <code>register/verify-otp</code>.
+    </p>
+    <h3 id="post-refresh-token"><code>POST /refresh-token</code> </h3>
+    <p><strong>Body:</strong> <code>{ "refreshToken": "..." }</code><br>
+      <strong>Response 200</strong> → <code>data</code>: <code>{ accessToken, refreshToken, sessionId }</code> (refresh
+      token چرخشی است — قبلی بعد از این دیگر کار نمی‌کند)<br>
+      <strong>خطاها:</strong> <code>401</code> نشست باطل/منقضی.
+    </p>
+    <h3 id="post-logout-نیاز-به-توکن"><code>POST /logout</code> <em>(نیاز به توکن)</em> </h3>
+    <p>بدون body. نشست فعلی (همان‌که accessToken متعلق به آن است) را غیرفعال می‌کند.</p>
+    <h3 id="post-logout-all-نیاز-به-توکن"><code>POST /logout-all</code> <em>(نیاز به توکن)</em> </h3>
+    <p>بدون body. تمام نشست‌های دیگر کاربر (به‌جز نشست فعلی) را غیرفعال می‌کند —<br>
+      برای «خروج از همه دستگاه‌ها».</p>
+    <h3 id="post-forgot-password"><code>POST /forgot-password</code> </h3>
+    <p><strong>Body:</strong> <code>{ "identifier": "..." }</code> → پاسخ همیشه عمومی (برای جلوگیری از افشای وجود حساب).
+    </p>
+    <h3 id="post-reset-password"><code>POST /reset-password</code> </h3>
+    <p><strong>Body:</strong> <code>{ "identifier": "...", "code": "...", "newPassword": "Abc12345" }</code><br>
+      <strong>Response 200:</strong> پیام موفقیت. <strong>نکته:</strong> بعد از این، تمام نشست‌های فعال کاربر باطل
+      می‌شوند (باید دوباره وارد شود).
+    </p>
+    <hr>
+    <h2 id="۲-دستهبندی-categories">۲. دسته‌بندی (Categories) </h2>
+    <p>Base path: <code>/api/v1/categories</code></p>
+    <p>دسته‌بندی چندلایه (درختی، با <code>parentId</code>). مدیریت فقط <code>ADMIN</code>/<code>EDITOR</code>.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/tree</code></td>
+          <td>ندارد</td>
+          <td>درخت کامل دسته‌بندی‌ها (تو در تو با <code>children</code>)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>ندارد</td>
+          <td>لیست تخت (flat)؛ <code>?includeInactive=true</code> برای پنل ادمین</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/slug/:slug</code></td>
+          <td>ندارد</td>
+          <td>دریافت یک دسته با slug</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/:id</code></td>
+          <td>ندارد</td>
+          <td>دریافت یک دسته با id</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/:id/attributes</code></td>
+          <td>ندارد</td>
+          <td>ویژگی‌های متصل به این دسته (برای فیلتر فروشگاه)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ایجاد</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ویرایش</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>حذف (اگر زیرمجموعه دارد، <code>409</code>)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/:id/attributes</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>اتصال یک ویژگی به این دسته</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id/attributes/:attributeId</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>قطع اتصال</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Body ایجاد/ویرایش:</strong></p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"موبایل"</span><span class="token punctuation">,</span>
+  <span class="token property">"slug"</span><span class="token operator">:</span> <span class="token string">"mobile"</span><span class="token punctuation">,</span>
+  <span class="token property">"description"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span>
+  <span class="token property">"imageId"</span><span class="token operator">:</span> <span class="token string">"media_id_اختیاری"</span><span class="token punctuation">,</span>
+  <span class="token property">"parentId"</span><span class="token operator">:</span> <span class="token string">"category_id_اختیاری"</span><span class="token punctuation">,</span>
+  <span class="token property">"order"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+  <span class="token property">"isActive"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"metaTitle"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"metaDescription"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"canonicalUrl"</span><span class="token operator">:</span> <span class="token string">"https://..."</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p><code>slug</code> اختیاری است — اگر نفرستید، خودکار از <code>name</code> ساخته می‌شود (و اگر<br>
+      تکراری بود، <code>-2</code>، <code>-3</code> و ... اضافه می‌شود).</p>
+    <p><strong>خطاها:</strong> <code>400</code> والد نامعتبر یا چرخه (والد جدید نمی‌تواند زیرمجموعه‌ی خودش<br>
+      باشد)، <code>409</code> slug تکراری یا (در حذف) دسته زیرمجموعه دارد.</p>
+    <p><strong>اتصال ویژگی:</strong> <code>POST /:id/attributes</code> با body <code>{ "attributeId": "..." }</code>.
+    </p>
+    <hr>
+    <h2 id="۳-برند-brands">۳. برند (Brands) </h2>
+    <p>Base path: <code>/api/v1/brands</code></p>
+    <p>CRUD ساده. مدیریت فقط <code>ADMIN</code>/<code>EDITOR</code>.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>ندارد</td>
+          <td>لیست برندها؛ <code>?includeInactive=true</code></td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/slug/:slug</code></td>
+          <td>ندارد</td>
+          <td>دریافت با slug</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/:id</code></td>
+          <td>ندارد</td>
+          <td>دریافت با id</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ایجاد</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ویرایش</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>حذف (اگر محصولی دارد، <code>409</code>)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Body:</strong>
+      <code>{ name, slug?, description?, logoId?, isActive?, metaTitle?, metaDescription? }</code><br>
+      (فقط <code>name</code> الزامی است؛ <code>slug</code> خودکار از <code>name</code> ساخته می‌شود اگر نفرستید)
+    </p>
+    <hr>
+    <h2 id="۴-ویژگی-attributes">۴. ویژگی (Attributes) </h2>
+    <p>Base path: <code>/api/v1/attributes</code></p>
+    <p>ویژگی‌های قابل تعریف برای تنوع کالا (رنگ، جنس، سایز، کشور سازنده و ...) +<br>
+      مقادیر هرکدام. مدیریت فقط <code>ADMIN</code>/<code>EDITOR</code>.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>ندارد</td>
+          <td>لیست ویژگی‌ها همراه با <code>values</code></td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/:id</code></td>
+          <td>ندارد</td>
+          <td>یک ویژگی همراه با <code>values</code></td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ایجاد ویژگی</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ویرایش ویژگی</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>حذف (اگر در تنوعی استفاده شده، <code>409</code>)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/:id/values</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>افزودن یک مقدار</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/values/:valueId</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ویرایش یک مقدار</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/values/:valueId</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>حذف یک مقدار (اگر استفاده شده، <code>409</code>)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Body ایجاد ویژگی:</strong></p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span> <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"رنگ"</span><span class="token punctuation">,</span> <span class="token property">"slug"</span><span class="token operator">:</span> <span class="token string">"color"</span><span class="token punctuation">,</span> <span class="token property">"inputType"</span><span class="token operator">:</span> <span class="token string">"COLOR"</span><span class="token punctuation">,</span> <span class="token property">"isFilterable"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token property">"isVariant"</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span>
+</code></pre>
+    <p><code>inputType</code>: یکی از <code>TEXT</code> | <code>COLOR</code> | <code>SELECT</code>.</p>
+    <p><strong>Body افزودن مقدار:</strong></p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span> <span class="token property">"value"</span><span class="token operator">:</span> <span class="token string">"قرمز"</span><span class="token punctuation">,</span> <span class="token property">"colorHex"</span><span class="token operator">:</span> <span class="token string">"#FF0000"</span><span class="token punctuation">,</span> <span class="token property">"order"</span><span class="token operator">:</span> <span class="token number">0</span> <span class="token punctuation">}</span>
+</code></pre>
+    <p><code>colorHex</code> فقط برای <code>inputType=COLOR</code> معنا دارد (فرمت <code>#RRGGBB</code>).</p>
+    <hr>
+    <h2 id="۵-محصولات-products">۵. محصولات (Products) </h2>
+    <p>Base path: <code>/api/v1/products</code></p>
+    <p>محصول متغیر: هر محصول حداقل یک «تنوع» (variant) دارد؛ هر تنوع SKU/قیمت/<br>
+      موجودی/تخفیف جدا دارد.
+      <code>minPrice</code>/<code>maxPrice</code>/<code>isInStock</code>/<code>hasActiveDiscount</code><br>
+      روی خود محصول کش می‌شوند و بعد از هر تغییر تنوع خودکار به‌روز می‌شوند.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/filters</code></td>
+          <td>ندارد</td>
+          <td>متادیتای فیلتر فروشگاه (برندها، بازه قیمت، ویژگی‌ها) — <code>?categorySlug=</code> اختیاری</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/admin</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>لیست ادمین (همه‌ی وضعیت‌ها) با همان فیلترهای زیر + <code>status</code></td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/admin/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>جزئیات کامل محصول (هر وضعیتی)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>ندارد</td>
+          <td>لیست فروشگاه (فقط <code>PUBLISHED</code>) با فیلتر/مرتب‌سازی/صفحه‌بندی</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/:slug</code></td>
+          <td>ندارد</td>
+          <td>جزئیات یک محصول منتشرشده با slug</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/:id/view</code></td>
+          <td>اختیاری</td>
+          <td>ثبت یک بازدید (برای آنالیز)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ایجاد محصول (با تنوع‌ها و تصاویر)</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ویرایش فیلدهای محصول + دسته‌بندی‌ها</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>حذف (اگر در سفارشی استفاده شده، <code>409</code> — به‌جای حذف ARCHIVED کنید)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/:id/variants</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>افزودن تنوع جدید</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/:id/variants/:variantId</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ویرایش تنوع</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id/variants/:variantId</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>حذف تنوع (باید حداقل ۱ تنوع باقی بماند؛ اگر سفارش دارد <code>409</code>)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/:id/variants/:variantId/images</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>افزودن تصویر به یک تنوع</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id/variants/:variantId/images/:imageId</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>حذف تصویر تنوع</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/:id/images</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>افزودن تصویر عمومی محصول</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id/images/:imageId</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>حذف تصویر محصول</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="query-پارامترهای-get--فروشگاه-و-get-admin">query پارامترهای <code>GET /</code> (فروشگاه) و
+      <code>GET /admin</code>
+    </h3>
+    <table>
+      <thead>
+        <tr>
+          <th>پارامتر</th>
+          <th>نوع</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>page</code>, <code>limit</code></td>
+          <td>number</td>
+          <td>صفحه‌بندی</td>
+        </tr>
+        <tr>
+          <td><code>categorySlug</code></td>
+          <td>string</td>
+          <td>شامل زیرمجموعه‌های آن دسته هم می‌شود</td>
+        </tr>
+        <tr>
+          <td><code>brandIds</code></td>
+          <td>string</td>
+          <td>چند id با کاما جدا: <code>id1,id2</code></td>
+        </tr>
+        <tr>
+          <td><code>attributeValueIds</code></td>
+          <td>string</td>
+          <td>چند id با کاما جدا — AND بین ویژگی‌های مختلف، OR بین مقادیر یک ویژگی</td>
+        </tr>
+        <tr>
+          <td><code>minPrice</code>, <code>maxPrice</code></td>
+          <td>number</td>
+          <td>بازه قیمت (هم‌پوشانی با بازه‌ی قیمت تنوع‌های محصول)</td>
+        </tr>
+        <tr>
+          <td><code>inStock</code></td>
+          <td>boolean</td>
+          <td>فقط موجود</td>
+        </tr>
+        <tr>
+          <td><code>hasDiscount</code></td>
+          <td>boolean</td>
+          <td>فقط تخفیف‌دار</td>
+        </tr>
+        <tr>
+          <td><code>isFeatured</code></td>
+          <td>boolean</td>
+          <td>فقط ویژه</td>
+        </tr>
+        <tr>
+          <td><code>search</code></td>
+          <td>string</td>
+          <td>جست‌وجو در نام/توضیح کوتاه</td>
+        </tr>
+        <tr>
+          <td><code>sort</code></td>
+          <td>enum</td>
+          <td><code>newest</code> (پیش‌فرض) | <code>price_asc</code> | <code>price_desc</code> | <code>popular</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>status</code> <em>(فقط admin)</em></td>
+          <td>enum</td>
+          <td><code>DRAFT</code> | <code>PUBLISHED</code> | <code>ARCHIVED</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <blockquote>
+      <p><strong>نکته‌ی مهم:</strong> فیلتر چند-ویژگی‌ای در سطح <em>محصول</em> انجام می‌شود نه <em>تنوع</em> —<br>
+        یعنی محصولی با یک تنوع قرمز و یک تنوع دیگر سایز L هم در فیلتر<br>
+        «رنگ=قرمز و سایز=L» نتیجه می‌شود (نه لزوماً یک تنوع که هم قرمز هم L باشد).</p>
+    </blockquote>
+    <h3 id="post--ایجاد-محصول"><code>POST /</code> (ایجاد محصول) </h3>
+    <p><strong>Body:</strong></p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"تیشرت مردانه"</span><span class="token punctuation">,</span>
+  <span class="token property">"brandId"</span><span class="token operator">:</span> <span class="token string">"brand_id_اختیاری"</span><span class="token punctuation">,</span>
+  <span class="token property">"shortDescription"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span>
+  <span class="token property">"description"</span><span class="token operator">:</span> <span class="token string">"&lt;p&gt;HTML از تکست ادیتور&lt;/p&gt;"</span><span class="token punctuation">,</span>
+  <span class="token property">"status"</span><span class="token operator">:</span> <span class="token string">"DRAFT"</span><span class="token punctuation">,</span>
+  <span class="token property">"isFeatured"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  <span class="token property">"categoryIds"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"cat_id_۱"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"images"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> <span class="token property">"mediaId"</span><span class="token operator">:</span> <span class="token string">"media_id"</span><span class="token punctuation">,</span> <span class="token property">"order"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token property">"isMain"</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"variants"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+      <span class="token property">"sku"</span><span class="token operator">:</span> <span class="token string">"TSHIRT-RED-L"</span><span class="token punctuation">,</span>
+      <span class="token property">"price"</span><span class="token operator">:</span> <span class="token number">250000</span><span class="token punctuation">,</span>
+      <span class="token property">"compareAtPrice"</span><span class="token operator">:</span> <span class="token number">300000</span><span class="token punctuation">,</span>
+      <span class="token property">"discountType"</span><span class="token operator">:</span> <span class="token string">"PERCENT"</span><span class="token punctuation">,</span>
+      <span class="token property">"discountValue"</span><span class="token operator">:</span> <span class="token number">10</span><span class="token punctuation">,</span>
+      <span class="token property">"discountStartAt"</span><span class="token operator">:</span> <span class="token string">"2026-06-01T00:00:00Z"</span><span class="token punctuation">,</span>
+      <span class="token property">"discountEndAt"</span><span class="token operator">:</span> <span class="token string">"2026-06-30T00:00:00Z"</span><span class="token punctuation">,</span>
+      <span class="token property">"stock"</span><span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span>
+      <span class="token property">"isDefault"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+      <span class="token property">"attributeValueIds"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"attrValue_رنگ_قرمز"</span><span class="token punctuation">,</span> <span class="token string">"attrValue_سایز_L"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p><strong>خطاها:</strong> <code>400</code> دسته/برند نامعتبر یا ترکیب ویژگی تکراری بین تنوع‌ها، <code>409</code>
+      SKU تکراری یا slug تکراری.</p>
+    <h3 id="put-id-ویرایش-محصول"><code>PUT /:id</code> (ویرایش محصول) </h3>
+    <p>فقط فیلدهای سطح‌بالا + <code>categoryIds</code> (که کامل جای‌گزین می‌شود). برای<br>
+      تنوع‌ها/تصاویر از endpoint های مخصوص خودشان استفاده کنید.</p>
+    <h3 id="post-idvariants-و-put-idvariantsvariantid"><code>POST /:id/variants</code> و
+      <code>PUT /:id/variants/:variantId</code>
+    </h3>
+    <p>همان شکل یک آیتم از آرایه‌ی <code>variants</code> بالا (در PUT همه‌ی فیلدها اختیاری‌اند).</p>
+    <hr>
+    <h2 id="۶-سبد-خرید-cart">۶. سبد خرید (Cart) </h2>
+    <p>Base path: <code>/api/v1/cart</code> — همه‌ی مسیرها برای <strong>مهمان و عضو</strong> کار می‌کنند مگر<br>
+      جایی که خلافش گفته شده (نگاه کنید به «هدر مهمان» در قراردادهای کلی).</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>اختیاری</td>
+          <td>دریافت سبد فعلی</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/items</code></td>
+          <td>اختیاری</td>
+          <td>افزودن آیتم</td>
+        </tr>
+        <tr>
+          <td>PATCH</td>
+          <td><code>/items/:itemId</code></td>
+          <td>اختیاری</td>
+          <td>تغییر تعداد (۰ = حذف)</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/items/:itemId</code></td>
+          <td>اختیاری</td>
+          <td>حذف یک آیتم</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/</code></td>
+          <td>اختیاری</td>
+          <td>خالی‌کردن کل سبد</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/merge</code></td>
+          <td><strong>دارد</strong></td>
+          <td>ادغام سبد مهمان با سبد کاربر بعد از لاگین</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="شکل-cart-در-همهی-پاسخها-datacart">شکل <code>cart</code> در همه‌ی پاسخ‌ها (<code>data.cart</code>) </h3>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"id"</span><span class="token operator">:</span> <span class="token string">"cart_id یا null اگر هنوز چیزی ثبت نشده"</span><span class="token punctuation">,</span>
+  <span class="token property">"itemCount"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span>
+  <span class="token property">"subtotal"</span><span class="token operator">:</span> <span class="token number">500000</span><span class="token punctuation">,</span>
+  <span class="token property">"totalDiscount"</span><span class="token operator">:</span> <span class="token number">50000</span><span class="token punctuation">,</span>
+  <span class="token property">"total"</span><span class="token operator">:</span> <span class="token number">450000</span><span class="token punctuation">,</span>
+  <span class="token property">"items"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+      <span class="token property">"id"</span><span class="token operator">:</span> <span class="token string">"cartItem_id"</span><span class="token punctuation">,</span>
+      <span class="token property">"variantId"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span>
+      <span class="token property">"productName"</span><span class="token operator">:</span> <span class="token string">"تیشرت مردانه"</span><span class="token punctuation">,</span>
+      <span class="token property">"productSlug"</span><span class="token operator">:</span> <span class="token string">"tshirt-mardane"</span><span class="token punctuation">,</span>
+      <span class="token property">"image"</span><span class="token operator">:</span> <span class="token string">"https://.../image.jpg"</span><span class="token punctuation">,</span>
+      <span class="token property">"attributesLabel"</span><span class="token operator">:</span> <span class="token string">"رنگ: قرمز، سایز: L"</span><span class="token punctuation">,</span>
+      <span class="token property">"quantity"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span>
+      <span class="token property">"unitPrice"</span><span class="token operator">:</span> <span class="token number">225000</span><span class="token punctuation">,</span>
+      <span class="token property">"originalPrice"</span><span class="token operator">:</span> <span class="token number">250000</span><span class="token punctuation">,</span>
+      <span class="token property">"lineTotal"</span><span class="token operator">:</span> <span class="token number">450000</span><span class="token punctuation">,</span>
+      <span class="token property">"isAvailable"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+      <span class="token property">"availableStock"</span><span class="token operator">:</span> <span class="token number">18</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p><code>subtotal</code> = جمع <code>originalPrice×quantity</code> (قبل از تخفیف تنوع) — <code>total</code> =<br>
+      جمع <code>unitPrice×quantity</code> (بعد از تخفیف تنوع، <strong>قبل از کد تخفیف</strong>؛ کد تخفیف<br>
+      در مرحله‌ی ثبت سفارش اعمال می‌شود، نه در سبد).</p>
+    <h3 id="post-items"><code>POST /items</code> </h3>
+    <p><strong>Body:</strong> <code>{ "variantId": "...", "quantity": 1 }</code><br>
+      <strong>Response 201</strong> → <code>data</code>: <code>{ cart, wasAdjusted, guestToken? }</code><br>
+      <code>wasAdjusted=true</code> یعنی تعداد درخواستی بیشتر از موجودی بود و خودکار به سقف موجودی کاهش یافت.<br>
+      <strong>خطاها:</strong> <code>404</code> تنوع پیدا نشد/غیرفعال، <code>400</code> محصول منتشر نشده،
+      <code>409</code> ناموجود.
+    </p>
+    <h3 id="patch-itemsitemid"><code>PATCH /items/:itemId</code> </h3>
+    <p><strong>Body:</strong> <code>{ "quantity": 3 }</code> (صفر = حذف آیتم) → خروجی مثل بالا.</p>
+    <h3 id="post-merge-نیاز-به-توکن"><code>POST /merge</code> <em>(نیاز به توکن)</em> </h3>
+    <p><strong>Body:</strong> <code>{ "guestToken": "..." }</code> — سبد مهمانِ این توکن را با سبد کاربر فعلی<br>
+      ادغام می‌کند (تعدادهای تکراری جمع می‌شوند، با رعایت سقف موجودی) و سبد مهمان<br>
+      حذف می‌شود.</p>
+    <hr>
+    <h2 id="۷-علاقهمندی-wishlist">۷. علاقه‌مندی (Wishlist) </h2>
+    <p>Base path: <code>/api/v1/wishlist</code> — <strong>همه‌ی مسیرها نیاز به ورود دارند</strong> (بدون حالت مهمان).
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/?page=&amp;limit=</code></td>
+          <td>لیست صفحه‌بندی‌شده</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>افزودن — Body: <code>{ "productId": "..." }</code></td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:productId</code></td>
+          <td>حذف</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>افزودن idempotent است (افزودن دوباره‌ی همان محصول خطا نمی‌دهد).</p>
+    <hr>
+    <h2 id="۸-مقایسه-comparison">۸. مقایسه (Comparison) </h2>
+    <p>Base path: <code>/api/v1/comparison</code> — مثل سبد خرید، هم مهمان هم عضو (همان هدر
+      <code>X-Guest-Token</code>).<br>
+      حداکثر <strong>۴ محصول</strong> هم‌زمان.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>دریافت لیست مقایسه‌ی فعلی</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>افزودن — Body: <code>{ "productId": "..." }</code></td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:productId</code></td>
+          <td>حذف یک محصول</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/</code></td>
+          <td>خالی‌کردن کل لیست</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>پاسخ‌ها به شکل
+      <code>{ comparison: { id, items: [{ id, product: {...با brand/categories} }] }, guestToken? }</code><br>
+      <strong>خطاها:</strong> <code>409</code> اگر بخواهید محصول پنجم اضافه کنید.
+    </p>
+    <hr>
+    <h2 id="۹-کد-تخفیف-discount-codes">۹. کد تخفیف (Discount Codes) </h2>
+    <p>Base path: <code>/api/v1/discount-codes</code></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>POST</td>
+          <td><code>/apply</code></td>
+          <td>اختیاری (مهمان/عضو)</td>
+          <td>بررسی و محاسبه‌ی کد روی سبد فعلی (بدون مصرف‌کردن کد)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>لیست (صفحه‌بندی + <code>?isActive=</code> + <code>?search=</code>)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>جزئیات + محصولات/دسته‌ها/کاربران متصل</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ایجاد</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ویرایش</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>حذف (اگر قبلاً مصرف شده، <code>409</code> — غیرفعال کنید)</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="post-apply"><code>POST /apply</code> </h3>
+    <p><strong>Body:</strong> <code>{ "code": "SUMMER20" }</code><br>
+      <strong>Response 200</strong> → <code>data</code>:
+    </p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"discountCodeId"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span>
+  <span class="token property">"code"</span><span class="token operator">:</span> <span class="token string">"SUMMER20"</span><span class="token punctuation">,</span>
+  <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"PERCENT"</span><span class="token punctuation">,</span>
+  <span class="token property">"value"</span><span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span>
+  <span class="token property">"cartTotal"</span><span class="token operator">:</span> <span class="token number">450000</span><span class="token punctuation">,</span>
+  <span class="token property">"eligibleSubtotal"</span><span class="token operator">:</span> <span class="token number">450000</span><span class="token punctuation">,</span>
+  <span class="token property">"discountAmount"</span><span class="token operator">:</span> <span class="token number">90000</span><span class="token punctuation">,</span>
+  <span class="token property">"payableTotal"</span><span class="token operator">:</span> <span class="token number">360000</span><span class="token punctuation">,</span>
+  <span class="token property">"eligibleVariantIds"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"..."</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"guestToken"</span><span class="token operator">:</span> <span class="token string">"فقط اگر مهمان بودید و هنوز توکن نداشتید"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p>این مقدار فقط پیش‌نمایش است — مصرف واقعی کد (افزایش شمارنده‌ی استفاده) فقط<br>
+      هنگام ثبت قطعی سفارش (بخش Orders) اتفاق می‌افتد. اگر <code>code</code> را به<br>
+      <code>POST /orders</code> بفرستید، دوباره از اول اعتبارسنجی و این‌بار واقعاً مصرف می‌شود.
+    </p>
+    <p><strong>خطاها (<code>400</code> با پیام مشخص):</strong> کد غیرفعال/منقضی/هنوز شروع‌نشده، ظرفیت<br>
+      استفاده تمام شده، نیاز به ورود (اگر کد به کاربر خاص محدود است)، کد برای<br>
+      حساب شما نیست، حداقل مبلغ سبد رعایت نشده، هیچ‌کدام از کالاهای سبد شامل این<br>
+      کد نمی‌شوند. <strong><code>404</code></strong> کد پیدا نشد.</p>
+    <h3 id="post--ایجاد"><code>POST /</code> (ایجاد) </h3>
+    <p><strong>Body:</strong></p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"code"</span><span class="token operator">:</span> <span class="token string">"SUMMER20"</span><span class="token punctuation">,</span>
+  <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"PERCENT"</span><span class="token punctuation">,</span>
+  <span class="token property">"value"</span><span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span>
+  <span class="token property">"maxDiscountAmount"</span><span class="token operator">:</span> <span class="token number">100000</span><span class="token punctuation">,</span>
+  <span class="token property">"minCartAmount"</span><span class="token operator">:</span> <span class="token number">200000</span><span class="token punctuation">,</span>
+  <span class="token property">"maxUsage"</span><span class="token operator">:</span> <span class="token number">500</span><span class="token punctuation">,</span>
+  <span class="token property">"maxUsagePerUser"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+  <span class="token property">"startsAt"</span><span class="token operator">:</span> <span class="token string">"2026-06-01T00:00:00Z"</span><span class="token punctuation">,</span>
+  <span class="token property">"expiresAt"</span><span class="token operator">:</span> <span class="token string">"2026-06-30T23:59:59Z"</span><span class="token punctuation">,</span>
+  <span class="token property">"isActive"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"productIds"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"categoryIds"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"userIds"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <ul>
+      <li><code>type=PERCENT</code> → <code>value</code> باید بین ۱ تا ۱۰۰ باشد.</li>
+      <li><code>productIds</code>/<code>categoryIds</code> خالی = روی کل سبد اعمال می‌شود؛ پر = فقط روی آیتم‌های واجد
+        شرایط (جزئیات در README پروژه).</li>
+      <li><code>userIds</code> پر = فقط همین کاربرها مجازند (یا <code>maxUsagePerUser</code> ست شده باشد) → کاربر باید
+        لاگین کرده باشد.</li>
+      <li><code>code</code> همیشه با حروف بزرگ ذخیره می‌شود (case-insensitive در عمل).</li>
+    </ul>
+    <p><strong>خطاها:</strong> <code>409</code> کد تکراری، <code>400</code> محصول/دسته/کاربر نامعتبر یا
+      <code>expiresAt &lt;= startsAt</code>.
+    </p>
+    <hr>
+    <h2 id="۱۰-آدرسها-addresses">۱۰. آدرس‌ها (Addresses) </h2>
+    <p>Base path: <code>/api/v1/addresses</code> — <strong>همه‌ی مسیرها نیاز به ورود دارند</strong>.<br>
+      پیش‌نیاز ثبت سفارش (انتخاب آدرس ارسال) + آیتم نقشه (<code>lat</code>/<code>lng</code>).</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>لیست آدرس‌های من</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/:id</code></td>
+          <td>یک آدرس</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>ایجاد</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/:id</code></td>
+          <td>ویرایش</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id</code></td>
+          <td>حذف (اگر در سفارشی استفاده شده، <code>409</code>)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Body:</strong></p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"title"</span><span class="token operator">:</span> <span class="token string">"خانه"</span><span class="token punctuation">,</span>
+  <span class="token property">"receiverName"</span><span class="token operator">:</span> <span class="token string">"علی رضایی"</span><span class="token punctuation">,</span>
+  <span class="token property">"receiverPhone"</span><span class="token operator">:</span> <span class="token string">"09123456789"</span><span class="token punctuation">,</span>
+  <span class="token property">"province"</span><span class="token operator">:</span> <span class="token string">"تهران"</span><span class="token punctuation">,</span>
+  <span class="token property">"city"</span><span class="token operator">:</span> <span class="token string">"تهران"</span><span class="token punctuation">,</span>
+  <span class="token property">"postalCode"</span><span class="token operator">:</span> <span class="token string">"1234567890"</span><span class="token punctuation">,</span>
+  <span class="token property">"fullAddress"</span><span class="token operator">:</span> <span class="token string">"خیابان ...، پلاک ..."</span><span class="token punctuation">,</span>
+  <span class="token property">"lat"</span><span class="token operator">:</span> <span class="token number">35.6892</span><span class="token punctuation">,</span>
+  <span class="token property">"lng"</span><span class="token operator">:</span> <span class="token number">51.3890</span><span class="token punctuation">,</span>
+  <span class="token property">"isDefault"</span><span class="token operator">:</span> <span class="token boolean">false</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p>اولین آدرس کاربر خودکار <code>isDefault=true</code> می‌شود. تنظیم <code>isDefault=true</code> روی<br>
+      یک آدرس، بقیه را خودکار <code>false</code> می‌کند.</p>
+    <hr>
+    <h2 id="۱۱-شرکتهای-ارسال-shipping-companies">۱۱. شرکت‌های ارسال (Shipping Companies) </h2>
+    <p>Base path: <code>/api/v1/shipping-companies</code></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>ندارد</td>
+          <td>لیست فعال‌ها؛ <code>?includeInactive=true</code> برای ادمین</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/:id</code></td>
+          <td>ندارد</td>
+          <td>یک شرکت</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ایجاد</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ویرایش</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>حذف (اگر در سفارشی استفاده شده، <code>409</code>)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Body:</strong>
+      <code>{ name, logoId?, description?, baseCost, estimatedDaysMin?, estimatedDaysMax?, isActive? }</code><br>
+      <code>baseCost</code> هزینه‌ی ثابت ارسال (تومان) که مستقیم به <code>Order.shippingCost</code> می‌رود.
+    </p>
+    <hr>
+    <h2 id="۱۲-درگاههای-پرداخت-payment-gateways">۱۲. درگاه‌های پرداخت (Payment Gateways) </h2>
+    <p>Base path: <code>/api/v1/payment-gateways</code></p>
+    <p>⚠️ این فقط رکورد «تنظیمات» یک درگاه در دیتابیس است (برای نمایش در صفحه‌ی<br>
+      پرداخت). اتصال واقعی به درگاه (زرین‌پال و ...) جدا و در<br>
+      <code>src/services/payment/payment.factory.ts</code> پیاده‌سازی می‌شود — <code>slug</code> اینجا<br>
+      باید با همان مقداری که در factory ثبت می‌کنید یکی باشد.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>ندارد</td>
+          <td>لیست فعال‌ها (برای نمایش گزینه‌های پرداخت)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>ADMIN</td>
+          <td>ایجاد</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN</td>
+          <td>ویرایش</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN</td>
+          <td>حذف</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Body:</strong> <code>{ name, slug, isActive?, config? }</code> — <code>config</code> یک شیء آزاد JSON<br>
+      (مثلاً merchantId) که فقط سمت سرور خوانده می‌شود.</p>
+    <hr>
+    <h2 id="۱۳-کیف-پول-wallet">۱۳. کیف پول (Wallet) </h2>
+    <p>Base path: <code>/api/v1/wallet</code> — <strong>همه‌ی مسیرها نیاز به ورود دارند</strong>.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/?page=&amp;limit=</code></td>
+          <td>موجودی + تاریخچه‌ی تراکنش‌ها (صفحه‌بندی‌شده)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/charge/initiate</code></td>
+          <td>شروع شارژ از درگاه</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/charge/:transactionId/verify</code></td>
+          <td>تایید بازگشت از درگاه و افزایش موجودی</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="get-"><code>GET /</code> </h3>
+    <p><strong>Response 200</strong> → <code>data</code>:</p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"balance"</span><span class="token operator">:</span> <span class="token number">150000</span><span class="token punctuation">,</span>
+  <span class="token property">"transactions"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token property">"id"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"DEPOSIT"</span><span class="token punctuation">,</span> <span class="token property">"amount"</span><span class="token operator">:</span> <span class="token number">100000</span><span class="token punctuation">,</span> <span class="token property">"description"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"orderId"</span><span class="token operator">:</span> <span class="token null keyword">null</span><span class="token punctuation">,</span> <span class="token property">"createdAt"</span><span class="token operator">:</span> <span class="token string">"..."</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"meta"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"total"</span><span class="token operator">:</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token property">"page"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token property">"limit"</span><span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token property">"totalPages"</span><span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p><code>type</code>: <code>DEPOSIT</code> (شارژ) | <code>WITHDRAW</code> | <code>PURCHASE</code> (پرداخت سفارش) |
+      <code>REFUND</code> | <code>ADMIN_ADJUST</code>.
+    </p>
+    <h3 id="post-chargeinitiate"><code>POST /charge/initiate</code> </h3>
+    <p><strong>Body:</strong> <code>{ "amount": 100000, "gatewaySlug": "zarinpal" }</code><br>
+      <strong>Response 200</strong> → <code>data</code>:
+      <code>{ "transactionId": "...", "redirectUrl": "https://..." }</code><br>
+      کاربر را به <code>redirectUrl</code> بفرستید؛ درگاه بعد از پرداخت کاربر را به همان<br>
+      callback که سرور ساخته برمی‌گرداند.<br>
+      <strong>خطاها:</strong> <code>404</code>/<code>400</code> اگر <code>gatewaySlug</code> ثبت یا فعال نباشد، یا (تا
+      قبل از<br>
+      اتصال یک درگاه واقعی در factory) «درگاه پرداخت ثبت نشده است».
+    </p>
+    <h3 id="post-chargetransactionidverify"><code>POST /charge/:transactionId/verify</code> </h3>
+    <p><strong>Body:</strong> <code>{ "providerParams": { "Authority": "...", "Status": "OK" } }</code> (هرچه درگاه در
+      querystring برگرداند)<br>
+      <strong>Response 200</strong> → <code>data</code>:
+      <code>{ "alreadyProcessed": false, "balance": 250000 }</code><br>
+      <strong>خطاها:</strong> <code>400</code> پرداخت ناموفق، <code>404</code> تراکنش پیدا نشد.
+    </p>
+    <hr>
+    <h2 id="۱۴-سفارشها-orders">۱۴. سفارش‌ها (Orders) </h2>
+    <p>Base path: <code>/api/v1/orders</code> — <strong>همه‌ی مسیرها نیاز به ورود دارند</strong> (بدون<br>
+      checkout مهمان؛ قبل از سفارش باید کاربر لاگین کرده و سبدش غیرخالی باشد).</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/admin</code></td>
+          <td>ADMIN/SUPPORT</td>
+          <td>لیست همه‌ی سفارش‌ها (فیلتر <code>status</code>, <code>userId</code>, <code>search</code>)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/admin/returns</code></td>
+          <td>ADMIN/SUPPORT</td>
+          <td>لیست درخواست‌های مرجوعی</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/admin/returns/:returnId</code></td>
+          <td>ADMIN/SUPPORT</td>
+          <td>بررسی/تایید/رد مرجوعی</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/admin/:id</code></td>
+          <td>ADMIN/SUPPORT</td>
+          <td>جزئیات هر سفارشی (بدون محدودیت مالکیت)</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/admin/:id/status</code></td>
+          <td>ADMIN/SUPPORT</td>
+          <td>تغییر دستی وضعیت سفارش</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>کاربر</td>
+          <td>لیست سفارش‌های من</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>کاربر</td>
+          <td><strong>ثبت سفارش از سبد خرید فعلی (checkout)</strong></td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/:id</code></td>
+          <td>کاربر (مالک)</td>
+          <td>جزئیات یک سفارش من</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/:id/cancel</code></td>
+          <td>کاربر (مالک)</td>
+          <td>لغو خودکار (فقط قبل از ارسال)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/:id/return</code></td>
+          <td>کاربر (مالک)</td>
+          <td>درخواست مرجوعی (فقط بعد از تحویل)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/:id/payment/initiate</code></td>
+          <td>کاربر (مالک)</td>
+          <td>شروع پرداخت از درگاه برای باقی‌مانده‌ی بدهی</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/:id/payment/verify</code></td>
+          <td>کاربر (مالک)</td>
+          <td>تایید بازگشت از درگاه</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="وضعیتهای-سفارش-orderstatus">وضعیت‌های سفارش (<code>OrderStatus</code>) </h3>
+    <p><code>PENDING_PAYMENT</code> → <code>PROCESSING</code> → <code>SHIPPED</code> → <code>DELIVERED</code>، یا در هر
+      مرحله<br>
+      قبل از ارسال: <code>CANCELLED</code>؛ بعد از تحویل: <code>RETURN_REQUESTED</code> → <code>RETURNED</code>.<br>
+      (<code>REFUNDED</code>, <code>FAILED</code> هم در enum هستند برای موارد خاص ادمین.)</p>
+    <h3 id="post--ثبت-سفارش"><code>POST /</code> (ثبت سفارش) </h3>
+    <p><strong>Body:</strong></p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"addressId"</span><span class="token operator">:</span> <span class="token string">"address_id"</span><span class="token punctuation">,</span>
+  <span class="token property">"shippingCompanyId"</span><span class="token operator">:</span> <span class="token string">"shipping_company_id"</span><span class="token punctuation">,</span>
+  <span class="token property">"paymentMethod"</span><span class="token operator">:</span> <span class="token string">"WALLET"</span><span class="token punctuation">,</span>
+  <span class="token property">"gatewaySlug"</span><span class="token operator">:</span> <span class="token string">"zarinpal"</span><span class="token punctuation">,</span>
+  <span class="token property">"discountCode"</span><span class="token operator">:</span> <span class="token string">"SUMMER20"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <ul>
+      <li><code>paymentMethod</code>: <code>WALLET</code> (کامل از کیف‌پول) | <code>GATEWAY</code> (کامل از درگاه) |
+        <code>MIXED</code> (تا جایی که کیف‌پول کافی است، باقی از درگاه).
+      </li>
+      <li><code>gatewaySlug</code> برای <code>GATEWAY</code>/<code>MIXED</code> الزامی است؛ برای <code>WALLET</code>
+        لازم نیست.</li>
+      <li><code>discountCode</code> اختیاری — همان منطق <code>POST /discount-codes/apply</code> اما این‌بار واقعاً مصرف
+        می‌شود.</li>
+    </ul>
+    <p><strong>رفتار بر اساس <code>paymentMethod</code>:</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>حالت</th>
+          <th>نتیجه</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>WALLET</code> و موجودی کافی</td>
+          <td>سفارش فوراً <code>PROCESSING</code> (پرداخت‌شده) می‌شود</td>
+        </tr>
+        <tr>
+          <td><code>MIXED</code> و موجودی کیف‌پول ≥ مبلغ کل</td>
+          <td>مثل بالا — کلش از کیف‌پول کسر می‌شود</td>
+        </tr>
+        <tr>
+          <td><code>MIXED</code> با موجودی ناکافی، یا <code>GATEWAY</code></td>
+          <td>سفارش <code>PENDING_PAYMENT</code> می‌ماند؛ بخش کیف‌پول (اگر بود) فوراً کسر می‌شود، باقی را با
+            <code>POST /:id/payment/initiate</code> تکمیل کنید
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Response 201</strong> → <code>data</code>: جزئیات کامل سفارش (شکل <code>GET /:id</code>).</p>
+    <p><strong>خطاها:</strong> <code>400</code> سبد خالی/کالای ناموجود/آدرس یا شرکت ارسال نامعتبر/موجودی<br>
+      کیف‌پول کافی نیست، <code>404</code> آدرس پیدا نشد، <code>409</code> موجودی هم‌زمان توسط سفارش<br>
+      دیگری مصرف شد (سبد را به‌روزرسانی کنید و دوباره تلاش کنید).</p>
+    <h3 id="get-id-جزئیات-سفارش"><code>GET /:id</code> (جزئیات سفارش) </h3>
+    <p><strong>Response 200</strong> → <code>data</code>:</p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"id"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"orderNumber"</span><span class="token operator">:</span> <span class="token string">"ORD-20260624-A1B2C9"</span><span class="token punctuation">,</span>
+  <span class="token property">"status"</span><span class="token operator">:</span> <span class="token string">"PROCESSING"</span><span class="token punctuation">,</span> <span class="token property">"paymentMethod"</span><span class="token operator">:</span> <span class="token string">"WALLET"</span><span class="token punctuation">,</span> <span class="token property">"paidAt"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span>
+  <span class="token property">"subtotal"</span><span class="token operator">:</span> <span class="token number">450000</span><span class="token punctuation">,</span> <span class="token property">"shippingCost"</span><span class="token operator">:</span> <span class="token number">30000</span><span class="token punctuation">,</span> <span class="token property">"discountAmount"</span><span class="token operator">:</span> <span class="token number">90000</span><span class="token punctuation">,</span> <span class="token property">"taxAmount"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token property">"totalAmount"</span><span class="token operator">:</span> <span class="token number">390000</span><span class="token punctuation">,</span>
+  <span class="token property">"shippingAddress"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"receiverName"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"fullAddress"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"..."</span><span class="token operator">:</span> <span class="token string">"..."</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"items"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> <span class="token property">"id"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"productName"</span><span class="token operator">:</span> <span class="token string">"تیشرت مردانه"</span><span class="token punctuation">,</span> <span class="token property">"variantAttributes"</span><span class="token operator">:</span> <span class="token string">"رنگ: قرمز، سایز: L"</span><span class="token punctuation">,</span> <span class="token property">"price"</span><span class="token operator">:</span> <span class="token number">225000</span><span class="token punctuation">,</span> <span class="token property">"quantity"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token property">"discountAmount"</span><span class="token operator">:</span> <span class="token number">90000</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"statusHistory"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> <span class="token property">"status"</span><span class="token operator">:</span> <span class="token string">"PROCESSING"</span><span class="token punctuation">,</span> <span class="token property">"note"</span><span class="token operator">:</span> <span class="token null keyword">null</span><span class="token punctuation">,</span> <span class="token property">"createdAt"</span><span class="token operator">:</span> <span class="token string">"..."</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"shippingCompany"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"id"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"..."</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"address"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"..."</span><span class="token operator">:</span> <span class="token string">"..."</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"discountCode"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"id"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"code"</span><span class="token operator">:</span> <span class="token string">"SUMMER20"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"transactions"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"cancellation"</span><span class="token operator">:</span> <span class="token null keyword">null</span><span class="token punctuation">,</span>
+  <span class="token property">"returns"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <h3 id="post-idcancel"><code>POST /:id/cancel</code> </h3>
+    <p><strong>Body:</strong> <code>{ "reason": "توضیح کوتاه" }</code><br>
+      فقط روی سفارش‌های <code>PENDING_PAYMENT</code>/<code>PROCESSING</code> کار می‌کند؛ خودکار تایید<br>
+      می‌شود (نیازی به بررسی ادمین نیست)، موجودی تنوع‌ها برمی‌گردد، و اگر پرداخت<br>
+      شده بود به کیف‌پول بازگشت می‌خورد.<br>
+      <strong>خطاها:</strong> <code>409</code> سفارش ارسال‌شده (باید مرجوعی بزنید) یا قبلاً لغو/مرجوع شده.
+    </p>
+    <h3 id="post-idreturn"><code>POST /:id/return</code> </h3>
+    <p><strong>Body:</strong>
+      <code>{ "orderItemId": "اختیاری — اگر نباشد یعنی کل سفارش", "reason": "...", "imageMediaIds": ["media_id"] }</code><br>
+      فقط روی سفارش <code>DELIVERED</code> کار می‌کند؛ وضعیت <code>PENDING</code> می‌گیرد و <strong>نیاز به<br>
+        بررسی ادمین دارد</strong> (برخلاف لغو). سفارش به <code>RETURN_REQUESTED</code> می‌رود.<br>
+      <strong>خطاها:</strong> <code>409</code> سفارش هنوز تحویل نشده.
+    </p>
+    <h3 id="post-idpaymentinitiate"><code>POST /:id/payment/initiate</code> </h3>
+    <p><strong>Body:</strong> <code>{ "gatewaySlug": "zarinpal" }</code> → <code>data</code>:
+      <code>{ "redirectUrl": "..." }</code><br>
+      فقط وقتی سفارش <code>PENDING_PAYMENT</code> باشد و یک تراکنش در انتظار (از مرحله‌ی<br>
+      ثبت سفارش) داشته باشد.
+    </p>
+    <h3 id="post-idpaymentverify"><code>POST /:id/payment/verify</code> </h3>
+    <p><strong>Body:</strong> <code>{ "providerParams": {...} }</code> → موفق: سفارش به <code>PROCESSING</code>
+      می‌رود<br>
+      و <code>paidAt</code> ست می‌شود. <strong>خطا:</strong> <code>400</code> پرداخت ناموفق (قابل تلاش دوباره با
+      initiate).</p>
+    <h3 id="ادمینپشتیبانی">ادمین/پشتیبانی </h3>
+    <ul>
+      <li><code>PUT /admin/:id/status</code> — Body: <code>{ "status": "SHIPPED", "note": "..." }</code> — هر تغییر در
+        <code>OrderStatusHistory</code> ثبت می‌شود.
+      </li>
+      <li><code>PUT /admin/returns/:returnId</code> — Body:
+        <code>{ "status": "RECEIVED" | "REFUNDED" | "REJECTED" | "APPROVED", "refundAmount"?: 90000, "adminNote"?: "..." }</code>
+        <ul>
+          <li><code>RECEIVED</code> → موجودی آیتم(های) مرجوعی برمی‌گردد.</li>
+          <li><code>REFUNDED</code> → <code>refundAmount</code> الزامی، به کیف‌پول کاربر واریز می‌شود؛ اگر مرجوعی کل
+            سفارش بود، سفارش <code>RETURNED</code> می‌شود.</li>
+          <li><code>REJECTED</code> → سفارش به <code>DELIVERED</code> برمی‌گردد.</li>
+        </ul>
+      </li>
+    </ul>
+    <hr>
+    <h2 id="۱۵-رسانه-media">۱۵. رسانه (Media) </h2>
+    <p>Base path: <code>/api/v1/media</code></p>
+    <p>فایل‌ها فعلاً روی دیسک خودِ سرور ذخیره می‌شوند و از مسیر <code>/uploads/...</code><br>
+      (خارج از <code>/api/v1</code>) به‌صورت استاتیک قابل‌دسترسی هستند. <code>Media.url</code> در پاسخ‌ها<br>
+      همیشه آدرس کامل و قابل‌استفاده مستقیم در <code>&lt;img src&gt;</code> است.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>هر کاربر لاگین‌کرده</td>
+          <td>آپلود یک فایل — <code>multipart/form-data</code>, field name: <code>file</code> (+ <code>alt</code>
+            اختیاری)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/bulk</code></td>
+          <td>هر کاربر لاگین‌کرده</td>
+          <td>آپلود چند فایل هم‌زمان — field name: <code>files</code> (حداکثر ۱۰ فایل)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>کتابخانه‌ی رسانه (صفحه‌بندی + فیلتر <code>type</code>/<code>uploadedById</code>)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>جزئیات یک فایل</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>حذف (اگر در جایی استفاده شده، <code>409</code>)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>فرمت‌های مجاز:</strong> <code>image/jpeg</code>, <code>image/png</code>, <code>image/webp</code>,
+      <code>image/gif</code>,<br>
+      <code>application/pdf</code>. <strong>حداکثر حجم:</strong> پیش‌فرض ۵ مگابایت (با <code>MAX_FILE_SIZE_MB</code> در
+      <code>.env</code> قابل تغییر).
+    </p>
+    <h3 id="post--آپلود-تکی"><code>POST /</code> (آپلود تکی) </h3>
+    <p>درخواست باید <code>Content-Type: multipart/form-data</code> باشد:</p>
+    <pre data-role="codeBlock" data-info="" class="language-text"><code>file: &lt;binary&gt;
+alt: "متن جای‌گزین تصویر (اختیاری)"
+</code></pre>
+    <p><strong>Response 201</strong> → <code>data</code>:</p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"id"</span><span class="token operator">:</span> <span class="token string">"media_id"</span><span class="token punctuation">,</span>
+  <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"http://localhost:4000/uploads/2026/06/171999-abc123.jpg"</span><span class="token punctuation">,</span>
+  <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"IMAGE"</span><span class="token punctuation">,</span>
+  <span class="token property">"mimeType"</span><span class="token operator">:</span> <span class="token string">"image/jpeg"</span><span class="token punctuation">,</span>
+  <span class="token property">"size"</span><span class="token operator">:</span> <span class="token number">245678</span><span class="token punctuation">,</span>
+  <span class="token property">"alt"</span><span class="token operator">:</span> <span class="token null keyword">null</span><span class="token punctuation">,</span>
+  <span class="token property">"uploadedById"</span><span class="token operator">:</span> <span class="token string">"user_id"</span><span class="token punctuation">,</span>
+  <span class="token property">"createdAt"</span><span class="token operator">:</span> <span class="token string">"..."</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p>این <code>id</code> را در فیلدهایی مثل <code>mediaId</code> در محصول/دسته/برند/تیکت/کامنت و... استفاده کنید.</p>
+    <p><strong>خطاها:</strong> <code>400</code> فایلی ارسال نشده / فرمت یا حجم مجاز نیست.</p>
+    <h3 id="post-bulk"><code>POST /bulk</code> </h3>
+    <p>همان شکل، ولی چند فایل با field name تکراری <code>files</code> و <code>data</code> آرایه‌ای از همان شکل بالاست.
+    </p>
+    <h3 id="delete-id"><code>DELETE /:id</code> </h3>
+    <p>قبل از حذف، استفاده‌ی فایل در همه‌جا (آواتار کاربر، تصویر محصول/تنوع، تصویر<br>
+      دسته/برند/شرکت‌ارسال، بنر، پاپ‌آپ، پیوست تیکت/کامنت، تصویر مرجوعی) بررسی<br>
+      می‌شود؛ اگر جایی استفاده شده باشد <code>409</code> برمی‌گردد (باید اول آن استفاده را حذف کنید).</p>
+    <hr>
+
+  </div>
+
+
+
+
+
+
+
+
+
+</body>
+
+</html>

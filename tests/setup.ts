@@ -2,8 +2,6 @@
 // تا src/config/env.ts (که envSchema.safeParse انجام می‌دهد) خطا ندهد.
 // مقادیر واقعی .env در تست‌ها استفاده/لازم نیست.
 
-import { prisma } from "../src/lib/prisma";
-
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL =
   process.env.DATABASE_URL ?? "postgresql://postgres:baset4591@localhost:5432/shopdb";

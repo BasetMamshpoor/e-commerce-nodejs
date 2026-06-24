@@ -8,10 +8,15 @@ import cartRoutes from "./cart.routes";
 import wishlistRoutes from "./wishlist.routes";
 import comparisonRoutes from "./comparison.routes";
 import discountRoutes from "./discount.routes";
+import addressRoutes from "./address.routes";
+import shippingRoutes from "./shipping.routes";
+import paymentGatewayRoutes from "./payment-gateway.routes";
+import walletRoutes from "./wallet.routes";
+import orderRoutes from "./order.routes";
+import mediaRoutes from "./media.routes";
 
 // ----------------------------------------------------------------------------
-// هر ماژول جدید (orders, ...) را همین‌جا mount کنید:
-//   router.use("/orders", orderRoutes);
+// هر ماژول جدید را همین‌جا mount کنید.
 // ----------------------------------------------------------------------------
 
 const router = Router();
@@ -25,5 +30,11 @@ router.use("/cart", cartRoutes);
 router.use("/wishlist", wishlistRoutes);
 router.use("/comparison", comparisonRoutes);
 router.use("/discount-codes", discountRoutes);
+router.use("/addresses", addressRoutes);
+router.use("/shipping-companies", shippingRoutes);
+router.use("/payment-gateways", paymentGatewayRoutes);
+router.use("/wallet", walletRoutes);
+router.use("/orders", orderRoutes);
+router.use("/media", mediaRoutes);
 
 export default router;

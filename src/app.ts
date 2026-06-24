@@ -7,6 +7,7 @@ import { notFoundHandler } from "./middlewares/notFound";
 import { errorHandler } from "./middlewares/errorHandler";
 import { globalApiLimiter } from "./middlewares/rateLimiter";
 import { checkBlockedIp } from "./middlewares/blockedIp.middleware";
+import { resolveUploadRoot } from "./middlewares/upload.middleware";
 import apiRouter from "./routes";
 
 export function createApp(): Application {
@@ -16,7 +17,13 @@ export function createApp(): Application {
   // پایه‌ی درست‌کارکردن rate limiter و ثبت IP در LoginAttempt/UserSession
   app.set("trust proxy", 1);
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      // فایل‌های /uploads باید روی دامنه‌ی جدا (فرانت‌اند) هم قابل نمایش
+      // باشند (مثلاً <img src="...">)، پس CORP پیش‌فرض same-origin را شل می‌کنیم
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+    })
+  );
   app.use(
     cors({
       origin: env.CORS_ORIGIN === "*" ? true : env.CORS_ORIGIN.split(","),
@@ -26,6 +33,8 @@ export function createApp(): Application {
   app.use(express.json({ limit: "2mb" }));
   app.use(express.urlencoded({ extended: true }));
   app.use(morgan(isProd ? "combined" : "dev"));
+
+  app.use("/uploads", express.static(resolveUploadRoot()));
 
   app.get("/health", (_req, res) => {
     res.json({ success: true, message: "OK", uptime: process.uptime() });

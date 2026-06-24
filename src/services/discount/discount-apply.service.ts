@@ -23,6 +23,7 @@ export interface DiscountEvaluationResult {
   eligibleSubtotal: number;
   discountAmount: number;
   payableTotal: number;
+  eligibleVariantIds: string[];
 }
 
 type DiscountCodeWithRestrictions = DiscountCode & {
@@ -169,6 +170,7 @@ export async function evaluateDiscountCode(
     eligibleSubtotal,
     discountAmount,
     payableTotal: cartTotal - discountAmount,
+    eligibleVariantIds: eligibleItems.map((i) => i.variantId),
   };
 }
 
@@ -179,24 +181,25 @@ export async function evaluateDiscountCode(
 // «مصرف‌شده» محسوب نمی‌شود.
 // ----------------------------------------------------------------------------
 
-export async function recordDiscountCodeUsage(params: {
-  discountCodeId: string;
-  userId: string;
-  orderId: string;
-  discountAmount: number;
-}): Promise<void> {
-  await prisma.$transaction(async (tx) => {
-    await tx.discountCodeUsage.create({
-      data: {
-        discountCodeId: params.discountCodeId,
-        userId: params.userId,
-        orderId: params.orderId,
-        discountAmount: params.discountAmount,
-      },
-    });
-    await tx.discountCode.update({
-      where: { id: params.discountCodeId },
-      data: { usageCount: { increment: 1 } },
-    });
+export async function recordDiscountCodeUsage(
+  params: {
+    discountCodeId: string;
+    userId: string;
+    orderId: string;
+    discountAmount: number;
+  },
+  client: Pick<typeof prisma, "discountCodeUsage" | "discountCode"> = prisma
+): Promise<void> {
+  await client.discountCodeUsage.create({
+    data: {
+      discountCodeId: params.discountCodeId,
+      userId: params.userId,
+      orderId: params.orderId,
+      discountAmount: params.discountAmount,
+    },
+  });
+  await client.discountCode.update({
+    where: { id: params.discountCodeId },
+    data: { usageCount: { increment: 1 } },
   });
 }

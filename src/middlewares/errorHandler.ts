@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
+import { MulterError } from "multer";
 import { ApiError } from "../utils/ApiError";
 import { isProd } from "../config/env";
 import { Prisma } from "../generated/prisma";
@@ -30,6 +31,14 @@ export function errorHandler(
     statusCode = 400;
     message = "داده‌های ورودی نامعتبر است";
     details = err.flatten().fieldErrors;
+  } else if (err instanceof MulterError) {
+    statusCode = 400;
+    message =
+      err.code === "LIMIT_FILE_SIZE"
+        ? "حجم فایل بیش از حد مجاز است"
+        : err.code === "LIMIT_FILE_COUNT" || err.code === "LIMIT_UNEXPECTED_FILE"
+          ? "تعداد فایل‌ها بیش از حد مجاز است"
+          : "خطا در آپلود فایل";
   } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
     const mapped = mapPrismaError(err);
     statusCode = mapped.statusCode;

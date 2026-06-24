@@ -261,6 +261,7 @@ export async function mergeGuestCartIntoUser(
 // ----------------------------------------------------------------------------
 
 export interface CartLineItemForDiscount {
+  variantId: string;
   productId: string;
   categoryIds: string[];
   quantity: number;
@@ -299,6 +300,7 @@ export async function getCartLineItemsForDiscount(
   return cart.items.map((item) => {
     const price = computeVariantEffectivePrice(item.variant);
     return {
+      variantId: item.variant.id,
       productId: item.variant.product.id,
       categoryIds: item.variant.product.categories.map((c) => c.categoryId),
       quantity: item.quantity,
