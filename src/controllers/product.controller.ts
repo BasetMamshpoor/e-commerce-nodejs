@@ -32,12 +32,12 @@ export async function getByIdAdmin(req: Request, res: Response) {
 }
 
 export async function listPublic(req: Request, res: Response) {
-  const result = await queryService.listProductsStorefront(req.query as never);
+  const result = await queryService.listProductsStorefront(req.validatedQuery as never);
   return ApiResponse.ok(res, result);
 }
 
 export async function listAdmin(req: Request, res: Response) {
-  const result = await queryService.listProductsAdmin(req.query as never);
+  const result = await queryService.listProductsAdmin(req.validatedQuery as never);
   return ApiResponse.ok(res, result);
 }
 

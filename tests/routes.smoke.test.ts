@@ -11,9 +11,7 @@ describe("روتینگ و میدلورهای پایه", () => {
   });
 
   it("ایجاد دسته‌بندی بدون توکن باید 401 برگرداند", async () => {
-    const res = await request(app)
-      .post("/api/v1/categories")
-      .send({ name: "تست" });
+    const res = await request(app).post("/api/v1/categories").send({ name: "تست" });
     expect(res.status).toBe(401);
   });
 

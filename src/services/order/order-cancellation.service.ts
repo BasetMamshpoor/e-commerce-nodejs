@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import { recomputeProductAggregates } from "../catalog/product.service";
+import { notifyUser } from "../notification/notification.service";
 import { Order, OrderItem } from "../../generated/prisma";
 
 // ----------------------------------------------------------------------------
@@ -105,6 +106,14 @@ export async function cancelOrder(
     })
     .then((rows) => Array.from(new Set(rows.map((r) => r.productId))));
   await Promise.all(productIds.map((id) => recomputeProductAggregates(id)));
+
+  notifyUser({
+    userId,
+    type: "ORDER",
+    title: `سفارش ${order.orderNumber}`,
+    message: "سفارش شما با موفقیت لغو شد",
+    link: `/orders/${order.id}`,
+  }).catch(() => undefined);
 
   return updated;
 }

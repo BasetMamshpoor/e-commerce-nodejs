@@ -25,6 +25,14 @@
 14. [کیف پول (Wallet)](#۱۳-کیف-پول-wallet)
 15. [سفارش‌ها (Orders)](#۱۴-سفارش‌ها-orders)
 16. [رسانه (Media)](#۱۵-رسانه-media)
+17. [نوتیفیکیشن (Notifications)](#۱۶-نوتیفیکیشن-notifications)
+18. [تیکتینگ (Tickets)](#۱۷-تیکتینگ-tickets)
+19. [دیدگاه‌های تودرتو (Comments)](#۱۸-دیدگاه‌های-تودرتو-comments)
+20. [بنر (Banners)](#۱۹-بنر-banners)
+21. [پاپ‌آپ (Popups)](#۲۰-پاپ‌آپ-popups)
+22. [مدیریت کاربران - ادمین (Users Admin)](#۲۱-مدیریت-کاربران---ادمین-users-admin)
+23. [امنیت - بلاک IP (Security)](#۲۲-امنیت---بلاک-ip-security)
+24. [آنالیز (Analytics)](#۲۳-آنالیز-analytics)
 
 ---
 
@@ -758,5 +766,270 @@ alt: "متن جای‌گزین تصویر (اختیاری)"
 قبل از حذف، استفاده‌ی فایل در همه‌جا (آواتار کاربر، تصویر محصول/تنوع، تصویر
 دسته/برند/شرکت‌ارسال، بنر، پاپ‌آپ، پیوست تیکت/کامنت، تصویر مرجوعی) بررسی
 می‌شود؛ اگر جایی استفاده شده باشد `409` برمی‌گردد (باید اول آن استفاده را حذف کنید).
+
+---
+
+## ۱۶. نوتیفیکیشن (Notifications)
+Base path: `/api/v1/notifications` — **همه‌ی مسیرها نیاز به ورود دارند**.
+
+این endpoint ها فقط برای *خوانش* نوتیفیکیشن‌های خودِ کاربر هستند. خودِ
+نوتیفیکیشن‌ها را ماژول‌های دیگر (سفارش، کیف‌پول، تیکت، کامنت) به‌صورت خودکار
+می‌سازند؛ تنها استثنا «پخش همگانی» برای ادمین است.
+
+| Method | Path | Auth | توضیح |
+|---|---|---|---|
+| GET | `/?page=&limit=&isRead=` | کاربر | لیست نوتیفیکیشن‌های من (صفحه‌بندی‌شده) |
+| GET | `/unread-count` | کاربر | تعداد نوتیفیکیشن‌های نخوانده |
+| PATCH | `/read-all` | کاربر | همه را خوانده‌شده علامت بزن |
+| PATCH | `/:id/read` | کاربر | یکی را خوانده‌شده علامت بزن |
+| DELETE | `/:id` | کاربر | حذف یک نوتیفیکیشن |
+| POST | `/admin/broadcast` | ADMIN/EDITOR | پخش همگانی/گروهی (مثلاً اطلاع‌رسانی جشنواره) |
+
+`type` همیشه یکی از: `ORDER` | `SYSTEM` | `TICKET` | `PROMOTION` | `WALLET` | `COMMENT`
+
+### `POST /admin/broadcast`
+**Body:**
+```json
+{
+  "userIds": ["user_id_۱", "user_id_۲"],
+  "type": "PROMOTION",
+  "title": "جشنواره تابستانه",
+  "message": "تا ۵۰٪ تخفیف روی همه‌ی محصولات!",
+  "link": "/products?hasDiscount=true"
+}
+```
+اگر `userIds` نفرستید (یا خالی باشد)، برای **همه‌ی کاربران** ارسال می‌شود.
+**Response 200** → `data`: `{ "sentCount": 1280 }`
+
+---
+
+## ۱۷. تیکتینگ (Tickets)
+Base path: `/api/v1/tickets` — **همه‌ی مسیرها نیاز به ورود دارند**.
+
+قاعده‌ی وضعیت (`TicketStatus`): تیکت تازه = `OPEN`. وقتی پشتیبانی پاسخ
+می‌دهد → `ANSWERED`. وقتی کاربر دوباره پیام می‌دهد (حتی روی تیکت `CLOSED`) →
+دوباره `OPEN`. `CLOSED` فقط با `PUT /admin/:id` دستی ست می‌شود.
+
+| Method | Path | Auth | توضیح |
+|---|---|---|---|
+| GET | `/departments` | هر کاربر لاگین‌کرده | لیست بخش‌های پشتیبانی |
+| POST | `/departments` | ADMIN | ایجاد بخش |
+| PUT | `/departments/:id` | ADMIN | ویرایش بخش |
+| DELETE | `/departments/:id` | ADMIN | حذف (اگر تیکت دارد، `409`) |
+| GET | `/` | کاربر | لیست تیکت‌های من (`?status=`) |
+| POST | `/` | کاربر | ایجاد تیکت جدید + پیام اول |
+| GET | `/:id` | کاربر (مالک) | جزئیات تیکت من + پیام‌ها |
+| POST | `/:id/messages` | کاربر (مالک) | افزودن پیام به تیکت من |
+| GET | `/admin` | ADMIN/SUPPORT | لیست همه‌ی تیکت‌ها (فیلتر `status`,`departmentId`,`priority`,`search`) |
+| GET | `/admin/:id` | ADMIN/SUPPORT | جزئیات هر تیکتی |
+| PUT | `/admin/:id` | ADMIN/SUPPORT | تغییر `status`/`priority`/`departmentId` |
+| POST | `/admin/:id/messages` | ADMIN/SUPPORT | پاسخ پشتیبانی (کاربر نوتیف می‌گیرد) |
+
+### `POST /` (ایجاد تیکت)
+**Body:**
+```json
+{
+  "subject": "مشکل در پرداخت سفارش",
+  "departmentId": "dept_id_اختیاری",
+  "priority": "NORMAL",
+  "orderId": "order_id_اختیاری",
+  "message": "سلام، سفارشم پرداخت شد ولی هنوز پردازش نشده...",
+  "attachmentMediaIds": ["media_id"]
+}
+```
+`priority`: `LOW` | `NORMAL` (پیش‌فرض) | `HIGH` | `URGENT`.
+
+### `POST /:id/messages` و `POST /admin/:id/messages`
+**Body:** `{ "message": "...", "attachmentMediaIds": ["media_id"] }`
+هر دو همان منطق را اجرا می‌کنند؛ نوع فرستنده (`USER`/`ADMIN`) از روی نقش
+کاربر لاگین‌کرده تشخیص داده می‌شود، نه از body.
+
+---
+
+## ۱۸. دیدگاه‌های تودرتو (Comments)
+Base path: `/api/v1/comments`
+
+دیدگاه‌های جدید با وضعیت `PENDING` ثبت می‌شوند و فقط بعد از تایید
+ادمین/ادیتور در لیست عمومی نمایش داده می‌شوند. هر دیدگاه اصلی (بدون
+`parentId`) می‌تواند امتیاز (`rating`، ۱ تا ۵) هم داشته باشد؛ پاسخ‌ها
+(`parentId` دارند) نمی‌توانند امتیاز بدهند.
+
+| Method | Path | Auth | توضیح |
+|---|---|---|---|
+| GET | `/product/:productId?page=&limit=` | ندارد | دیدگاه‌های تاییدشده‌ی یک محصول، به‌صورت درختی + میانگین امتیاز (SSR-friendly) |
+| POST | `/product/:productId` | کاربر | ثبت دیدگاه/پاسخ جدید (می‌رود در صف بررسی) |
+| PUT | `/:id` | کاربر (مالک) | ویرایش متن (دوباره می‌رود در صف بررسی) |
+| DELETE | `/:id` | کاربر (مالک) یا ADMIN/EDITOR/SUPPORT | حذف (اگر پاسخ دارد، `409`) |
+| POST | `/:id/like` | کاربر | لایک/آن‌لایک (toggle) |
+| GET | `/admin?status=` | ADMIN/EDITOR | لیست همه‌ی دیدگاه‌ها برای بررسی |
+| PUT | `/admin/:id` | ADMIN/EDITOR | تایید/رد — Body: `{ "status": "APPROVED" }` |
+
+### `GET /product/:productId`
+**Response 200** → `data`:
+```json
+{
+  "items": [
+    {
+      "id": "...", "content": "کیفیت عالی بود", "rating": 5, "createdAt": "...",
+      "likeCount": 3,
+      "replies": [
+        { "id": "...", "content": "موافقم!", "rating": null, "likeCount": 0, "replies": [] }
+      ]
+    }
+  ],
+  "meta": { "total": 12, "page": 1, "limit": 20, "totalPages": 1 },
+  "ratingSummary": { "average": 4.6, "count": 8 }
+}
+```
+صفحه‌بندی فقط روی دیدگاه‌های **سطح اول** اعمال می‌شود؛ پاسخ‌های هر دیدگاه
+کامل (بدون صفحه‌بندی جدا) همراهش می‌آیند.
+
+### `POST /product/:productId`
+**Body:** `{ "content": "...", "parentId": "اختیاری (یعنی پاسخ است)", "rating": 5, "attachmentMediaIds": [] }`
+**خطاها:** `400` اگر هم `parentId` و هم `rating` با هم فرستاده شوند.
+
+---
+
+## ۱۹. بنر (Banners)
+Base path: `/api/v1/banners`
+
+| Method | Path | Auth | توضیح |
+|---|---|---|---|
+| GET | `/?position=` | ندارد | بنرهای فعال و در بازه‌ی زمانی فعلی (برای نمایش در سایت) |
+| GET | `/admin` | ADMIN/EDITOR | همه‌ی بنرها (فعال/غیرفعال) برای پنل مدیریت |
+| POST | `/` | ADMIN/EDITOR | ایجاد |
+| PUT | `/:id` | ADMIN/EDITOR | ویرایش |
+| DELETE | `/:id` | ADMIN/EDITOR | حذف |
+
+**Body:**
+```json
+{
+  "title": "جشنواره تابستانه",
+  "mediaId": "media_id",
+  "link": "/products?hasDiscount=true",
+  "position": "HOME_MAIN",
+  "order": 0,
+  "isActive": true,
+  "startsAt": "2026-06-01T00:00:00Z",
+  "endsAt": "2026-06-30T23:59:59Z"
+}
+```
+`position`: `HOME_MAIN` | `HOME_MIDDLE` | `CATEGORY_TOP` | `SIDEBAR`.
+`GET /` فقط بنرهایی را برمی‌گرداند که `isActive=true` و تاریخ فعلی بین
+`startsAt` و `endsAt` باشد (هرکدام نباشند، یعنی محدودیتی ندارند).
+
+---
+
+## ۲۰. پاپ‌آپ (Popups)
+Base path: `/api/v1/popups`
+
+| Method | Path | Auth | توضیح |
+|---|---|---|---|
+| GET | `/` | ندارد | پاپ‌آپ‌(های) فعال فعلی (برای نمایش در بازشدن سایت) |
+| GET | `/admin` | ADMIN/EDITOR | همه‌ی پاپ‌آپ‌ها |
+| POST | `/` | ADMIN/EDITOR | ایجاد |
+| PUT | `/:id` | ADMIN/EDITOR | ویرایش |
+| DELETE | `/:id` | ADMIN/EDITOR | حذف |
+
+**Body:**
+```json
+{
+  "title": "جشنواره تابستانه",
+  "content": "تا ۵۰٪ تخفیف، فقط امروز!",
+  "mediaId": "media_id_اختیاری",
+  "link": "/products?hasDiscount=true",
+  "isActive": true,
+  "startsAt": "2026-06-01T00:00:00Z",
+  "endsAt": "2026-06-30T23:59:59Z",
+  "showOncePerSession": true
+}
+```
+`showOncePerSession` فقط یک پرچم اطلاعاتی است؛ منطق «یک‌بار در هر session
+نشان بده» باید سمت فرانت‌اند (مثلاً با sessionStorage) پیاده‌سازی شود.
+
+---
+
+## ۲۱. مدیریت کاربران - ادمین (Users Admin)
+Base path: `/api/v1/users` — **همه‌ی مسیرها فقط `ADMIN`**.
+
+| Method | Path | توضیح |
+|---|---|---|
+| GET | `/admin?page=&limit=&role=&isBlocked=&search=` | لیست/جست‌وجوی کاربران |
+| GET | `/admin/:id` | جزئیات کاربر + تعداد نشست فعال + تعداد سفارش + موجودی کیف‌پول |
+| PUT | `/admin/:id/block` | مسدودکردن — Body: `{ "reason": "..." }` |
+| PUT | `/admin/:id/unblock` | رفع مسدودیت |
+| PUT | `/admin/:id/role` | تغییر نقش — Body: `{ "role": "EDITOR" }` |
+| GET | `/admin/:id/sessions` | لیست نشست‌های فعال/غیرفعال این کاربر |
+| DELETE | `/admin/:id/sessions/:sessionId` | باطل‌کردن یک نشست خاص |
+| DELETE | `/admin/:id/sessions` | باطل‌کردن همه‌ی نشست‌های این کاربر (خروج اجباری از همه‌جا) |
+
+**نکات مهم:**
+- مسدودکردن یک کاربر **همان لحظه همه‌ی نشست‌های فعالش را هم باطل می‌کند**
+  (خروج اجباری فوری از همه‌ی دستگاه‌ها)، نه فقط ست‌کردن یک پرچم.
+- کاربر با نقش `ADMIN` قابل مسدودکردن نیست (`403`).
+- `search` در نام/ایمیل/موبایل جست‌وجو می‌کند.
+
+---
+
+## ۲۲. امنیت - بلاک IP (Security)
+Base path: `/api/v1/security` — **همه‌ی مسیرها فقط `ADMIN`**.
+
+| Method | Path | توضیح |
+|---|---|---|
+| GET | `/blocked-ips` | لیست IP های مسدودشده |
+| POST | `/blocked-ips` | مسدودکردن یک IP |
+| DELETE | `/blocked-ips/:id` | رفع مسدودیت |
+
+**Body مسدودکردن:** `{ "ip": "1.2.3.4", "reason": "تلاش مکرر ورود ناموفق", "expiresAt": "2026-07-01T00:00:00Z" }`
+`expiresAt` اختیاری است — نبودنش یعنی مسدودیت دائمی. اگر همان IP قبلاً
+مسدود بوده، رکورد قبلی به‌روزرسانی می‌شود (نه خطای تکراری).
+
+این لیست توسط میدلور `checkBlockedIp` روی **همه‌ی** درخواست‌های API چک
+می‌شود (قبل از rate limiter)، پس اثرش فوری و سراسری است.
+
+---
+
+## ۲۳. آنالیز (Analytics)
+Base path: `/api/v1/analytics` — **همه‌ی مسیرها فقط `ADMIN`**.
+
+همه‌ی این endpoint ها فقط خوانش (read-only) هستند و برای نمودارهای پنل
+مدیریت طراحی شده‌اند.
+
+| Method | Path | توضیح |
+|---|---|---|
+| GET | `/overview` | KPI های کلی (درآمد کل، تعداد سفارش، تعداد کاربر و ...) |
+| GET | `/sales-over-time?from=&to=&period=` | نمودار فروش در طول زمان |
+| GET | `/order-status-breakdown` | تعداد سفارش به ازای هر وضعیت |
+| GET | `/top-products?limit=&from=&to=` | پرفروش‌ترین محصولات |
+| GET | `/new-users-over-time?from=&to=&period=` | نمودار ثبت‌نام کاربران جدید |
+
+`period`: `day` (پیش‌فرض) | `week` | `month`. اگر `from`/`to` نفرستید،
+پیش‌فرض ۳۰ روز اخیر است (برای `top-products` پیش‌فرض ۹۰ روز).
+
+### `GET /overview`
+**Response 200** → `data`:
+```json
+{
+  "totalRevenue": 458000000,
+  "totalOrders": 312,
+  "totalUsers": 1280,
+  "totalProducts": 96,
+  "pendingOrders": 4,
+  "todayRevenue": 12500000,
+  "todayOrders": 7
+}
+```
+`totalRevenue`/`todayRevenue` فقط سفارش‌های **پرداخت‌شده** (`paidAt` ست‌شده) را حساب می‌کنند.
+
+### `GET /sales-over-time`
+**Response 200** → `data`: `[{ "date": "2026-06-24", "revenue": 12500000, "orderCount": 7 }, ...]`
+(فرمت `date` برای `period=month` به‌صورت `YYYY-MM` است.)
+
+### `GET /order-status-breakdown`
+**Response 200** → `data`: `[{ "status": "PENDING_PAYMENT", "count": 4 }, { "status": "DELIVERED", "count": 180 }, ...]`
+
+### `GET /top-products`
+**Response 200** → `data`: `[{ "product": { "id": "...", "name": "...", "slug": "..." }, "quantitySold": 84, "revenue": 21000000 }, ...]`
+بر اساس `revenue` نزولی مرتب می‌شود (نه تعداد).
 
 ---

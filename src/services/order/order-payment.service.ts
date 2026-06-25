@@ -3,6 +3,7 @@ import { ApiError } from "../../utils/ApiError";
 import { env } from "../../config/env";
 import { getGateway } from "../payment/payment.factory";
 import { getPaymentGatewayBySlug } from "../payment/payment-gateway-admin.service";
+import { notifyUser } from "../notification/notification.service";
 import { Order } from "../../generated/prisma";
 
 async function getOwnedOrder(userId: string, orderId: string): Promise<Order> {
@@ -93,18 +94,28 @@ export async function verifyOrderPayment(
     throw ApiError.badRequest("پرداخت ناموفق بود؛ می‌توانید دوباره تلاش کنید");
   }
 
-  return prisma.$transaction(async (tx) => {
+  const updated = await prisma.$transaction(async (tx) => {
     await tx.transaction.update({
       where: { id: transaction.id },
       data: { status: "SUCCESS", refId: result.refId },
     });
-    const updated = await tx.order.update({
+    const updatedOrder = await tx.order.update({
       where: { id: order.id },
       data: { status: "PROCESSING", paidAt: new Date() },
     });
     await tx.orderStatusHistory.create({
       data: { orderId: order.id, status: "PROCESSING", note: "پرداخت از درگاه تایید شد" },
     });
-    return updated;
+    return updatedOrder;
   });
+
+  notifyUser({
+    userId: order.userId,
+    type: "ORDER",
+    title: `سفارش ${order.orderNumber}`,
+    message: "پرداخت سفارش شما با موفقیت تایید شد",
+    link: `/orders/${order.id}`,
+  }).catch(() => undefined);
+
+  return updated;
 }

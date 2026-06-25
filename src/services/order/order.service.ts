@@ -8,6 +8,7 @@ import * as discountApplyService from "../discount/discount-apply.service";
 import * as walletService from "../wallet/wallet.service";
 import * as gatewayAdminService from "../payment/payment-gateway-admin.service";
 import { recomputeProductAggregates } from "../catalog/product.service";
+import { notifyUser } from "../notification/notification.service";
 import {
   CreateOrderInput,
   ListOrdersQuery,
@@ -268,6 +269,20 @@ export async function listOrdersAdmin(query: AdminListOrdersQuery) {
   return { items, meta: buildPaginationMeta(total, pagination) };
 }
 
+
+
+const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+  PENDING_PAYMENT: "در انتظار پرداخت",
+  PROCESSING: "در حال پردازش",
+  SHIPPED: "ارسال شد",
+  DELIVERED: "تحویل داده شد",
+  CANCELLED: "لغو شد",
+  RETURN_REQUESTED: "درخواست مرجوعی ثبت شد",
+  RETURNED: "مرجوع شد",
+  REFUNDED: "وجه بازگشت داده شد",
+  FAILED: "ناموفق",
+};
+
 export async function updateOrderStatusAdmin(
   orderId: string,
   input: AdminUpdateOrderStatusInput
@@ -275,14 +290,24 @@ export async function updateOrderStatusAdmin(
   const order = await prisma.order.findUnique({ where: { id: orderId } });
   if (!order) throw ApiError.notFound("سفارش پیدا نشد");
 
-  return prisma.$transaction(async (tx) => {
-    const updated = await tx.order.update({
+  const updated = await prisma.$transaction(async (tx) => {
+    const updatedOrder = await tx.order.update({
       where: { id: orderId },
       data: { status: input.status as OrderStatus },
     });
     await tx.orderStatusHistory.create({
       data: { orderId, status: input.status as OrderStatus, note: input.note },
     });
-    return updated;
+    return updatedOrder;
   });
+
+  notifyUser({
+    userId: order.userId,
+    type: "ORDER",
+    title: `سفارش ${order.orderNumber}`,
+    message: `وضعیت سفارش شما به «${ORDER_STATUS_LABELS[input.status as OrderStatus]}» تغییر کرد`,
+    link: `/orders/${order.id}`,
+  }).catch(() => undefined);
+
+  return updated;
 }

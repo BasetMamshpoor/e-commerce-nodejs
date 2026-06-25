@@ -25,7 +25,7 @@ export async function getById(req: Request, res: Response) {
 }
 
 export async function list(req: Request, res: Response) {
-  return ApiResponse.ok(res, await discountService.listDiscountCodesAdmin(req.query as never));
+  return ApiResponse.ok(res, await discountService.listDiscountCodesAdmin(req.validatedQuery as never));
 }
 
 export async function apply(req: Request, res: Response) {

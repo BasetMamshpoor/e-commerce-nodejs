@@ -4,6 +4,7 @@ import { parsePagination, buildPaginationMeta } from "../../utils/pagination";
 import { getGateway } from "../payment/payment.factory";
 import { getPaymentGatewayBySlug } from "../payment/payment-gateway-admin.service";
 import { env } from "../../config/env";
+import { notifyUser } from "../notification/notification.service";
 import { Wallet } from "../../generated/prisma";
 
 // ----------------------------------------------------------------------------
@@ -112,6 +113,13 @@ export async function verifyWalletCharge(
       },
     });
   });
+
+  notifyUser({
+    userId,
+    type: "WALLET",
+    title: "شارژ کیف پول",
+    message: `کیف پول شما با موفقیت به مبلغ ${transaction.amount.toLocaleString("fa-IR")} تومان شارژ شد`,
+  }).catch(() => undefined);
 
   return { alreadyProcessed: false, balance: wallet.balance + transaction.amount };
 }

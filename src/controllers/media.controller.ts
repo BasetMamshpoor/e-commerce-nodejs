@@ -22,7 +22,7 @@ export async function uploadMany(req: Request, res: Response) {
 }
 
 export async function list(req: Request, res: Response) {
-  return ApiResponse.ok(res, await mediaService.listMedia(req.query as never));
+  return ApiResponse.ok(res, await mediaService.listMedia(req.validatedQuery as never));
 }
 
 export async function getById(req: Request, res: Response) {

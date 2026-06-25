@@ -1,5 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
+import { notifyUser } from "../notification/notification.service";
 import { ReturnOrderInput, AdminUpdateReturnInput } from "../../validations/order.validation";
 import { OrderReturn, Order, OrderItem } from "../../generated/prisma";
 
@@ -74,7 +75,7 @@ export async function updateReturnAdmin(
   })) as (OrderReturn & { order: Order & { items: OrderItem[] }; orderItem: OrderItem | null }) | null;
   if (!orderReturn) throw ApiError.notFound("درخواست مرجوعی پیدا نشد");
 
-  return prisma.$transaction(async (tx) => {
+  const updated = await prisma.$transaction(async (tx) => {
     if (input.status === "RECEIVED") {
       const itemsToRestock = orderReturn.orderItemId
         ? orderReturn.order.items.filter((i) => i.id === orderReturn.orderItemId)
@@ -138,4 +139,24 @@ export async function updateReturnAdmin(
       },
     });
   });
+
+  if (input.status === "REFUNDED") {
+    notifyUser({
+      userId: orderReturn.order.userId,
+      type: "ORDER",
+      title: `سفارش ${orderReturn.order.orderNumber}`,
+      message: `مرجوعی شما تایید و ${input.refundAmount?.toLocaleString("fa-IR")} تومان به کیف‌پول شما بازگشت داده شد`,
+      link: `/orders/${orderReturn.orderId}`,
+    }).catch(() => undefined);
+  } else if (input.status === "REJECTED") {
+    notifyUser({
+      userId: orderReturn.order.userId,
+      type: "ORDER",
+      title: `سفارش ${orderReturn.order.orderNumber}`,
+      message: "درخواست مرجوعی شما رد شد",
+      link: `/orders/${orderReturn.orderId}`,
+    }).catch(() => undefined);
+  }
+
+  return updated;
 }

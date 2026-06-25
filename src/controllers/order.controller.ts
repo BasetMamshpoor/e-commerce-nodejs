@@ -21,7 +21,7 @@ export async function create(req: Request, res: Response) {
 }
 
 export async function listMine(req: Request, res: Response) {
-  return ApiResponse.ok(res, await orderService.listOrders(userId(req), req.query as never));
+  return ApiResponse.ok(res, await orderService.listOrders(userId(req), req.validatedQuery as never));
 }
 
 export async function getMine(req: Request, res: Response) {
@@ -64,7 +64,7 @@ export async function verifyPayment(req: Request, res: Response) {
 // --- ادمین/پشتیبانی ---
 
 export async function listAdmin(req: Request, res: Response) {
-  return ApiResponse.ok(res, await orderService.listOrdersAdmin(req.query as never));
+  return ApiResponse.ok(res, await orderService.listOrdersAdmin(req.validatedQuery as never));
 }
 
 export async function getByIdAdmin(req: Request, res: Response) {
@@ -77,7 +77,7 @@ export async function updateStatusAdmin(req: Request, res: Response) {
 }
 
 export async function listReturnsAdmin(req: Request, res: Response) {
-  return ApiResponse.ok(res, await returnService.listReturnsAdmin(req.query as never));
+  return ApiResponse.ok(res, await returnService.listReturnsAdmin(req.validatedQuery as never));
 }
 
 export async function updateReturnAdmin(req: Request, res: Response) {

@@ -14,6 +14,14 @@ import paymentGatewayRoutes from "./payment-gateway.routes";
 import walletRoutes from "./wallet.routes";
 import orderRoutes from "./order.routes";
 import mediaRoutes from "./media.routes";
+import notificationRoutes from "./notification.routes";
+import ticketRoutes from "./ticket.routes";
+import commentRoutes from "./comment.routes";
+import bannerRoutes from "./banner.routes";
+import popupRoutes from "./popup.routes";
+import userRoutes from "./user.routes";
+import securityRoutes from "./security.routes";
+import analyticsRoutes from "./analytics.routes";
 
 // ----------------------------------------------------------------------------
 // هر ماژول جدید را همین‌جا mount کنید.
@@ -36,5 +44,13 @@ router.use("/payment-gateways", paymentGatewayRoutes);
 router.use("/wallet", walletRoutes);
 router.use("/orders", orderRoutes);
 router.use("/media", mediaRoutes);
+router.use("/notifications", notificationRoutes);
+router.use("/tickets", ticketRoutes);
+router.use("/comments", commentRoutes);
+router.use("/banners", bannerRoutes);
+router.use("/popups", popupRoutes);
+router.use("/users", userRoutes);
+router.use("/security", securityRoutes);
+router.use("/analytics", analyticsRoutes);
 
 export default router;

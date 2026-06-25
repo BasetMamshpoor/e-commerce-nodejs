@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html dir="rtl">
+<html>
 
 <head>
   <title>API</title>
@@ -245,6 +245,7 @@
     }
 
     html body {
+      font-family: 'Helvetica Neue', Helvetica, 'Segoe UI', Arial, freesans, sans-serif;
       font-size: 16px;
       line-height: 1.6;
       color: #333;
@@ -461,6 +462,7 @@
     }
 
     html body code {
+      font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
       font-size: .85em;
       color: #000;
       background-color: #f0f0f0;
@@ -1040,6 +1042,20 @@
       <li><a href="#%DB%B1%DB%B3-%DA%A9%DB%8C%D9%81-%D9%BE%D9%88%D9%84-wallet">کیف پول (Wallet)</a></li>
       <li><a href="#%DB%B1%DB%B4-%D8%B3%D9%81%D8%A7%D8%B1%D8%B4%E2%80%8C%D9%87%D8%A7-orders">سفارش‌ها (Orders)</a></li>
       <li><a href="#%DB%B1%DB%B5-%D8%B1%D8%B3%D8%A7%D9%86%D9%87-media">رسانه (Media)</a></li>
+      <li><a href="#%DB%B1%DB%B6-%D9%86%D9%88%D8%AA%DB%8C%D9%81%DB%8C%DA%A9%DB%8C%D8%B4%D9%86-notifications">نوتیفیکیشن
+          (Notifications)</a></li>
+      <li><a href="#%DB%B1%DB%B7-%D8%AA%DB%8C%DA%A9%D8%AA%DB%8C%D9%86%DA%AF-tickets">تیکتینگ (Tickets)</a></li>
+      <li><a
+          href="#%DB%B1%DB%B8-%D8%AF%DB%8C%D8%AF%DA%AF%D8%A7%D9%87%E2%80%8C%D9%87%D8%A7%DB%8C-%D8%AA%D9%88%D8%AF%D8%B1%D8%AA%D9%88-comments">دیدگاه‌های
+          تودرتو (Comments)</a></li>
+      <li><a href="#%DB%B1%DB%B9-%D8%A8%D9%86%D8%B1-banners">بنر (Banners)</a></li>
+      <li><a href="#%DB%B2%DB%B0-%D9%BE%D8%A7%D9%BE%E2%80%8C%D8%A2%D9%BE-popups">پاپ‌آپ (Popups)</a></li>
+      <li><a
+          href="#%DB%B2%DB%B1-%D9%85%D8%AF%DB%8C%D8%B1%DB%8C%D8%AA-%DA%A9%D8%A7%D8%B1%D8%A8%D8%B1%D8%A7%D9%86---%D8%A7%D8%AF%D9%85%DB%8C%D9%86-users-admin">مدیریت
+          کاربران - ادمین (Users Admin)</a></li>
+      <li><a href="#%DB%B2%DB%B2-%D8%A7%D9%85%D9%86%DB%8C%D8%AA---%D8%A8%D9%84%D8%A7%DA%A9-ip-security">امنیت - بلاک IP
+          (Security)</a></li>
+      <li><a href="#%DB%B2%DB%B3-%D8%A2%D9%86%D8%A7%D9%84%DB%8C%D8%B2-analytics">آنالیز (Analytics)</a></li>
     </ol>
     <hr>
     <h2 id="قراردادهای-کلی">قراردادهای کلی </h2>
@@ -1215,8 +1231,7 @@
     </p>
     <h3 id="post-loginotpverify"><code>POST /login/otp/verify</code> </h3>
     <p><strong>Body:</strong> <code>{ "identifier": "...", "code": "...", "deviceName": "..." }</code> → خروجی مثل
-      <code>register/verify-otp</code>.
-    </p>
+      <code>register/verify-otp</code>.</p>
     <h3 id="post-refresh-token"><code>POST /refresh-token</code> </h3>
     <p><strong>Body:</strong> <code>{ "refreshToken": "..." }</code><br>
       <strong>Response 200</strong> → <code>data</code>: <code>{ accessToken, refreshToken, sessionId }</code> (refresh
@@ -1384,8 +1399,7 @@
     </table>
     <p><strong>Body:</strong>
       <code>{ name, slug?, description?, logoId?, isActive?, metaTitle?, metaDescription? }</code><br>
-      (فقط <code>name</code> الزامی است؛ <code>slug</code> خودکار از <code>name</code> ساخته می‌شود اگر نفرستید)
-    </p>
+      (فقط <code>name</code> الزامی است؛ <code>slug</code> خودکار از <code>name</code> ساخته می‌شود اگر نفرستید)</p>
     <hr>
     <h2 id="۴-ویژگی-attributes">۴. ویژگی (Attributes) </h2>
     <p>Base path: <code>/api/v1/attributes</code></p>
@@ -1465,8 +1479,7 @@
     <p>محصول متغیر: هر محصول حداقل یک «تنوع» (variant) دارد؛ هر تنوع SKU/قیمت/<br>
       موجودی/تخفیف جدا دارد.
       <code>minPrice</code>/<code>maxPrice</code>/<code>isInStock</code>/<code>hasActiveDiscount</code><br>
-      روی خود محصول کش می‌شوند و بعد از هر تغییر تنوع خودکار به‌روز می‌شوند.
-    </p>
+      روی خود محصول کش می‌شوند و بعد از هر تغییر تنوع خودکار به‌روز می‌شوند.</p>
     <table>
       <thead>
         <tr>
@@ -1576,8 +1589,7 @@
       </tbody>
     </table>
     <h3 id="query-پارامترهای-get--فروشگاه-و-get-admin">query پارامترهای <code>GET /</code> (فروشگاه) و
-      <code>GET /admin</code>
-    </h3>
+      <code>GET /admin</code> </h3>
     <table>
       <thead>
         <tr>
@@ -1683,8 +1695,7 @@
     <p>فقط فیلدهای سطح‌بالا + <code>categoryIds</code> (که کامل جای‌گزین می‌شود). برای<br>
       تنوع‌ها/تصاویر از endpoint های مخصوص خودشان استفاده کنید.</p>
     <h3 id="post-idvariants-و-put-idvariantsvariantid"><code>POST /:id/variants</code> و
-      <code>PUT /:id/variants/:variantId</code>
-    </h3>
+      <code>PUT /:id/variants/:variantId</code> </h3>
     <p>همان شکل یک آیتم از آرایه‌ی <code>variants</code> بالا (در PUT همه‌ی فیلدها اختیاری‌اند).</p>
     <hr>
     <h2 id="۶-سبد-خرید-cart">۶. سبد خرید (Cart) </h2>
@@ -1814,8 +1825,7 @@
     <h2 id="۸-مقایسه-comparison">۸. مقایسه (Comparison) </h2>
     <p>Base path: <code>/api/v1/comparison</code> — مثل سبد خرید، هم مهمان هم عضو (همان هدر
       <code>X-Guest-Token</code>).<br>
-      حداکثر <strong>۴ محصول</strong> هم‌زمان.
-    </p>
+      حداکثر <strong>۴ محصول</strong> هم‌زمان.</p>
     <table>
       <thead>
         <tr>
@@ -1954,8 +1964,7 @@
       <li><code>code</code> همیشه با حروف بزرگ ذخیره می‌شود (case-insensitive در عمل).</li>
     </ul>
     <p><strong>خطاها:</strong> <code>409</code> کد تکراری، <code>400</code> محصول/دسته/کاربر نامعتبر یا
-      <code>expiresAt &lt;= startsAt</code>.
-    </p>
+      <code>expiresAt &lt;= startsAt</code>.</p>
     <hr>
     <h2 id="۱۰-آدرسها-addresses">۱۰. آدرس‌ها (Addresses) </h2>
     <p>Base path: <code>/api/v1/addresses</code> — <strong>همه‌ی مسیرها نیاز به ورود دارند</strong>.<br>
@@ -2147,8 +2156,7 @@
 <span class="token punctuation">}</span>
 </code></pre>
     <p><code>type</code>: <code>DEPOSIT</code> (شارژ) | <code>WITHDRAW</code> | <code>PURCHASE</code> (پرداخت سفارش) |
-      <code>REFUND</code> | <code>ADMIN_ADJUST</code>.
-    </p>
+      <code>REFUND</code> | <code>ADMIN_ADJUST</code>.</p>
     <h3 id="post-chargeinitiate"><code>POST /charge/initiate</code> </h3>
     <p><strong>Body:</strong> <code>{ "amount": 100000, "gatewaySlug": "zarinpal" }</code><br>
       <strong>Response 200</strong> → <code>data</code>:
@@ -2271,8 +2279,7 @@
 </code></pre>
     <ul>
       <li><code>paymentMethod</code>: <code>WALLET</code> (کامل از کیف‌پول) | <code>GATEWAY</code> (کامل از درگاه) |
-        <code>MIXED</code> (تا جایی که کیف‌پول کافی است، باقی از درگاه).
-      </li>
+        <code>MIXED</code> (تا جایی که کیف‌پول کافی است، باقی از درگاه).</li>
       <li><code>gatewaySlug</code> برای <code>GATEWAY</code>/<code>MIXED</code> الزامی است؛ برای <code>WALLET</code>
         لازم نیست.</li>
       <li><code>discountCode</code> اختیاری — همان منطق <code>POST /discount-codes/apply</code> اما این‌بار واقعاً مصرف
@@ -2298,8 +2305,7 @@
         <tr>
           <td><code>MIXED</code> با موجودی ناکافی، یا <code>GATEWAY</code></td>
           <td>سفارش <code>PENDING_PAYMENT</code> می‌ماند؛ بخش کیف‌پول (اگر بود) فوراً کسر می‌شود، باقی را با
-            <code>POST /:id/payment/initiate</code> تکمیل کنید
-          </td>
+            <code>POST /:id/payment/initiate</code> تکمیل کنید</td>
         </tr>
       </tbody>
     </table>
@@ -2342,8 +2348,7 @@
     <p><strong>Body:</strong> <code>{ "gatewaySlug": "zarinpal" }</code> → <code>data</code>:
       <code>{ "redirectUrl": "..." }</code><br>
       فقط وقتی سفارش <code>PENDING_PAYMENT</code> باشد و یک تراکنش در انتظار (از مرحله‌ی<br>
-      ثبت سفارش) داشته باشد.
-    </p>
+      ثبت سفارش) داشته باشد.</p>
     <h3 id="post-idpaymentverify"><code>POST /:id/payment/verify</code> </h3>
     <p><strong>Body:</strong> <code>{ "providerParams": {...} }</code> → موفق: سفارش به <code>PROCESSING</code>
       می‌رود<br>
@@ -2352,8 +2357,7 @@
     <h3 id="ادمینپشتیبانی">ادمین/پشتیبانی </h3>
     <ul>
       <li><code>PUT /admin/:id/status</code> — Body: <code>{ "status": "SHIPPED", "note": "..." }</code> — هر تغییر در
-        <code>OrderStatusHistory</code> ثبت می‌شود.
-      </li>
+        <code>OrderStatusHistory</code> ثبت می‌شود.</li>
       <li><code>PUT /admin/returns/:returnId</code> — Body:
         <code>{ "status": "RECEIVED" | "REFUNDED" | "REJECTED" | "APPROVED", "refundAmount"?: 90000, "adminNote"?: "..." }</code>
         <ul>
@@ -2444,6 +2448,556 @@ alt: "متن جای‌گزین تصویر (اختیاری)"
     <p>قبل از حذف، استفاده‌ی فایل در همه‌جا (آواتار کاربر، تصویر محصول/تنوع، تصویر<br>
       دسته/برند/شرکت‌ارسال، بنر، پاپ‌آپ، پیوست تیکت/کامنت، تصویر مرجوعی) بررسی<br>
       می‌شود؛ اگر جایی استفاده شده باشد <code>409</code> برمی‌گردد (باید اول آن استفاده را حذف کنید).</p>
+    <hr>
+    <h2 id="۱۶-نوتیفیکیشن-notifications">۱۶. نوتیفیکیشن (Notifications) </h2>
+    <p>Base path: <code>/api/v1/notifications</code> — <strong>همه‌ی مسیرها نیاز به ورود دارند</strong>.</p>
+    <p>این endpoint ها فقط برای <em>خوانش</em> نوتیفیکیشن‌های خودِ کاربر هستند. خودِ<br>
+      نوتیفیکیشن‌ها را ماژول‌های دیگر (سفارش، کیف‌پول، تیکت، کامنت) به‌صورت خودکار<br>
+      می‌سازند؛ تنها استثنا «پخش همگانی» برای ادمین است.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/?page=&amp;limit=&amp;isRead=</code></td>
+          <td>کاربر</td>
+          <td>لیست نوتیفیکیشن‌های من (صفحه‌بندی‌شده)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/unread-count</code></td>
+          <td>کاربر</td>
+          <td>تعداد نوتیفیکیشن‌های نخوانده</td>
+        </tr>
+        <tr>
+          <td>PATCH</td>
+          <td><code>/read-all</code></td>
+          <td>کاربر</td>
+          <td>همه را خوانده‌شده علامت بزن</td>
+        </tr>
+        <tr>
+          <td>PATCH</td>
+          <td><code>/:id/read</code></td>
+          <td>کاربر</td>
+          <td>یکی را خوانده‌شده علامت بزن</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id</code></td>
+          <td>کاربر</td>
+          <td>حذف یک نوتیفیکیشن</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/admin/broadcast</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>پخش همگانی/گروهی (مثلاً اطلاع‌رسانی جشنواره)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><code>type</code> همیشه یکی از: <code>ORDER</code> | <code>SYSTEM</code> | <code>TICKET</code> |
+      <code>PROMOTION</code> | <code>WALLET</code> | <code>COMMENT</code></p>
+    <h3 id="post-adminbroadcast"><code>POST /admin/broadcast</code> </h3>
+    <p><strong>Body:</strong></p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"userIds"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"user_id_۱"</span><span class="token punctuation">,</span> <span class="token string">"user_id_۲"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"PROMOTION"</span><span class="token punctuation">,</span>
+  <span class="token property">"title"</span><span class="token operator">:</span> <span class="token string">"جشنواره تابستانه"</span><span class="token punctuation">,</span>
+  <span class="token property">"message"</span><span class="token operator">:</span> <span class="token string">"تا ۵۰٪ تخفیف روی همه‌ی محصولات!"</span><span class="token punctuation">,</span>
+  <span class="token property">"link"</span><span class="token operator">:</span> <span class="token string">"/products?hasDiscount=true"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p>اگر <code>userIds</code> نفرستید (یا خالی باشد)، برای <strong>همه‌ی کاربران</strong> ارسال می‌شود.<br>
+      <strong>Response 200</strong> → <code>data</code>: <code>{ "sentCount": 1280 }</code>
+    </p>
+    <hr>
+    <h2 id="۱۷-تیکتینگ-tickets">۱۷. تیکتینگ (Tickets) </h2>
+    <p>Base path: <code>/api/v1/tickets</code> — <strong>همه‌ی مسیرها نیاز به ورود دارند</strong>.</p>
+    <p>قاعده‌ی وضعیت (<code>TicketStatus</code>): تیکت تازه = <code>OPEN</code>. وقتی پشتیبانی پاسخ<br>
+      می‌دهد → <code>ANSWERED</code>. وقتی کاربر دوباره پیام می‌دهد (حتی روی تیکت <code>CLOSED</code>) →<br>
+      دوباره <code>OPEN</code>. <code>CLOSED</code> فقط با <code>PUT /admin/:id</code> دستی ست می‌شود.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/departments</code></td>
+          <td>هر کاربر لاگین‌کرده</td>
+          <td>لیست بخش‌های پشتیبانی</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/departments</code></td>
+          <td>ADMIN</td>
+          <td>ایجاد بخش</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/departments/:id</code></td>
+          <td>ADMIN</td>
+          <td>ویرایش بخش</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/departments/:id</code></td>
+          <td>ADMIN</td>
+          <td>حذف (اگر تیکت دارد، <code>409</code>)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>کاربر</td>
+          <td>لیست تیکت‌های من (<code>?status=</code>)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>کاربر</td>
+          <td>ایجاد تیکت جدید + پیام اول</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/:id</code></td>
+          <td>کاربر (مالک)</td>
+          <td>جزئیات تیکت من + پیام‌ها</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/:id/messages</code></td>
+          <td>کاربر (مالک)</td>
+          <td>افزودن پیام به تیکت من</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/admin</code></td>
+          <td>ADMIN/SUPPORT</td>
+          <td>لیست همه‌ی تیکت‌ها (فیلتر
+            <code>status</code>,<code>departmentId</code>,<code>priority</code>,<code>search</code>)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/admin/:id</code></td>
+          <td>ADMIN/SUPPORT</td>
+          <td>جزئیات هر تیکتی</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/admin/:id</code></td>
+          <td>ADMIN/SUPPORT</td>
+          <td>تغییر <code>status</code>/<code>priority</code>/<code>departmentId</code></td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/admin/:id/messages</code></td>
+          <td>ADMIN/SUPPORT</td>
+          <td>پاسخ پشتیبانی (کاربر نوتیف می‌گیرد)</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="post--ایجاد-تیکت"><code>POST /</code> (ایجاد تیکت) </h3>
+    <p><strong>Body:</strong></p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"subject"</span><span class="token operator">:</span> <span class="token string">"مشکل در پرداخت سفارش"</span><span class="token punctuation">,</span>
+  <span class="token property">"departmentId"</span><span class="token operator">:</span> <span class="token string">"dept_id_اختیاری"</span><span class="token punctuation">,</span>
+  <span class="token property">"priority"</span><span class="token operator">:</span> <span class="token string">"NORMAL"</span><span class="token punctuation">,</span>
+  <span class="token property">"orderId"</span><span class="token operator">:</span> <span class="token string">"order_id_اختیاری"</span><span class="token punctuation">,</span>
+  <span class="token property">"message"</span><span class="token operator">:</span> <span class="token string">"سلام، سفارشم پرداخت شد ولی هنوز پردازش نشده..."</span><span class="token punctuation">,</span>
+  <span class="token property">"attachmentMediaIds"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"media_id"</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p><code>priority</code>: <code>LOW</code> | <code>NORMAL</code> (پیش‌فرض) | <code>HIGH</code> |
+      <code>URGENT</code>.</p>
+    <h3 id="post-idmessages-و-post-adminidmessages"><code>POST /:id/messages</code> و
+      <code>POST /admin/:id/messages</code> </h3>
+    <p><strong>Body:</strong> <code>{ "message": "...", "attachmentMediaIds": ["media_id"] }</code><br>
+      هر دو همان منطق را اجرا می‌کنند؛ نوع فرستنده (<code>USER</code>/<code>ADMIN</code>) از روی نقش<br>
+      کاربر لاگین‌کرده تشخیص داده می‌شود، نه از body.</p>
+    <hr>
+    <h2 id="۱۸-دیدگاههای-تودرتو-comments">۱۸. دیدگاه‌های تودرتو (Comments) </h2>
+    <p>Base path: <code>/api/v1/comments</code></p>
+    <p>دیدگاه‌های جدید با وضعیت <code>PENDING</code> ثبت می‌شوند و فقط بعد از تایید<br>
+      ادمین/ادیتور در لیست عمومی نمایش داده می‌شوند. هر دیدگاه اصلی (بدون<br>
+      <code>parentId</code>) می‌تواند امتیاز (<code>rating</code>، ۱ تا ۵) هم داشته باشد؛ پاسخ‌ها<br>
+      (<code>parentId</code> دارند) نمی‌توانند امتیاز بدهند.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/product/:productId?page=&amp;limit=</code></td>
+          <td>ندارد</td>
+          <td>دیدگاه‌های تاییدشده‌ی یک محصول، به‌صورت درختی + میانگین امتیاز (SSR-friendly)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/product/:productId</code></td>
+          <td>کاربر</td>
+          <td>ثبت دیدگاه/پاسخ جدید (می‌رود در صف بررسی)</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/:id</code></td>
+          <td>کاربر (مالک)</td>
+          <td>ویرایش متن (دوباره می‌رود در صف بررسی)</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id</code></td>
+          <td>کاربر (مالک) یا ADMIN/EDITOR/SUPPORT</td>
+          <td>حذف (اگر پاسخ دارد، <code>409</code>)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/:id/like</code></td>
+          <td>کاربر</td>
+          <td>لایک/آن‌لایک (toggle)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/admin?status=</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>لیست همه‌ی دیدگاه‌ها برای بررسی</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/admin/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>تایید/رد — Body: <code>{ "status": "APPROVED" }</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="get-productproductid"><code>GET /product/:productId</code> </h3>
+    <p><strong>Response 200</strong> → <code>data</code>:</p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"items"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+      <span class="token property">"id"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"content"</span><span class="token operator">:</span> <span class="token string">"کیفیت عالی بود"</span><span class="token punctuation">,</span> <span class="token property">"rating"</span><span class="token operator">:</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token property">"createdAt"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span>
+      <span class="token property">"likeCount"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
+      <span class="token property">"replies"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">{</span> <span class="token property">"id"</span><span class="token operator">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> <span class="token property">"content"</span><span class="token operator">:</span> <span class="token string">"موافقم!"</span><span class="token punctuation">,</span> <span class="token property">"rating"</span><span class="token operator">:</span> <span class="token null keyword">null</span><span class="token punctuation">,</span> <span class="token property">"likeCount"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token property">"replies"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
+      <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"meta"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"total"</span><span class="token operator">:</span> <span class="token number">12</span><span class="token punctuation">,</span> <span class="token property">"page"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token property">"limit"</span><span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token property">"totalPages"</span><span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"ratingSummary"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"average"</span><span class="token operator">:</span> <span class="token number">4.6</span><span class="token punctuation">,</span> <span class="token property">"count"</span><span class="token operator">:</span> <span class="token number">8</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p>صفحه‌بندی فقط روی دیدگاه‌های <strong>سطح اول</strong> اعمال می‌شود؛ پاسخ‌های هر دیدگاه<br>
+      کامل (بدون صفحه‌بندی جدا) همراهش می‌آیند.</p>
+    <h3 id="post-productproductid"><code>POST /product/:productId</code> </h3>
+    <p><strong>Body:</strong>
+      <code>{ "content": "...", "parentId": "اختیاری (یعنی پاسخ است)", "rating": 5, "attachmentMediaIds": [] }</code><br>
+      <strong>خطاها:</strong> <code>400</code> اگر هم <code>parentId</code> و هم <code>rating</code> با هم فرستاده شوند.
+    </p>
+    <hr>
+    <h2 id="۱۹-بنر-banners">۱۹. بنر (Banners) </h2>
+    <p>Base path: <code>/api/v1/banners</code></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/?position=</code></td>
+          <td>ندارد</td>
+          <td>بنرهای فعال و در بازه‌ی زمانی فعلی (برای نمایش در سایت)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/admin</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>همه‌ی بنرها (فعال/غیرفعال) برای پنل مدیریت</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ایجاد</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ویرایش</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>حذف</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Body:</strong></p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"title"</span><span class="token operator">:</span> <span class="token string">"جشنواره تابستانه"</span><span class="token punctuation">,</span>
+  <span class="token property">"mediaId"</span><span class="token operator">:</span> <span class="token string">"media_id"</span><span class="token punctuation">,</span>
+  <span class="token property">"link"</span><span class="token operator">:</span> <span class="token string">"/products?hasDiscount=true"</span><span class="token punctuation">,</span>
+  <span class="token property">"position"</span><span class="token operator">:</span> <span class="token string">"HOME_MAIN"</span><span class="token punctuation">,</span>
+  <span class="token property">"order"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+  <span class="token property">"isActive"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"startsAt"</span><span class="token operator">:</span> <span class="token string">"2026-06-01T00:00:00Z"</span><span class="token punctuation">,</span>
+  <span class="token property">"endsAt"</span><span class="token operator">:</span> <span class="token string">"2026-06-30T23:59:59Z"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p><code>position</code>: <code>HOME_MAIN</code> | <code>HOME_MIDDLE</code> | <code>CATEGORY_TOP</code> |
+      <code>SIDEBAR</code>.<br>
+      <code>GET /</code> فقط بنرهایی را برمی‌گرداند که <code>isActive=true</code> و تاریخ فعلی بین<br>
+      <code>startsAt</code> و <code>endsAt</code> باشد (هرکدام نباشند، یعنی محدودیتی ندارند).
+    </p>
+    <hr>
+    <h2 id="۲۰-پاپآپ-popups">۲۰. پاپ‌آپ (Popups) </h2>
+    <p>Base path: <code>/api/v1/popups</code></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>ندارد</td>
+          <td>پاپ‌آپ‌(های) فعال فعلی (برای نمایش در بازشدن سایت)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/admin</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>همه‌ی پاپ‌آپ‌ها</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ایجاد</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>ویرایش</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/:id</code></td>
+          <td>ADMIN/EDITOR</td>
+          <td>حذف</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Body:</strong></p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"title"</span><span class="token operator">:</span> <span class="token string">"جشنواره تابستانه"</span><span class="token punctuation">,</span>
+  <span class="token property">"content"</span><span class="token operator">:</span> <span class="token string">"تا ۵۰٪ تخفیف، فقط امروز!"</span><span class="token punctuation">,</span>
+  <span class="token property">"mediaId"</span><span class="token operator">:</span> <span class="token string">"media_id_اختیاری"</span><span class="token punctuation">,</span>
+  <span class="token property">"link"</span><span class="token operator">:</span> <span class="token string">"/products?hasDiscount=true"</span><span class="token punctuation">,</span>
+  <span class="token property">"isActive"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"startsAt"</span><span class="token operator">:</span> <span class="token string">"2026-06-01T00:00:00Z"</span><span class="token punctuation">,</span>
+  <span class="token property">"endsAt"</span><span class="token operator">:</span> <span class="token string">"2026-06-30T23:59:59Z"</span><span class="token punctuation">,</span>
+  <span class="token property">"showOncePerSession"</span><span class="token operator">:</span> <span class="token boolean">true</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p><code>showOncePerSession</code> فقط یک پرچم اطلاعاتی است؛ منطق «یک‌بار در هر session<br>
+      نشان بده» باید سمت فرانت‌اند (مثلاً با sessionStorage) پیاده‌سازی شود.</p>
+    <hr>
+    <h2 id="۲۱-مدیریت-کاربران---ادمین-users-admin">۲۱. مدیریت کاربران - ادمین (Users Admin) </h2>
+    <p>Base path: <code>/api/v1/users</code> — <strong>همه‌ی مسیرها فقط <code>ADMIN</code></strong>.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/admin?page=&amp;limit=&amp;role=&amp;isBlocked=&amp;search=</code></td>
+          <td>لیست/جست‌وجوی کاربران</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/admin/:id</code></td>
+          <td>جزئیات کاربر + تعداد نشست فعال + تعداد سفارش + موجودی کیف‌پول</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/admin/:id/block</code></td>
+          <td>مسدودکردن — Body: <code>{ "reason": "..." }</code></td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/admin/:id/unblock</code></td>
+          <td>رفع مسدودیت</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/admin/:id/role</code></td>
+          <td>تغییر نقش — Body: <code>{ "role": "EDITOR" }</code></td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/admin/:id/sessions</code></td>
+          <td>لیست نشست‌های فعال/غیرفعال این کاربر</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/admin/:id/sessions/:sessionId</code></td>
+          <td>باطل‌کردن یک نشست خاص</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/admin/:id/sessions</code></td>
+          <td>باطل‌کردن همه‌ی نشست‌های این کاربر (خروج اجباری از همه‌جا)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>نکات مهم:</strong></p>
+    <ul>
+      <li>مسدودکردن یک کاربر <strong>همان لحظه همه‌ی نشست‌های فعالش را هم باطل می‌کند</strong><br>
+        (خروج اجباری فوری از همه‌ی دستگاه‌ها)، نه فقط ست‌کردن یک پرچم.</li>
+      <li>کاربر با نقش <code>ADMIN</code> قابل مسدودکردن نیست (<code>403</code>).</li>
+      <li><code>search</code> در نام/ایمیل/موبایل جست‌وجو می‌کند.</li>
+    </ul>
+    <hr>
+    <h2 id="۲۲-امنیت---بلاک-ip-security">۲۲. امنیت - بلاک IP (Security) </h2>
+    <p>Base path: <code>/api/v1/security</code> — <strong>همه‌ی مسیرها فقط <code>ADMIN</code></strong>.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/blocked-ips</code></td>
+          <td>لیست IP های مسدودشده</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/blocked-ips</code></td>
+          <td>مسدودکردن یک IP</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/blocked-ips/:id</code></td>
+          <td>رفع مسدودیت</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Body مسدودکردن:</strong>
+      <code>{ "ip": "1.2.3.4", "reason": "تلاش مکرر ورود ناموفق", "expiresAt": "2026-07-01T00:00:00Z" }</code><br>
+      <code>expiresAt</code> اختیاری است — نبودنش یعنی مسدودیت دائمی. اگر همان IP قبلاً<br>
+      مسدود بوده، رکورد قبلی به‌روزرسانی می‌شود (نه خطای تکراری).
+    </p>
+    <p>این لیست توسط میدلور <code>checkBlockedIp</code> روی <strong>همه‌ی</strong> درخواست‌های API چک<br>
+      می‌شود (قبل از rate limiter)، پس اثرش فوری و سراسری است.</p>
+    <hr>
+    <h2 id="۲۳-آنالیز-analytics">۲۳. آنالیز (Analytics) </h2>
+    <p>Base path: <code>/api/v1/analytics</code> — <strong>همه‌ی مسیرها فقط <code>ADMIN</code></strong>.</p>
+    <p>همه‌ی این endpoint ها فقط خوانش (read-only) هستند و برای نمودارهای پنل<br>
+      مدیریت طراحی شده‌اند.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/overview</code></td>
+          <td>KPI های کلی (درآمد کل، تعداد سفارش، تعداد کاربر و ...)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/sales-over-time?from=&amp;to=&amp;period=</code></td>
+          <td>نمودار فروش در طول زمان</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/order-status-breakdown</code></td>
+          <td>تعداد سفارش به ازای هر وضعیت</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/top-products?limit=&amp;from=&amp;to=</code></td>
+          <td>پرفروش‌ترین محصولات</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/new-users-over-time?from=&amp;to=&amp;period=</code></td>
+          <td>نمودار ثبت‌نام کاربران جدید</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><code>period</code>: <code>day</code> (پیش‌فرض) | <code>week</code> | <code>month</code>. اگر
+      <code>from</code>/<code>to</code> نفرستید،<br>
+      پیش‌فرض ۳۰ روز اخیر است (برای <code>top-products</code> پیش‌فرض ۹۰ روز).</p>
+    <h3 id="get-overview"><code>GET /overview</code> </h3>
+    <p><strong>Response 200</strong> → <code>data</code>:</p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"totalRevenue"</span><span class="token operator">:</span> <span class="token number">458000000</span><span class="token punctuation">,</span>
+  <span class="token property">"totalOrders"</span><span class="token operator">:</span> <span class="token number">312</span><span class="token punctuation">,</span>
+  <span class="token property">"totalUsers"</span><span class="token operator">:</span> <span class="token number">1280</span><span class="token punctuation">,</span>
+  <span class="token property">"totalProducts"</span><span class="token operator">:</span> <span class="token number">96</span><span class="token punctuation">,</span>
+  <span class="token property">"pendingOrders"</span><span class="token operator">:</span> <span class="token number">4</span><span class="token punctuation">,</span>
+  <span class="token property">"todayRevenue"</span><span class="token operator">:</span> <span class="token number">12500000</span><span class="token punctuation">,</span>
+  <span class="token property">"todayOrders"</span><span class="token operator">:</span> <span class="token number">7</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p><code>totalRevenue</code>/<code>todayRevenue</code> فقط سفارش‌های <strong>پرداخت‌شده</strong>
+      (<code>paidAt</code> ست‌شده) را حساب می‌کنند.</p>
+    <h3 id="get-sales-over-time"><code>GET /sales-over-time</code> </h3>
+    <p><strong>Response 200</strong> → <code>data</code>:
+      <code>[{ "date": "2026-06-24", "revenue": 12500000, "orderCount": 7 }, ...]</code><br>
+      (فرمت <code>date</code> برای <code>period=month</code> به‌صورت <code>YYYY-MM</code> است.)</p>
+    <h3 id="get-order-status-breakdown"><code>GET /order-status-breakdown</code> </h3>
+    <p><strong>Response 200</strong> → <code>data</code>:
+      <code>[{ "status": "PENDING_PAYMENT", "count": 4 }, { "status": "DELIVERED", "count": 180 }, ...]</code></p>
+    <h3 id="get-top-products"><code>GET /top-products</code> </h3>
+    <p><strong>Response 200</strong> → <code>data</code>:
+      <code>[{ "product": { "id": "...", "name": "...", "slug": "..." }, "quantitySold": 84, "revenue": 21000000 }, ...]</code><br>
+      بر اساس <code>revenue</code> نزولی مرتب می‌شود (نه تعداد).</p>
     <hr>
 
   </div>
