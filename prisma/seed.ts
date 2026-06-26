@@ -3,8 +3,15 @@
 
 import { PrismaClient, Role, ProductStatus, DiscountType, AttributeInputType, MediaType, OrderStatus, PaymentMethod, PaymentStatus, TransactionType, WalletTransactionType, TicketStatus, TicketPriority, SenderType, CommentStatus, NotificationType, BannerPosition, OtpChannel, OtpPurpose } from '../src/generated/prisma';
 import * as bcrypt from 'bcryptjs';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
+import * as dotenv from 'dotenv';
 
-const prisma = new PrismaClient();
+dotenv.config();
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('🌱 شروع seed دیتابیس...');
@@ -1042,4 +1049,5 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });
