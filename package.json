@@ -9,6 +9,9 @@
     "test": "jest --runInBand",
     "test:watch": "jest --watchAll"
   },
+  "prisma": {
+    "seed": "ts-node-dev prisma/seed.ts"
+  },
   "author": "Baset Mamushipoor",
   "license": "ISC",
   "description": "",
