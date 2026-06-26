@@ -5,7 +5,7 @@ import {
   UpdatePaymentGatewayInput,
 } from "../../validations/payment-gateway.validation";
 import { PaymentGateway } from "../../generated/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../../generated/prisma";
 
 // ----------------------------------------------------------------------------
 // این مدل، رکورد «تنظیمات» یک درگاه در دیتابیس است (نام، فعال/غیرفعال،
