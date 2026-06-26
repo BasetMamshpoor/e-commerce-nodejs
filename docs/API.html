@@ -1056,6 +1056,12 @@
       <li><a href="#%DB%B2%DB%B2-%D8%A7%D9%85%D9%86%DB%8C%D8%AA---%D8%A8%D9%84%D8%A7%DA%A9-ip-security">امنیت - بلاک IP
           (Security)</a></li>
       <li><a href="#%DB%B2%DB%B3-%D8%A2%D9%86%D8%A7%D9%84%DB%8C%D8%B2-analytics">آنالیز (Analytics)</a></li>
+      <li><a
+          href="#%DB%B2%DB%B4-%D9%BE%D8%B1%D9%88%D9%81%D8%A7%DB%8C%D9%84-%DA%A9%D8%A7%D8%B1%D8%A8%D8%B1-users-me">پروفایل
+          کاربر (Users Me)</a></li>
+      <li><a href="#%DB%B2%DB%B5-%D8%AA%D9%86%D8%B8%DB%8C%D9%85%D8%A7%D8%AA-%D8%B3%D8%A7%DB%8C%D8%AA-settings">تنظیمات
+          سایت (Settings)</a></li>
+      <li><a href="#%DB%B2%DB%B6-%D8%B3%D8%A6%D9%88-sitemapxml--robotstxt">سئو (sitemap.xml / robots.txt)</a></li>
     </ol>
     <hr>
     <h2 id="قراردادهای-کلی">قراردادهای کلی </h2>
@@ -2998,6 +3004,163 @@ alt: "متن جای‌گزین تصویر (اختیاری)"
     <p><strong>Response 200</strong> → <code>data</code>:
       <code>[{ "product": { "id": "...", "name": "...", "slug": "..." }, "quantitySold": 84, "revenue": 21000000 }, ...]</code><br>
       بر اساس <code>revenue</code> نزولی مرتب می‌شود (نه تعداد).</p>
+    <hr>
+    <h2 id="۲۴-پروفایل-کاربر-users-me">۲۴. پروفایل کاربر (Users Me) </h2>
+    <p>Base path: <code>/api/v1/users/me</code> — <strong>همه‌ی مسیرها نیاز به ورود دارند</strong>.</p>
+    <p>تغییر ایمیل/موبایل چون همان شناسه‌ی ورود است، از مسیر OTP عبور می‌کند<br>
+      (نه مستقیم) تا کسی نتواند با صرفاً دانستن ایمیل/موبایل یک نفر دیگر، آن را<br>
+      به حساب خودش منتقل کند.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>پروفایل من (+ موجودی کیف‌پول)</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/</code></td>
+          <td>ویرایش <code>fullName</code></td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/avatar</code></td>
+          <td>تنظیم تصویر پروفایل — Body: <code>{ "mediaId": "..." }</code> (اول با <code>/media</code> آپلود کنید)</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/password</code></td>
+          <td>تغییر رمز عبور (با دانستن رمز فعلی)</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/change-identifier/request</code></td>
+          <td>درخواست تغییر ایمیل/موبایل — ارسال OTP به مقدار جدید</td>
+        </tr>
+        <tr>
+          <td>POST</td>
+          <td><code>/change-identifier/verify</code></td>
+          <td>تایید OTP و اعمال تغییر</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="put-password"><code>PUT /password</code> </h3>
+    <p><strong>Body:</strong> <code>{ "currentPassword": "...", "newPassword": "Abc12345" }</code><br>
+      بعد از تغییر موفق، تمام نشست‌های <strong>دیگر</strong> باطل می‌شوند (نشست فعلی شما باز می‌ماند).<br>
+      <strong>خطاها:</strong> <code>400</code> رمز فعلی اشتباه است.
+    </p>
+    <h3 id="post-change-identifierrequest-و-verify"><code>POST /change-identifier/request</code> و <code>/verify</code>
+    </h3>
+    <p><strong>Body request:</strong> <code>{ "newIdentifier": "new@example.com" }</code> → کد OTP به همان مقدار جدید
+      ارسال می‌شود.<br>
+      <strong>Body verify:</strong> <code>{ "newIdentifier": "new@example.com", "code": "12345" }</code> → ایمیل/موبایل
+      حساب واقعاً عوض می‌شود.<br>
+      <strong>خطاها:</strong> <code>409</code> این شناسه قبلاً توسط حساب دیگری استفاده شده است.
+    </p>
+    <hr>
+    <h2 id="۲۵-تنظیمات-سایت-settings">۲۵. تنظیمات سایت (Settings) </h2>
+    <p>Base path: <code>/api/v1/settings</code></p>
+    <p>تنظیمات سراسری و <strong>غیرحساس</strong> سایت (نام فروشگاه، شبکه‌های اجتماعی، متای<br>
+      پیش‌فرض سئو و ...) به‌صورت کلید-مقدار. کلیدهای حساس/رمز همیشه باید در<br>
+      <code>.env</code> بمانند، نه اینجا.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/</code></td>
+          <td>ندارد</td>
+          <td>همه‌ی تنظیمات به‌صورت <code>{ key: value }</code> با تایپ درست (parse شده)</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/admin</code></td>
+          <td>ADMIN</td>
+          <td>لیست خام همه‌ی تنظیمات (برای فرم ویرایش پنل ادمین)</td>
+        </tr>
+        <tr>
+          <td>PUT</td>
+          <td><code>/admin/:key</code></td>
+          <td>ADMIN</td>
+          <td>ایجاد/ویرایش یک تنظیم (upsert)</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td><code>/admin/:key</code></td>
+          <td>ADMIN</td>
+          <td>حذف یک تنظیم</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="get--عمومی"><code>GET /</code> (عمومی) </h3>
+    <p><strong>Response 200</strong> → <code>data</code>:</p>
+    <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
+  <span class="token property">"store_name"</span><span class="token operator">:</span> <span class="token string">"فروشگاه من"</span><span class="token punctuation">,</span>
+  <span class="token property">"support_phone"</span><span class="token operator">:</span> <span class="token string">"021-12345678"</span><span class="token punctuation">,</span>
+  <span class="token property">"instagram_url"</span><span class="token operator">:</span> <span class="token string">"https://instagram.com/myshop"</span><span class="token punctuation">,</span>
+  <span class="token property">"free_shipping_threshold"</span><span class="token operator">:</span> <span class="token number">500000</span>
+<span class="token punctuation">}</span>
+</code></pre>
+    <p>نوع هر مقدار بر اساس <code>type</code> ذخیره‌شده برگردانده می‌شود (نه همیشه رشته).</p>
+    <h3 id="put-adminkey"><code>PUT /admin/:key</code> </h3>
+    <p><strong>Body:</strong> <code>{ "value": "فروشگاه من", "type": "string" }</code><br>
+      <code>type</code>: <code>string</code> (پیش‌فرض) | <code>number</code> | <code>boolean</code> | <code>json</code>.
+      اگر <code>type=json</code><br>
+      باشد، <code>value</code> باید یک رشته‌ی JSON معتبر باشد (مثلاً <code>"{\"a\":1}"</code>).
+    </p>
+    <hr>
+    <h2 id="۲۶-سئو-sitemapxml--robotstxt">۲۶. سئو (sitemap.xml / robots.txt) </h2>
+    <p>⚠️ این دو مسیر <strong>بیرون از <code>/api/v1</code></strong> و در ریشه‌ی سرور هستند (مثل <code>/health</code>):
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GET</td>
+          <td><code>/sitemap.xml</code></td>
+          <td>نقشه‌ی سایت XML با همه‌ی محصولات منتشرشده + دسته‌ها + برندهای فعال</td>
+        </tr>
+        <tr>
+          <td>GET</td>
+          <td><code>/robots.txt</code></td>
+          <td>فایل robots استاندارد + ارجاع به sitemap</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>فرض مسیرهای فرانت‌اند در sitemap:</strong> <code>/products/:slug</code>،
+      <code>/categories/:slug</code>،<br>
+      <code>/brands/:slug</code>. اگر ساختار route های فرانت شما فرق دارد، در<br>
+      <code>src/services/seo/sitemap.service.ts</code> (تابع <code>buildUrl</code>) تغییرش بدهید.
+    </p>
+    <p><strong>لینک‌های داخل sitemap از کدام دامنه ساخته می‌شوند؟</strong> از <code>PUBLIC_SITE_URL</code><br>
+      در <code>.env</code> (نه <code>APP_BASE_URL</code> که آدرس خودِ API است). اگر فرانت‌اند روی<br>
+      دامنه‌ی جدایی از API است (مثلاً <code>myshop.com</code> در برابر <code>api.myshop.com</code>)،<br>
+      ساده‌ترین راه این است که در فرانت یک rewrite بزنید تا <code>myshop.com/sitemap.xml</code><br>
+      و <code>myshop.com/robots.txt</code> همین دو مسیر را از API پروکسی کنند — آن‌وقت<br>
+      لینک‌های داخل فایل هم درست به دامنه‌ی اصلی اشاره می‌کنند چون از<br>
+      <code>PUBLIC_SITE_URL</code> ساخته شده‌اند.
+    </p>
     <hr>
 
   </div>

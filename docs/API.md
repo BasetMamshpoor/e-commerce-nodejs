@@ -33,6 +33,9 @@
 22. [مدیریت کاربران - ادمین (Users Admin)](#۲۱-مدیریت-کاربران---ادمین-users-admin)
 23. [امنیت - بلاک IP (Security)](#۲۲-امنیت---بلاک-ip-security)
 24. [آنالیز (Analytics)](#۲۳-آنالیز-analytics)
+25. [پروفایل کاربر (Users Me)](#۲۴-پروفایل-کاربر-users-me)
+26. [تنظیمات سایت (Settings)](#۲۵-تنظیمات-سایت-settings)
+27. [سئو (sitemap.xml / robots.txt)](#۲۶-سئو-sitemapxml--robotstxt)
 
 ---
 
@@ -1031,5 +1034,89 @@ Base path: `/api/v1/analytics` — **همه‌ی مسیرها فقط `ADMIN`**.
 ### `GET /top-products`
 **Response 200** → `data`: `[{ "product": { "id": "...", "name": "...", "slug": "..." }, "quantitySold": 84, "revenue": 21000000 }, ...]`
 بر اساس `revenue` نزولی مرتب می‌شود (نه تعداد).
+
+---
+
+## ۲۴. پروفایل کاربر (Users Me)
+Base path: `/api/v1/users/me` — **همه‌ی مسیرها نیاز به ورود دارند**.
+
+تغییر ایمیل/موبایل چون همان شناسه‌ی ورود است، از مسیر OTP عبور می‌کند
+(نه مستقیم) تا کسی نتواند با صرفاً دانستن ایمیل/موبایل یک نفر دیگر، آن را
+به حساب خودش منتقل کند.
+
+| Method | Path | توضیح |
+|---|---|---|
+| GET | `/` | پروفایل من (+ موجودی کیف‌پول) |
+| PUT | `/` | ویرایش `fullName` |
+| PUT | `/avatar` | تنظیم تصویر پروفایل — Body: `{ "mediaId": "..." }` (اول با `/media` آپلود کنید) |
+| PUT | `/password` | تغییر رمز عبور (با دانستن رمز فعلی) |
+| POST | `/change-identifier/request` | درخواست تغییر ایمیل/موبایل — ارسال OTP به مقدار جدید |
+| POST | `/change-identifier/verify` | تایید OTP و اعمال تغییر |
+
+### `PUT /password`
+**Body:** `{ "currentPassword": "...", "newPassword": "Abc12345" }`
+بعد از تغییر موفق، تمام نشست‌های **دیگر** باطل می‌شوند (نشست فعلی شما باز می‌ماند).
+**خطاها:** `400` رمز فعلی اشتباه است.
+
+### `POST /change-identifier/request` و `/verify`
+**Body request:** `{ "newIdentifier": "new@example.com" }` → کد OTP به همان مقدار جدید ارسال می‌شود.
+**Body verify:** `{ "newIdentifier": "new@example.com", "code": "12345" }` → ایمیل/موبایل حساب واقعاً عوض می‌شود.
+**خطاها:** `409` این شناسه قبلاً توسط حساب دیگری استفاده شده است.
+
+---
+
+## ۲۵. تنظیمات سایت (Settings)
+Base path: `/api/v1/settings`
+
+تنظیمات سراسری و **غیرحساس** سایت (نام فروشگاه، شبکه‌های اجتماعی، متای
+پیش‌فرض سئو و ...) به‌صورت کلید-مقدار. کلیدهای حساس/رمز همیشه باید در
+`.env` بمانند، نه اینجا.
+
+| Method | Path | Auth | توضیح |
+|---|---|---|---|
+| GET | `/` | ندارد | همه‌ی تنظیمات به‌صورت `{ key: value }` با تایپ درست (parse شده) |
+| GET | `/admin` | ADMIN | لیست خام همه‌ی تنظیمات (برای فرم ویرایش پنل ادمین) |
+| PUT | `/admin/:key` | ADMIN | ایجاد/ویرایش یک تنظیم (upsert) |
+| DELETE | `/admin/:key` | ADMIN | حذف یک تنظیم |
+
+### `GET /` (عمومی)
+**Response 200** → `data`:
+```json
+{
+  "store_name": "فروشگاه من",
+  "support_phone": "021-12345678",
+  "instagram_url": "https://instagram.com/myshop",
+  "free_shipping_threshold": 500000
+}
+```
+نوع هر مقدار بر اساس `type` ذخیره‌شده برگردانده می‌شود (نه همیشه رشته).
+
+### `PUT /admin/:key`
+**Body:** `{ "value": "فروشگاه من", "type": "string" }`
+`type`: `string` (پیش‌فرض) | `number` | `boolean` | `json`. اگر `type=json`
+باشد، `value` باید یک رشته‌ی JSON معتبر باشد (مثلاً `"{\"a\":1}"`).
+
+---
+
+## ۲۶. سئو (sitemap.xml / robots.txt)
+
+⚠️ این دو مسیر **بیرون از `/api/v1`** و در ریشه‌ی سرور هستند (مثل `/health`):
+
+| Method | Path | توضیح |
+|---|---|---|
+| GET | `/sitemap.xml` | نقشه‌ی سایت XML با همه‌ی محصولات منتشرشده + دسته‌ها + برندهای فعال |
+| GET | `/robots.txt` | فایل robots استاندارد + ارجاع به sitemap |
+
+**فرض مسیرهای فرانت‌اند در sitemap:** `/products/:slug`، `/categories/:slug`،
+`/brands/:slug`. اگر ساختار route های فرانت شما فرق دارد، در
+`src/services/seo/sitemap.service.ts` (تابع `buildUrl`) تغییرش بدهید.
+
+**لینک‌های داخل sitemap از کدام دامنه ساخته می‌شوند؟** از `PUBLIC_SITE_URL`
+در `.env` (نه `APP_BASE_URL` که آدرس خودِ API است). اگر فرانت‌اند روی
+دامنه‌ی جدایی از API است (مثلاً `myshop.com` در برابر `api.myshop.com`)،
+ساده‌ترین راه این است که در فرانت یک rewrite بزنید تا `myshop.com/sitemap.xml`
+و `myshop.com/robots.txt` همین دو مسیر را از API پروکسی کنند — آن‌وقت
+لینک‌های داخل فایل هم درست به دامنه‌ی اصلی اشاره می‌کنند چون از
+`PUBLIC_SITE_URL` ساخته شده‌اند.
 
 ---
