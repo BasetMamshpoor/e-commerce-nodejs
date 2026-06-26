@@ -10,7 +10,7 @@
     "test:watch": "jest --watchAll"
   },
   "prisma": {
-    "seed": "ts-node-dev prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   },
   "author": "Baset Mamushipoor",
   "license": "ISC",
