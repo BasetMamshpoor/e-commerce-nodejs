@@ -11,6 +11,10 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.coerce.number().int().positive().default(4000),
   APP_BASE_URL: z.string().url().default("http://localhost:4000"),
+  // آدرس عمومی سایت فروشگاه (فرانت‌اند) — برای ساخت لینک‌های sitemap.xml.
+  // معمولاً دامنه‌ی فرانت با دامنه‌ی همین API فرق دارد؛ اگر ست نشود همان
+  // APP_BASE_URL استفاده می‌شود (فقط برای محیط dev که هر دو یکی‌اند کاربردی است).
+  PUBLIC_SITE_URL: z.string().url().optional(),
   CORS_ORIGIN: z.string().default("*"),
 
   DATABASE_URL: z.string().min(1, "DATABASE_URL تنظیم نشده است"),
@@ -63,3 +67,4 @@ export const env = parsed.data;
 
 export const isProd = env.NODE_ENV === "production";
 export const isTest = env.NODE_ENV === "test";
+export const publicSiteUrl = env.PUBLIC_SITE_URL ?? env.APP_BASE_URL;

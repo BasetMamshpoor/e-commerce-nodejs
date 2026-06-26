@@ -22,6 +22,7 @@ import popupRoutes from "./popup.routes";
 import userRoutes from "./user.routes";
 import securityRoutes from "./security.routes";
 import analyticsRoutes from "./analytics.routes";
+import settingsRoutes from "./settings.routes";
 
 // ----------------------------------------------------------------------------
 // هر ماژول جدید را همین‌جا mount کنید.
@@ -52,5 +53,6 @@ router.use("/popups", popupRoutes);
 router.use("/users", userRoutes);
 router.use("/security", securityRoutes);
 router.use("/analytics", analyticsRoutes);
+router.use("/settings", settingsRoutes);
 
 export default router;

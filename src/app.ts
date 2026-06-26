@@ -8,6 +8,7 @@ import { errorHandler } from "./middlewares/errorHandler";
 import { globalApiLimiter } from "./middlewares/rateLimiter";
 import { checkBlockedIp } from "./middlewares/blockedIp.middleware";
 import { resolveUploadRoot } from "./middlewares/upload.middleware";
+import { buildSitemapEntries, entriesToXml, buildRobotsTxt } from "./services/seo/sitemap.service";
 import apiRouter from "./routes";
 
 export function createApp(): Application {
@@ -38,6 +39,18 @@ export function createApp(): Application {
 
   app.get("/health", (_req, res) => {
     res.json({ success: true, message: "OK", uptime: process.uptime() });
+  });
+
+  // سئوی تکنیکال — آیتم ۲۳. اگر فرانت‌اند روی دامنه‌ی جدایی است، ساده‌ترین
+  // راه این است که در همان فرانت یک rewrite بزنید:
+  //   /sitemap.xml  →  https://api.yourdomain.com/sitemap.xml
+  //   /robots.txt   →  https://api.yourdomain.com/robots.txt
+  app.get("/sitemap.xml", async (_req, res) => {
+    const entries = await buildSitemapEntries();
+    res.type("application/xml").send(entriesToXml(entries));
+  });
+  app.get("/robots.txt", (_req, res) => {
+    res.type("text/plain").send(buildRobotsTxt());
   });
 
   app.use(checkBlockedIp);
