@@ -25,6 +25,14 @@ export async function list(req: Request, res: Response) {
   return ApiResponse.ok(res, await mediaService.listMedia(req.validatedQuery as never));
 }
 
+export async function getByIds(req: Request, res: Response) {
+  const ids = (req.validatedQuery?.ids as string)
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+  return ApiResponse.ok(res, await mediaService.getMediaByIds(ids));
+}
+
 export async function getById(req: Request, res: Response) {
   return ApiResponse.ok(res, await mediaService.getMediaById(paramStr(req.params.id)));
 }

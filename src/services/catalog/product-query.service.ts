@@ -3,7 +3,8 @@ import { ApiError } from "../../utils/ApiError";
 import { parsePagination, buildPaginationMeta } from "../../utils/pagination";
 import { getDescendantCategoryIds } from "./category.service";
 import { ListProductsQuery, AdminListProductsQuery } from "../../validations/product.validation";
-import { Attribute, AttributeValue } from "../../generated/prisma";
+import { Attribute, AttributeValue, Product, Brand } from "../../generated/prisma";
+import { serializeProduct, serializeBrand, ProductLike } from "../../utils/serialize";
 
 // ----------------------------------------------------------------------------
 // نکته‌ی مهم درباره‌ی فیلتر بر اساس چند ویژگی هم‌زمان (مثلاً رنگ=قرمز و سایز=L):
@@ -14,8 +15,8 @@ import { Attribute, AttributeValue } from "../../generated/prisma";
 // ----------------------------------------------------------------------------
 
 const LIST_INCLUDE = {
-  brand: true,
-  categories: { include: { category: true } },
+  brand: { include: { logo: true } },
+  categories: { include: { category: { include: { image: true } } } },
   images: { where: { isMain: true }, take: 1, include: { media: true } },
 };
 
@@ -120,7 +121,10 @@ export async function listProductsStorefront(query: ListProductsQuery) {
     prisma.product.count({ where }),
   ]);
 
-  return { items, meta: buildPaginationMeta(total, pagination) };
+  return {
+    items: (items as unknown as (Product & ProductLike)[]).map(serializeProduct),
+    meta: buildPaginationMeta(total, pagination),
+  };
 }
 
 export async function listProductsAdmin(query: AdminListProductsQuery) {
@@ -142,7 +146,10 @@ export async function listProductsAdmin(query: AdminListProductsQuery) {
     prisma.product.count({ where }),
   ]);
 
-  return { items, meta: buildPaginationMeta(total, pagination) };
+  return {
+    items: (items as unknown as (Product & ProductLike)[]).map(serializeProduct),
+    meta: buildPaginationMeta(total, pagination),
+  };
 }
 
 // ----------------------------------------------------------------------------
@@ -168,6 +175,7 @@ export async function getStorefrontFilters(categorySlug?: string) {
     prisma.brand.findMany({
       where: { isActive: true, products: { some: productWhere } },
       orderBy: { name: "asc" },
+      include: { logo: true },
     }),
     prisma.product.aggregate({
       where: productWhere,
@@ -195,7 +203,9 @@ export async function getStorefrontFilters(categorySlug?: string) {
   }
 
   return {
-    brands,
+    brands: (brands as unknown as (Brand & { logo: { url: string; alt: string | null } | null })[]).map(
+      serializeBrand
+    ),
     priceRange: {
       min: priceAgg._min.minPrice ?? 0,
       max: priceAgg._max.maxPrice ?? 0,

@@ -147,6 +147,20 @@ enum CommentStatus {
   REJECTED
 }
 
+// برای کامنت‌های پلی‌مورفیک — قابل اتصال هم به محصول هم به پست وبلاگ
+// (معادل polymorphic relation در Laravel؛ پریزما رابطه‌ی پلی‌مورفیک بومی
+// ندارد، پس با یک ستون نوع + یک ستون شناسه‌ی عمومی شبیه‌سازی می‌شود)
+enum CommentableType {
+  PRODUCT
+  BLOG_POST
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 enum NotificationType {
   ORDER
   SYSTEM
@@ -208,6 +222,7 @@ model User {
   transactions       Transaction[]
   uploadedMedia      Media[]             @relation("UploadedMedia")
   createdProducts    Product[]           @relation("ProductCreatedBy")
+  blogPosts          BlogPost[]          @relation("BlogPostAuthor")
   auditLogs          AuditLog[]
 
   @@index([role])
@@ -320,6 +335,7 @@ model Media {
   ticketAttachments  TicketAttachment[]
   commentAttachments CommentAttachment[]
   returnImages       OrderReturnImage[]
+  blogCoverOf        BlogPost[]
 
   @@index([type])
 }
@@ -450,7 +466,6 @@ model Product {
   variants         ProductVariant[]
   images           ProductImage[]
   wishlists        Wishlist[]
-  comments         Comment[]
   discountCodes    DiscountCodeProduct[]
   productViews     ProductView[]
   comparisonItems  ProductComparisonItem[]
@@ -946,24 +961,26 @@ model TicketAttachment {
 // ============================================================================
 
 model Comment {
-  id        String        @id @default(cuid())
-  productId String
-  product   Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User          @relation(fields: [userId], references: [id])
-  parentId  String?
-  parent    Comment?      @relation("CommentReplies", fields: [parentId], references: [id])
-  replies   Comment[]     @relation("CommentReplies")
-  content   String
-  rating    Int? // امتیاز فقط روی کامنت‌های اصلی (سطح اول) معنا دارد
-  status    CommentStatus @default(PENDING)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id              String          @id @default(cuid())
+  // پلی‌مورفیک: به‌جای productId مستقیم، نوع + شناسه‌ی موجودیت مرتبط
+  // (چون Comment الان هم زیر محصول هم زیر پست وبلاگ استفاده می‌شود)
+  commentableType CommentableType
+  commentableId   String
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  parentId        String?
+  parent          Comment?        @relation("CommentReplies", fields: [parentId], references: [id])
+  replies         Comment[]       @relation("CommentReplies")
+  content         String
+  rating          Int? // امتیاز فقط روی کامنت‌های اصلی محصول (سطح اول) معنا دارد
+  status          CommentStatus   @default(PENDING)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
   likes       CommentLike[]
   attachments CommentAttachment[]
 
-  @@index([productId])
+  @@index([commentableType, commentableId])
   @@index([parentId])
 }
 
@@ -984,6 +1001,52 @@ model CommentAttachment {
   comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
   mediaId   String
   media     Media   @relation(fields: [mediaId], references: [id])
+}
+
+// ============================================================================
+// وبلاگ — کامنت‌های وبلاگ از همان مدل پلی‌مورفیک Comment بالا استفاده
+// می‌کنند (commentableType: BLOG_POST, commentableId: BlogPost.id)
+// ============================================================================
+
+model BlogCategory {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  posts BlogPost[]
+}
+
+model BlogPost {
+  id         String     @id @default(cuid())
+  title      String
+  slug       String     @unique
+  excerpt    String?
+  content    String // HTML از تکست ادیتور
+  status     PostStatus @default(DRAFT)
+  viewCount  Int        @default(0)
+
+  coverImageId String?
+  coverImage   Media?  @relation(fields: [coverImageId], references: [id])
+
+  authorId String?
+  author   User?   @relation("BlogPostAuthor", fields: [authorId], references: [id])
+
+  categoryId String?
+  category   BlogCategory? @relation(fields: [categoryId], references: [id])
+
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status])
+  @@index([categoryId])
 }
 
 // ============================================================================

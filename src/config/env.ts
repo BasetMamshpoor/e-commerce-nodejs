@@ -51,6 +51,12 @@ const envSchema = z.object({
   // رسانه (آپلود فایل) — آیتم ۱۷
   UPLOAD_DIR: z.string().default("uploads"),
   MAX_FILE_SIZE_MB: z.coerce.number().int().positive().default(5),
+
+  // کرون‌جاب‌های پس‌زمینه — src/jobs
+  ENABLE_BACKGROUND_JOBS: z.coerce.boolean().default(true),
+  JOB_CHECK_INTERVAL_MINUTES: z.coerce.number().int().positive().default(5),
+  ORDER_PENDING_EXPIRY_MINUTES: z.coerce.number().int().positive().default(30),
+  OTP_CLEANUP_RETENTION_HOURS: z.coerce.number().int().positive().default(24),
 });
 
 const parsed = envSchema.safeParse(process.env);

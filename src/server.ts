@@ -1,6 +1,7 @@
 import { createApp } from "./app";
 import { env } from "./config/env";
 import { prisma, disconnectPrisma } from "./lib/prisma";
+import { startBackgroundJobs, stopBackgroundJobs } from "./jobs/scheduler";
 import "./types/express";
 
 async function main() {
@@ -15,9 +16,12 @@ async function main() {
     console.log(`🚀 سرور روی پورت ${env.PORT} در حالت ${env.NODE_ENV} اجرا شد`);
   });
 
+  startBackgroundJobs();
+
   const shutdown = async (signal: string) => {
     // eslint-disable-next-line no-console
     console.log(`\n${signal} گرفته شد، در حال خاموش‌کردن امن سرور...`);
+    stopBackgroundJobs();
     server.close(async () => {
       await disconnectPrisma();
       process.exit(0);

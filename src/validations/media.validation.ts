@@ -8,3 +8,9 @@ export const listMediaQuerySchema = z.object({
 });
 
 export type ListMediaQuery = z.infer<typeof listMediaQuerySchema>;
+
+export const getMediaByIdsQuerySchema = z.object({
+  ids: z.string().min(1, "ids الزامی است (با کاما جدا کنید)"),
+});
+
+export type GetMediaByIdsQuery = z.infer<typeof getMediaByIdsQuerySchema>;

@@ -16,11 +16,9 @@ import { Prisma } from "../../generated/prisma";
 // ----------------------------------------------------------------------------
 
 export async function createPaymentGateway(
-  input: CreatePaymentGatewayInput,
+  input: CreatePaymentGatewayInput
 ): Promise<PaymentGateway> {
-  const existing = await prisma.paymentGateway.findUnique({
-    where: { slug: input.slug },
-  });
+  const existing = await prisma.paymentGateway.findUnique({ where: { slug: input.slug } });
   if (existing) throw ApiError.conflict("درگاهی با این slug قبلاً ثبت شده است");
 
   return prisma.paymentGateway.create({
@@ -33,17 +31,14 @@ export async function createPaymentGateway(
 
 export async function updatePaymentGateway(
   id: string,
-  input: UpdatePaymentGatewayInput,
+  input: UpdatePaymentGatewayInput
 ): Promise<PaymentGateway> {
   const gateway = await prisma.paymentGateway.findUnique({ where: { id } });
   if (!gateway) throw ApiError.notFound("درگاه پرداخت پیدا نشد");
 
   if (input.slug && input.slug !== gateway.slug) {
-    const existing = await prisma.paymentGateway.findUnique({
-      where: { slug: input.slug },
-    });
-    if (existing)
-      throw ApiError.conflict("درگاهی با این slug قبلاً ثبت شده است");
+    const existing = await prisma.paymentGateway.findUnique({ where: { slug: input.slug } });
+    if (existing) throw ApiError.conflict("درگاهی با این slug قبلاً ثبت شده است");
   }
 
   return prisma.paymentGateway.update({
@@ -61,20 +56,15 @@ export async function deletePaymentGateway(id: string): Promise<void> {
   await prisma.paymentGateway.delete({ where: { id } });
 }
 
-export async function listPaymentGateways(
-  includeInactive: boolean,
-): Promise<PaymentGateway[]> {
+export async function listPaymentGateways(includeInactive: boolean): Promise<PaymentGateway[]> {
   return prisma.paymentGateway.findMany({
     where: includeInactive ? {} : { isActive: true },
     orderBy: { name: "asc" },
   });
 }
 
-export async function getPaymentGatewayBySlug(
-  slug: string,
-): Promise<PaymentGateway> {
+export async function getPaymentGatewayBySlug(slug: string): Promise<PaymentGateway> {
   const gateway = await prisma.paymentGateway.findUnique({ where: { slug } });
-  if (!gateway || !gateway.isActive)
-    throw ApiError.notFound("درگاه پرداخت پیدا نشد یا غیرفعال است");
+  if (!gateway || !gateway.isActive) throw ApiError.notFound("درگاه پرداخت پیدا نشد یا غیرفعال است");
   return gateway;
 }

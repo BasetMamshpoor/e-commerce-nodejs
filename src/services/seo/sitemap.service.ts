@@ -24,7 +24,7 @@ function toIsoDate(date: Date): string {
 }
 
 export async function buildSitemapEntries(): Promise<SitemapEntry[]> {
-  const [products, categories, brands] = await Promise.all([
+  const [products, categories, brands, blogPosts] = await Promise.all([
     prisma.product.findMany({
       where: { status: "PUBLISHED" },
       select: { slug: true, updatedAt: true },
@@ -35,6 +35,10 @@ export async function buildSitemapEntries(): Promise<SitemapEntry[]> {
     }),
     prisma.brand.findMany({
       where: { isActive: true },
+      select: { slug: true, updatedAt: true },
+    }),
+    prisma.blogPost.findMany({
+      where: { status: "PUBLISHED" },
       select: { slug: true, updatedAt: true },
     }),
   ]);
@@ -63,6 +67,14 @@ export async function buildSitemapEntries(): Promise<SitemapEntry[]> {
     entries.push({
       loc: buildUrl(`/brands/${b.slug}`),
       lastmod: toIsoDate(b.updatedAt),
+      changefreq: "monthly",
+      priority: 0.5,
+    });
+  }
+  for (const post of blogPosts) {
+    entries.push({
+      loc: buildUrl(`/blog/${post.slug}`),
+      lastmod: toIsoDate(post.updatedAt),
       changefreq: "monthly",
       priority: 0.5,
     });

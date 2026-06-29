@@ -11,16 +11,37 @@ function userId(req: Request): string {
 
 export async function listForProduct(req: Request, res: Response) {
   const result = await commentService.listApprovedComments(
+    "PRODUCT",
     paramStr(req.params.productId),
     req.validatedQuery as never
   );
   return ApiResponse.ok(res, result);
 }
 
-export async function create(req: Request, res: Response) {
+export async function createForProduct(req: Request, res: Response) {
   const comment = await commentService.createComment(
     userId(req),
+    "PRODUCT",
     paramStr(req.params.productId),
+    req.body
+  );
+  return ApiResponse.created(res, comment, "دیدگاه شما ثبت شد و پس از بررسی نمایش داده می‌شود");
+}
+
+export async function listForBlogPost(req: Request, res: Response) {
+  const result = await commentService.listApprovedComments(
+    "BLOG_POST",
+    paramStr(req.params.postId),
+    req.validatedQuery as never
+  );
+  return ApiResponse.ok(res, result);
+}
+
+export async function createForBlogPost(req: Request, res: Response) {
+  const comment = await commentService.createComment(
+    userId(req),
+    "BLOG_POST",
+    paramStr(req.params.postId),
     req.body
   );
   return ApiResponse.created(res, comment, "دیدگاه شما ثبت شد و پس از بررسی نمایش داده می‌شود");

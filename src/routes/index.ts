@@ -23,6 +23,7 @@ import userRoutes from "./user.routes";
 import securityRoutes from "./security.routes";
 import analyticsRoutes from "./analytics.routes";
 import settingsRoutes from "./settings.routes";
+import blogRoutes from "./blog.routes";
 
 // ----------------------------------------------------------------------------
 // هر ماژول جدید را همین‌جا mount کنید.
@@ -54,5 +55,6 @@ router.use("/users", userRoutes);
 router.use("/security", securityRoutes);
 router.use("/analytics", analyticsRoutes);
 router.use("/settings", settingsRoutes);
+router.use("/blog", blogRoutes);
 
 export default router;

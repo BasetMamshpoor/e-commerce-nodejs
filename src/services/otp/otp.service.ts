@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import { env } from "../../config/env";
+import { env, isProd } from "../../config/env";
 import { ApiError } from "../../utils/ApiError";
 import { generateNumericOtp, normalizeIdentifier, detectIdentifierChannel } from "../../utils/otp";
 import { MockSmsProvider } from "./providers/mock-sms.provider";
@@ -22,6 +22,12 @@ export interface IssueOtpResult {
   identifier: string;
   channel: OtpChannel;
   expiresAt: Date;
+  /**
+   * ⚠️ فقط در محیط غیر-production پر می‌شود (برای تست خودکار توسط
+   * agent های فرانت‌اند/QA بدون نیاز به خواندن کنسول سرور). در production
+   * همیشه undefined است — هرگز این رفتار را برای production فعال نکنید.
+   */
+  devCode?: string;
 }
 
 export async function issueOtp(params: {
@@ -69,7 +75,7 @@ export async function issueOtp(params: {
     purposeLabel: PURPOSE_LABELS[params.purpose],
   });
 
-  return { identifier, channel, expiresAt };
+  return { identifier, channel, expiresAt, ...(isProd ? {} : { devCode: code }) };
 }
 
 export async function verifyOtp(params: {

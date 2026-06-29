@@ -572,7 +572,8 @@ exports.Prisma.TicketAttachmentScalarFieldEnum = {
 
 exports.Prisma.CommentScalarFieldEnum = {
   id: 'id',
-  productId: 'productId',
+  commentableType: 'commentableType',
+  commentableId: 'commentableId',
   userId: 'userId',
   parentId: 'parentId',
   content: 'content',
@@ -593,6 +594,34 @@ exports.Prisma.CommentAttachmentScalarFieldEnum = {
   id: 'id',
   commentId: 'commentId',
   mediaId: 'mediaId'
+};
+
+exports.Prisma.BlogCategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.BlogPostScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  excerpt: 'excerpt',
+  content: 'content',
+  status: 'status',
+  viewCount: 'viewCount',
+  coverImageId: 'coverImageId',
+  authorId: 'authorId',
+  categoryId: 'categoryId',
+  metaTitle: 'metaTitle',
+  metaDescription: 'metaDescription',
+  canonicalUrl: 'canonicalUrl',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.NotificationScalarFieldEnum = {
@@ -790,10 +819,21 @@ exports.SenderType = exports.$Enums.SenderType = {
   ADMIN: 'ADMIN'
 };
 
+exports.CommentableType = exports.$Enums.CommentableType = {
+  PRODUCT: 'PRODUCT',
+  BLOG_POST: 'BLOG_POST'
+};
+
 exports.CommentStatus = exports.$Enums.CommentStatus = {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED'
+};
+
+exports.PostStatus = exports.$Enums.PostStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  ARCHIVED: 'ARCHIVED'
 };
 
 exports.NotificationType = exports.$Enums.NotificationType = {
@@ -860,6 +900,8 @@ exports.Prisma.ModelName = {
   Comment: 'Comment',
   CommentLike: 'CommentLike',
   CommentAttachment: 'CommentAttachment',
+  BlogCategory: 'BlogCategory',
+  BlogPost: 'BlogPost',
   Notification: 'Notification',
   Banner: 'Banner',
   Popup: 'Popup',

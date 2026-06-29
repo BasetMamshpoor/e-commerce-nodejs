@@ -70,6 +70,12 @@ export async function getMediaById(id: string): Promise<Media> {
   return media;
 }
 
+/** برای جلوگیری از N+1 در فرانت — چند id را یک‌جا resolve می‌کند */
+export async function getMediaByIds(ids: string[]): Promise<Media[]> {
+  if (ids.length === 0) return [];
+  return prisma.media.findMany({ where: { id: { in: ids } } });
+}
+
 async function countMediaUsage(mediaId: string): Promise<number> {
   const counts = await Promise.all([
     prisma.user.count({ where: { avatarId: mediaId } }),

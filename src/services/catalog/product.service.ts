@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import { slugify, ensureUniqueSlug } from "../../utils/slug";
+import { serializeProduct, ProductLike } from "../../utils/serialize";
 import {
   CreateProductInput,
   UpdateProductInput,
@@ -236,9 +237,9 @@ export async function deleteProduct(id: string): Promise<void> {
 }
 
 const PRODUCT_DETAIL_INCLUDE = {
-  brand: true,
+  brand: { include: { logo: true } },
   images: { include: { media: true }, orderBy: { order: "asc" as const } },
-  categories: { include: { category: true } },
+  categories: { include: { category: { include: { image: true } } } },
   variants: {
     include: {
       images: { include: { media: true }, orderBy: { order: "asc" as const } },
@@ -248,23 +249,23 @@ const PRODUCT_DETAIL_INCLUDE = {
 };
 
 export async function getProductBySlugPublic(slug: string) {
-  const product = await prisma.product.findUnique({
+  const product = (await prisma.product.findUnique({
     where: { slug },
     include: PRODUCT_DETAIL_INCLUDE,
-  });
+  })) as unknown as (Product & ProductLike) | null;
   if (!product || product.status !== "PUBLISHED") {
     throw ApiError.notFound("محصول پیدا نشد");
   }
-  return product;
+  return serializeProduct(product);
 }
 
 export async function getProductByIdAdmin(id: string) {
-  const product = await prisma.product.findUnique({
+  const product = (await prisma.product.findUnique({
     where: { id },
     include: PRODUCT_DETAIL_INCLUDE,
-  });
+  })) as unknown as (Product & ProductLike) | null;
   if (!product) throw ApiError.notFound("محصول پیدا نشد");
-  return product;
+  return serializeProduct(product);
 }
 
 // ----------------------------------------------------------------------------

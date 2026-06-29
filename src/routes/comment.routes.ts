@@ -19,20 +19,31 @@ router.get(
   validate(listCommentsQuerySchema, "query"),
   commentController.listForProduct
 );
-
-// ثبت دیدگاه/پاسخ — نیاز به ورود
 router.post(
   "/product/:productId",
   authenticate,
   validate(createCommentSchema),
-  commentController.create
+  commentController.createForProduct
+);
+
+// عمومی — لیست دیدگاه‌های تاییدشده‌ی یک پست وبلاگ (همان مدل Comment، پلی‌مورفیک)
+router.get(
+  "/blog/:postId",
+  validate(listCommentsQuerySchema, "query"),
+  commentController.listForBlogPost
+);
+router.post(
+  "/blog/:postId",
+  authenticate,
+  validate(createCommentSchema),
+  commentController.createForBlogPost
 );
 
 router.put("/:id", authenticate, validate(updateCommentSchema), commentController.update);
 router.delete("/:id", authenticate, commentController.remove);
 router.post("/:id/like", authenticate, commentController.like);
 
-// مدیریت/بررسی — ادمین/ادیتور
+// مدیریت/بررسی — ادمین/ادیتور (هم کامنت محصول هم وبلاگ از همینجا مدیریت می‌شود)
 router.get(
   "/admin",
   ...manageOnly,

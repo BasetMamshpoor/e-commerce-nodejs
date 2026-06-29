@@ -9,20 +9,32 @@ import {
   AdminListCommentsQuery,
   ModerateCommentInput,
 } from "../../validations/comment.validation";
-import { Comment } from "../../generated/prisma";
+import { Comment, CommentableType } from "../../generated/prisma";
 
 // ----------------------------------------------------------------------------
 // سیستم کامنت‌های تودرتو (nested) — آیتم ۱۴.
+// از این مدل هم برای محصول و هم برای پست وبلاگ استفاده می‌شود (پلی‌مورفیک:
+// commentableType + commentableId — معادل polymorphic relation در Laravel،
+// چون پریزما رابطه‌ی پلی‌مورفیک بومی ندارد).
+//
 // دیدگاه‌های جدید با وضعیت PENDING ثبت می‌شوند و فقط بعد از تایید ادمین/ادیتور
-// در صفحه‌ی محصول عمومی نمایش داده می‌شوند (ضدِ اسپم/محتوای نامناسب).
-// SSR-friendly یعنی این endpoint می‌تواند مستقیم سمت سرور فرانت (Next.js و
-// مشابه) صدا زده شود تا اولین رندر کامنت‌ها از سمت سرور باشد.
+// عمومی نمایش داده می‌شوند (ضدِ اسپم/محتوای نامناسب).
+// SSR-friendly یعنی این endpoint می‌تواند مستقیم سمت سرور فرانت صدا زده شود.
 // ----------------------------------------------------------------------------
 
 export interface CommentTreeNode extends Comment {
   replies: CommentTreeNode[];
   likeCount: number;
-  isLikedByMe?: boolean;
+}
+
+async function assertCommentableExists(type: CommentableType, id: string): Promise<void> {
+  if (type === "PRODUCT") {
+    const product = await prisma.product.findUnique({ where: { id } });
+    if (!product) throw ApiError.notFound("محصول پیدا نشد");
+  } else {
+    const post = await prisma.blogPost.findUnique({ where: { id } });
+    if (!post) throw ApiError.notFound("پست وبلاگ پیدا نشد");
+  }
 }
 
 async function getDescendantCommentIds(rootIds: string[]): Promise<string[]> {
@@ -58,22 +70,27 @@ function buildTree(
 
 export async function createComment(
   userId: string,
-  productId: string,
+  commentableType: CommentableType,
+  commentableId: string,
   input: CreateCommentInput
 ): Promise<Comment> {
-  const product = await prisma.product.findUnique({ where: { id: productId } });
-  if (!product) throw ApiError.notFound("محصول پیدا نشد");
+  await assertCommentableExists(commentableType, commentableId);
 
   if (input.parentId) {
     const parent = await prisma.comment.findUnique({ where: { id: input.parentId } });
-    if (!parent || parent.productId !== productId) {
+    if (
+      !parent ||
+      parent.commentableType !== commentableType ||
+      parent.commentableId !== commentableId
+    ) {
       throw ApiError.badRequest("دیدگاه والد پیدا نشد");
     }
   }
 
   return prisma.comment.create({
     data: {
-      productId,
+      commentableType,
+      commentableId,
       userId,
       parentId: input.parentId,
       content: input.content,
@@ -129,10 +146,14 @@ export async function toggleLike(userId: string, commentId: string): Promise<{ l
   return { liked: true };
 }
 
-export async function listApprovedComments(productId: string, query: ListCommentsQuery) {
+export async function listApprovedComments(
+  commentableType: CommentableType,
+  commentableId: string,
+  query: ListCommentsQuery
+) {
   const pagination = parsePagination({ page: query.page, limit: query.limit });
 
-  const topLevelWhere = { productId, parentId: null, status: "APPROVED" as const };
+  const topLevelWhere = { commentableType, commentableId, parentId: null, status: "APPROVED" as const };
 
   const [topLevel, total, ratingAgg] = await Promise.all([
     prisma.comment.findMany({
@@ -144,7 +165,7 @@ export async function listApprovedComments(productId: string, query: ListComment
     }),
     prisma.comment.count({ where: topLevelWhere }),
     prisma.comment.aggregate({
-      where: { productId, parentId: null, status: "APPROVED", rating: { not: null } },
+      where: { commentableType, commentableId, parentId: null, status: "APPROVED", rating: { not: null } },
       _avg: { rating: true },
       _count: { rating: true },
     }),
@@ -174,12 +195,16 @@ export async function listApprovedComments(productId: string, query: ListComment
 }
 
 // ----------------------------------------------------------------------------
-// مدیریت/بررسی ادمین
+// مدیریت/بررسی ادمین — چون پلی‌مورفیک است، عنوان محصول/پست را جدا resolve
+// می‌کنیم (نه با include مستقیم چون رابطه‌ی Prisma واقعی وجود ندارد)
 // ----------------------------------------------------------------------------
 
 export async function listCommentsAdmin(query: AdminListCommentsQuery) {
   const pagination = parsePagination({ page: query.page, limit: query.limit });
-  const where = query.status ? { status: query.status } : {};
+  const where = {
+    ...(query.status ? { status: query.status } : {}),
+    ...(query.commentableType ? { commentableType: query.commentableType } : {}),
+  };
 
   const [items, total] = await Promise.all([
     prisma.comment.findMany({
@@ -187,15 +212,39 @@ export async function listCommentsAdmin(query: AdminListCommentsQuery) {
       orderBy: { createdAt: "desc" },
       skip: pagination.skip,
       take: pagination.take,
-      include: {
-        user: { select: { id: true, fullName: true } },
-        product: { select: { id: true, name: true, slug: true } },
-      },
+      include: { user: { select: { id: true, fullName: true } } },
     }),
     prisma.comment.count({ where }),
   ]);
 
-  return { items, meta: buildPaginationMeta(total, pagination) };
+  const productIds = items
+    .filter((c) => c.commentableType === "PRODUCT")
+    .map((c) => c.commentableId);
+  const postIds = items
+    .filter((c) => c.commentableType === "BLOG_POST")
+    .map((c) => c.commentableId);
+
+  const [products, posts] = await Promise.all([
+    productIds.length
+      ? prisma.product.findMany({ where: { id: { in: productIds } }, select: { id: true, name: true, slug: true } })
+      : Promise.resolve([]),
+    postIds.length
+      ? prisma.blogPost.findMany({ where: { id: { in: postIds } }, select: { id: true, title: true, slug: true } })
+      : Promise.resolve([]),
+  ]);
+
+  const productMap = new Map(products.map((p) => [p.id, p]));
+  const postMap = new Map(posts.map((p) => [p.id, p]));
+
+  const enriched = items.map((c) => ({
+    ...c,
+    entity:
+      c.commentableType === "PRODUCT"
+        ? productMap.get(c.commentableId) ?? null
+        : postMap.get(c.commentableId) ?? null,
+  }));
+
+  return { items: enriched, meta: buildPaginationMeta(total, pagination) };
 }
 
 export async function moderateComment(

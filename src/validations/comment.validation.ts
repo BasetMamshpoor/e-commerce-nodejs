@@ -25,6 +25,7 @@ export const adminListCommentsQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().optional(),
   status: z.enum(["PENDING", "APPROVED", "REJECTED"]).optional(),
+  commentableType: z.enum(["PRODUCT", "BLOG_POST"]).optional(),
 });
 
 export const moderateCommentSchema = z.object({

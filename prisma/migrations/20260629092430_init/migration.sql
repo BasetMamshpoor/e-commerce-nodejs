@@ -53,6 +53,12 @@ CREATE TYPE "SenderType" AS ENUM ('USER', 'ADMIN');
 CREATE TYPE "CommentStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
 
 -- CreateEnum
+CREATE TYPE "CommentableType" AS ENUM ('PRODUCT', 'BLOG_POST');
+
+-- CreateEnum
+CREATE TYPE "PostStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED');
+
+-- CreateEnum
 CREATE TYPE "NotificationType" AS ENUM ('ORDER', 'SYSTEM', 'TICKET', 'PROMOTION', 'WALLET', 'COMMENT');
 
 -- CreateEnum
@@ -643,7 +649,8 @@ CREATE TABLE "TicketAttachment" (
 -- CreateTable
 CREATE TABLE "Comment" (
     "id" TEXT NOT NULL,
-    "productId" TEXT NOT NULL,
+    "commentableType" "CommentableType" NOT NULL,
+    "commentableId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "parentId" TEXT,
     "content" TEXT NOT NULL,
@@ -672,6 +679,40 @@ CREATE TABLE "CommentAttachment" (
     "mediaId" TEXT NOT NULL,
 
     CONSTRAINT "CommentAttachment_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "BlogCategory" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
+    "description" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "BlogCategory_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "BlogPost" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
+    "excerpt" TEXT,
+    "content" TEXT NOT NULL,
+    "status" "PostStatus" NOT NULL DEFAULT 'DRAFT',
+    "viewCount" INTEGER NOT NULL DEFAULT 0,
+    "coverImageId" TEXT,
+    "authorId" TEXT,
+    "categoryId" TEXT,
+    "metaTitle" TEXT,
+    "metaDescription" TEXT,
+    "canonicalUrl" TEXT,
+    "publishedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "BlogPost_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -912,13 +953,25 @@ CREATE UNIQUE INDEX "Wallet_userId_key" ON "Wallet"("userId");
 CREATE INDEX "WalletTransaction_walletId_idx" ON "WalletTransaction"("walletId");
 
 -- CreateIndex
-CREATE INDEX "Comment_productId_idx" ON "Comment"("productId");
+CREATE INDEX "Comment_commentableType_commentableId_idx" ON "Comment"("commentableType", "commentableId");
 
 -- CreateIndex
 CREATE INDEX "Comment_parentId_idx" ON "Comment"("parentId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "CommentLike_commentId_userId_key" ON "CommentLike"("commentId", "userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "BlogCategory_slug_key" ON "BlogCategory"("slug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "BlogPost_slug_key" ON "BlogPost"("slug");
+
+-- CreateIndex
+CREATE INDEX "BlogPost_status_idx" ON "BlogPost"("status");
+
+-- CreateIndex
+CREATE INDEX "BlogPost_categoryId_idx" ON "BlogPost"("categoryId");
 
 -- CreateIndex
 CREATE INDEX "Notification_userId_isRead_idx" ON "Notification"("userId", "isRead");
@@ -1131,9 +1184,6 @@ ALTER TABLE "TicketAttachment" ADD CONSTRAINT "TicketAttachment_messageId_fkey" 
 ALTER TABLE "TicketAttachment" ADD CONSTRAINT "TicketAttachment_mediaId_fkey" FOREIGN KEY ("mediaId") REFERENCES "Media"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Comment" ADD CONSTRAINT "Comment_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Comment" ADD CONSTRAINT "Comment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -1150,6 +1200,15 @@ ALTER TABLE "CommentAttachment" ADD CONSTRAINT "CommentAttachment_commentId_fkey
 
 -- AddForeignKey
 ALTER TABLE "CommentAttachment" ADD CONSTRAINT "CommentAttachment_mediaId_fkey" FOREIGN KEY ("mediaId") REFERENCES "Media"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BlogPost" ADD CONSTRAINT "BlogPost_coverImageId_fkey" FOREIGN KEY ("coverImageId") REFERENCES "Media"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BlogPost" ADD CONSTRAINT "BlogPost_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BlogPost" ADD CONSTRAINT "BlogPost_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "BlogCategory"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Notification" ADD CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

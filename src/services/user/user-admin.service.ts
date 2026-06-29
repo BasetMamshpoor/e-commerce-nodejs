@@ -3,21 +3,22 @@ import { ApiError } from "../../utils/ApiError";
 import { parsePagination, buildPaginationMeta } from "../../utils/pagination";
 import { revokeSession, revokeAllSessions } from "../auth/session.service";
 import { notifyUser } from "../notification/notification.service";
+import { serializeUserAvatar } from "../../utils/serialize";
 import {
   AdminListUsersQuery,
   BlockUserInput,
   UpdateUserRoleInput,
 } from "../../validations/user-admin.validation";
-import { User } from "../../generated/prisma";
+import { User, Media } from "../../generated/prisma";
 
 // ----------------------------------------------------------------------------
 // مدیریت کاربران از پنل ادمین — آیتم ۲۵ (بلاک‌کردن کاربر، محدودیت/مدیریت
 // نشست‌ها). فیلدهای امن (بدون password) برگردانده می‌شوند.
 // ----------------------------------------------------------------------------
 
-function publicUser(user: User) {
+function publicUser(user: User & { avatar?: Media | null }) {
   const { password, ...rest } = user;
-  return rest;
+  return serializeUserAvatar(rest);
 }
 
 export async function listUsersAdmin(query: AdminListUsersQuery) {
@@ -42,6 +43,7 @@ export async function listUsersAdmin(query: AdminListUsersQuery) {
       orderBy: { createdAt: "desc" },
       skip: pagination.skip,
       take: pagination.take,
+      include: { avatar: true },
     }),
     prisma.user.count({ where }),
   ]);
@@ -50,7 +52,7 @@ export async function listUsersAdmin(query: AdminListUsersQuery) {
 }
 
 export async function getUserDetailAdmin(userId: string) {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const user = await prisma.user.findUnique({ where: { id: userId }, include: { avatar: true } });
   if (!user) throw ApiError.notFound("کاربر پیدا نشد");
 
   const [activeSessionCount, orderCount, wallet] = await Promise.all([
@@ -77,6 +79,7 @@ export async function blockUser(userId: string, input: BlockUserInput) {
   const updated = await prisma.user.update({
     where: { id: userId },
     data: { isBlocked: true, blockedReason: input.reason, blockedAt: new Date() },
+    include: { avatar: true },
   });
 
   // بلاک‌شدن باید همان لحظه همه‌ی نشست‌های فعال کاربر را باطل کند —
@@ -94,6 +97,7 @@ export async function unblockUser(userId: string) {
   const updated = await prisma.user.update({
     where: { id: userId },
     data: { isBlocked: false, blockedReason: null, blockedAt: null },
+    include: { avatar: true },
   });
 
   notifyUser({
@@ -110,7 +114,11 @@ export async function updateUserRole(userId: string, input: UpdateUserRoleInput)
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw ApiError.notFound("کاربر پیدا نشد");
 
-  const updated = await prisma.user.update({ where: { id: userId }, data: { role: input.role } });
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data: { role: input.role },
+    include: { avatar: true },
+  });
   return publicUser(updated);
 }
 

@@ -12,24 +12,25 @@ import {
 } from "./session.service";
 import { assertNotLockedOut, recordLoginAttempt } from "./login-guard.service";
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from "../../utils/jwt";
-import { User } from "../../generated/prisma";
+import { serializeUserAvatar } from "../../utils/serialize";
+import { User, Media } from "../../generated/prisma";
 
 // ----------------------------------------------------------------------------
 // توابع کمکی محلی
 // ----------------------------------------------------------------------------
 
-function publicUser(user: User) {
+function publicUser(user: User & { avatar?: Media | null }) {
   // فیلدهای حساس (password) را قبل از برگرداندن به کلاینت حذف می‌کنیم
   const { password, ...rest } = user;
-  return rest;
+  return serializeUserAvatar(rest);
 }
 
 async function findUserByIdentifier(rawIdentifier: string) {
   const channel = detectIdentifierChannel(rawIdentifier);
   const identifier = normalizeIdentifier(rawIdentifier);
   return channel === "SMS"
-    ? prisma.user.findUnique({ where: { phone: identifier } })
-    : prisma.user.findUnique({ where: { email: identifier } });
+    ? prisma.user.findUnique({ where: { phone: identifier }, include: { avatar: true } })
+    : prisma.user.findUnique({ where: { email: identifier }, include: { avatar: true } });
 }
 
 // ----------------------------------------------------------------------------
@@ -92,6 +93,7 @@ export async function verifyRegisterOtp(
       channel === "SMS"
         ? { phoneVerifiedAt: new Date() }
         : { emailVerifiedAt: new Date() },
+    include: { avatar: true },
   });
 
   const tokens = await createSessionAndTokens(updated.id, updated.role, device);
@@ -179,8 +181,8 @@ export async function verifyLoginOtp(
 
   const user =
     channel === "SMS"
-      ? await prisma.user.findUnique({ where: { phone: normalized } })
-      : await prisma.user.findUnique({ where: { email: normalized } });
+      ? await prisma.user.findUnique({ where: { phone: normalized }, include: { avatar: true } })
+      : await prisma.user.findUnique({ where: { email: normalized }, include: { avatar: true } });
 
   if (!user) throw ApiError.notFound("کاربر مربوط به این کد پیدا نشد");
   if (user.isBlocked) {
