@@ -3,43 +3,27 @@ import { ApiError } from "../../utils/ApiError";
 import { hashPassword, comparePassword, sha256 } from "../../utils/hash";
 import { normalizeIdentifier, detectIdentifierChannel } from "../../utils/otp";
 import { issueOtp, verifyOtp, IssueOtpResult } from "../otp/otp.service";
-import {
-  createSessionAndTokens,
-  revokeSession,
-  revokeAllSessions,
-  DeviceMeta,
-  IssuedTokens,
-} from "./session.service";
+import { createSessionAndTokens, revokeSession, revokeAllSessions, DeviceMeta, IssuedTokens } from "./session.service";
 import { assertNotLockedOut, recordLoginAttempt } from "./login-guard.service";
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from "../../utils/jwt";
-import { serializeUserAvatar } from "../../utils/serialize";
-import { User, Media } from "../../generated/prisma";
+import { User } from "../../generated/prisma";
 
-// ----------------------------------------------------------------------------
-// توابع کمکی محلی
-// ----------------------------------------------------------------------------
-
-function publicUser(user: User & { avatar?: Media | null }) {
-  // فیلدهای حساس (password) را قبل از برگرداندن به کلاینت حذف می‌کنیم
+function publicUser(user: User) {
   const { password, ...rest } = user;
-  return serializeUserAvatar(rest);
+  return rest;
 }
 
 async function findUserByIdentifier(rawIdentifier: string) {
   const channel = detectIdentifierChannel(rawIdentifier);
   const identifier = normalizeIdentifier(rawIdentifier);
   return channel === "SMS"
-    ? prisma.user.findUnique({ where: { phone: identifier }, include: { avatar: true } })
-    : prisma.user.findUnique({ where: { email: identifier }, include: { avatar: true } });
+    ? prisma.user.findUnique({ where: { phone: identifier } })
+    : prisma.user.findUnique({ where: { email: identifier } });
 }
-
-// ----------------------------------------------------------------------------
-// ۱) ثبت‌نام
-// ----------------------------------------------------------------------------
 
 export async function register(input: {
   fullName?: string;
-  identifier: string; // ایمیل یا موبایل
+  identifier: string;
   password: string;
 }): Promise<IssueOtpResult> {
   const channel = detectIdentifierChannel(input.identifier);
@@ -74,11 +58,7 @@ export async function verifyRegisterOtp(
   code: string,
   device: DeviceMeta
 ): Promise<{ user: ReturnType<typeof publicUser>; tokens: IssuedTokens }> {
-  const { identifier: normalized, channel } = await verifyOtp({
-    identifier,
-    code,
-    purpose: "REGISTER",
-  });
+  const { identifier: normalized, channel } = await verifyOtp({ identifier, code, purpose: "REGISTER" });
 
   const user =
     channel === "SMS"
@@ -93,7 +73,6 @@ export async function verifyRegisterOtp(
       channel === "SMS"
         ? { phoneVerifiedAt: new Date() }
         : { emailVerifiedAt: new Date() },
-    include: { avatar: true },
   });
 
   const tokens = await createSessionAndTokens(updated.id, updated.role, device);
@@ -101,10 +80,6 @@ export async function verifyRegisterOtp(
 
   return { user: publicUser(updated), tokens };
 }
-
-// ----------------------------------------------------------------------------
-// ۲) ورود با رمز عبور
-// ----------------------------------------------------------------------------
 
 export async function login(input: {
   identifier: string;
@@ -153,10 +128,6 @@ export async function login(input: {
   return { user: publicUser(user), tokens };
 }
 
-// ----------------------------------------------------------------------------
-// ۳) ورود بدون رمز با OTP
-// ----------------------------------------------------------------------------
-
 export async function requestLoginOtp(identifier: string): Promise<IssueOtpResult> {
   const user = await findUserByIdentifier(identifier);
   if (!user) {
@@ -173,16 +144,12 @@ export async function verifyLoginOtp(
   code: string,
   device: DeviceMeta
 ): Promise<{ user: ReturnType<typeof publicUser>; tokens: IssuedTokens }> {
-  const { identifier: normalized, channel } = await verifyOtp({
-    identifier,
-    code,
-    purpose: "LOGIN",
-  });
+  const { identifier: normalized, channel } = await verifyOtp({ identifier, code, purpose: "LOGIN" });
 
   const user =
     channel === "SMS"
-      ? await prisma.user.findUnique({ where: { phone: normalized }, include: { avatar: true } })
-      : await prisma.user.findUnique({ where: { email: normalized }, include: { avatar: true } });
+      ? await prisma.user.findUnique({ where: { phone: normalized } })
+      : await prisma.user.findUnique({ where: { email: normalized } });
 
   if (!user) throw ApiError.notFound("کاربر مربوط به این کد پیدا نشد");
   if (user.isBlocked) {
@@ -195,10 +162,6 @@ export async function verifyLoginOtp(
   return { user: publicUser(user), tokens };
 }
 
-// ----------------------------------------------------------------------------
-// ۴) تازه‌سازی توکن (refresh) — با چرخش (rotation) توکن
-// ----------------------------------------------------------------------------
-
 export async function refreshTokens(refreshTokenRaw: string): Promise<IssuedTokens> {
   let payload;
   try {
@@ -207,58 +170,40 @@ export async function refreshTokens(refreshTokenRaw: string): Promise<IssuedToke
     throw ApiError.unauthorized("refresh token نامعتبر یا منقضی‌شده است");
   }
 
-  const session = await prisma.userSession.findUnique({ where: { id: payload.sid } });
+  const sessionId = Number(payload.sid);
+  const session = await prisma.userSession.findUnique({ where: { id: sessionId } });
 
-  if (
-    !session ||
-    !session.isActive ||
-    session.userId !== payload.sub ||
-    session.token !== sha256(refreshTokenRaw)
-  ) {
+  if (!session || !session.isActive || session.userId !== Number(payload.sub) || session.token !== sha256(refreshTokenRaw)) {
     throw ApiError.unauthorized("نشست شما باطل شده، دوباره وارد شوید");
   }
 
-  const user = await prisma.user.findUnique({ where: { id: payload.sub } });
+  const user = await prisma.user.findUnique({ where: { id: Number(payload.sub) } });
   if (!user || user.isBlocked) {
     throw ApiError.unauthorized("دسترسی این حساب باطل شده است");
   }
 
-  // چرخش refresh token: قدیمی دیگر کار نمی‌کند، فقط جدید معتبر است
-  const newAccessToken = signAccessToken({
-    userId: user.id,
-    role: user.role,
-    sessionId: session.id,
-  });
-  const newRefreshToken = signRefreshToken({ userId: user.id, sessionId: session.id });
+  const newAccessToken = signAccessToken({ userId: String(user.id), role: user.role, sessionId: String(session.id) });
+  const newRefreshToken = signRefreshToken({ userId: String(user.id), sessionId: String(session.id) });
 
   await prisma.userSession.update({
     where: { id: session.id },
     data: { token: sha256(newRefreshToken), lastActivityAt: new Date() },
   });
 
-  return { accessToken: newAccessToken, refreshToken: newRefreshToken, sessionId: session.id };
+  return { accessToken: newAccessToken, refreshToken: newRefreshToken, sessionId: String(session.id) };
 }
-
-// ----------------------------------------------------------------------------
-// ۵) خروج از حساب
-// ----------------------------------------------------------------------------
 
 export async function logout(sessionId: string): Promise<void> {
   await revokeSession(sessionId);
 }
 
-export async function logoutAllDevices(userId: string, currentSessionId: string): Promise<void> {
+export async function logoutAllDevices(userId: number, currentSessionId: string): Promise<void> {
   await revokeAllSessions(userId, currentSessionId);
 }
-
-// ----------------------------------------------------------------------------
-// ۶) فراموشی و بازنشانی رمز عبور
-// ----------------------------------------------------------------------------
 
 export async function forgotPassword(identifier: string): Promise<IssueOtpResult> {
   const user = await findUserByIdentifier(identifier);
   if (!user) {
-    // برای جلوگیری از افشای وجود/عدم‌وجود حساب، خطای عمومی برمی‌گردانیم
     throw ApiError.notFound("در صورت وجود حساب، کد بازیابی ارسال می‌شود");
   }
   return issueOtp({ identifier, purpose: "RESET_PASSWORD", userId: user.id });
@@ -289,12 +234,10 @@ export async function resetPassword(input: {
     data: { password: passwordHash },
   });
 
-  // به‌دلیل تغییر رمز، تمام نشست‌های فعال باطل می‌شوند (باید دوباره لاگین کند)
   await revokeAllSessions(user.id);
 }
 
-// ----------------------------------------------------------------------------
-async function touchLastLogin(userId: string, ip?: string): Promise<void> {
+async function touchLastLogin(userId: number, ip?: string): Promise<void> {
   await prisma.user.update({
     where: { id: userId },
     data: { lastLoginAt: new Date(), lastLoginIp: ip },

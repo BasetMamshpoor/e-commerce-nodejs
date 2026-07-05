@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { ApiResponse } from "../utils/ApiResponse";
-import { paramStr } from "../utils/params";
+import { paramInt } from "../utils/params";
 import * as wishlistService from "../services/shopping/wishlist.service";
 
 export async function add(req: Request, res: Response) {
@@ -9,7 +9,7 @@ export async function add(req: Request, res: Response) {
 }
 
 export async function remove(req: Request, res: Response) {
-  await wishlistService.removeFromWishlist(req.user!.id, paramStr(req.params.productId));
+  await wishlistService.removeFromWishlist(req.user!.id, paramInt(req.params.productId));
   return ApiResponse.ok(res, null, "محصول از لیست علاقه‌مندی حذف شد");
 }
 

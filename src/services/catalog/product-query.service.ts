@@ -3,48 +3,45 @@ import { ApiError } from "../../utils/ApiError";
 import { parsePagination, buildPaginationMeta } from "../../utils/pagination";
 import { getDescendantCategoryIds } from "./category.service";
 import { ListProductsQuery, AdminListProductsQuery } from "../../validations/product.validation";
-import { Attribute, AttributeValue, Product, Brand } from "../../generated/prisma";
-import { serializeProduct, serializeBrand, ProductLike } from "../../utils/serialize";
-
-// ----------------------------------------------------------------------------
-// نکته‌ی مهم درباره‌ی فیلتر بر اساس چند ویژگی هم‌زمان (مثلاً رنگ=قرمز و سایز=L):
-// فیلتر در سطح «محصول» انجام می‌شود نه «تنوع». یعنی محصولی که یک تنوعِ قرمز
-// و یک تنوعِ دیگر با سایز L دارد (نه لزوماً در یک تنوع) هم در نتیجه می‌آید.
-// این دقیقاً همان رفتاری است که اکثر فروشگاه‌های اینترنتی در صفحه‌ی لیست
-// محصولات دارند (ترکیب دقیق را کاربر در صفحه‌ی خود محصول انتخاب می‌کند).
-// ----------------------------------------------------------------------------
+import { Prisma } from "../../generated/prisma";
 
 const LIST_INCLUDE = {
-  brand: { include: { logo: true } },
-  categories: { include: { category: { include: { image: true } } } },
+  brand: true,
+  categories: { include: { category: true } },
   images: { where: { isMain: true }, take: 1, include: { media: true } },
-};
+} satisfies Prisma.ProductInclude;
 
-function parseIdList(value?: string): string[] | undefined {
+function parseIdList(value?: string): number[] | undefined {
   if (!value) return undefined;
   const ids = value
     .split(",")
-    .map((v) => v.trim())
-    .filter(Boolean);
+    .map((v) => Number(v.trim()))
+    .filter((v) => Number.isInteger(v) && v > 0);
   return ids.length > 0 ? ids : undefined;
 }
 
-function buildSortOrder(sort: ListProductsQuery["sort"]) {
+function buildSortOrder(sort: ListProductsQuery["sort"]): Prisma.ProductOrderByWithRelationInput {
   switch (sort) {
     case "price_asc":
-      return { minPrice: "asc" as const };
+      return { minPrice: "asc" };
     case "price_desc":
-      return { minPrice: "desc" as const };
+      return { minPrice: "desc" };
     case "popular":
-      return { viewCount: "desc" as const };
+      return { viewCount: "desc" };
+    case "most_viewed":
+      return { viewCount: "desc" };
+    case "most_popular":
+      return { avgRating: "desc" };
+    case "bestselling":
+      return { totalSold: "desc" };
     default:
-      return { createdAt: "desc" as const };
+      return { createdAt: "desc" };
   }
 }
 
 async function buildAttributeFilterConditions(
   attributeValueIdsParam?: string
-): Promise<Record<string, unknown>[]> {
+): Promise<Prisma.ProductWhereInput[]> {
   const ids = parseIdList(attributeValueIdsParam);
   if (!ids) return [];
 
@@ -53,23 +50,20 @@ async function buildAttributeFilterConditions(
     select: { id: true, attributeId: true },
   });
 
-  const groups = new Map<string, string[]>();
+  const groups = new Map<number, number[]>();
   for (const v of values) {
     const arr = groups.get(v.attributeId) ?? [];
     arr.push(v.id);
     groups.set(v.attributeId, arr);
   }
 
-  // برای هر ویژگی یک شرط جدا (AND بین ویژگی‌های مختلف، OR بین مقادیر یک ویژگی)
   return Array.from(groups.values()).map((groupIds) => ({
     variants: { some: { attributeValues: { some: { attributeValueId: { in: groupIds } } } } },
   }));
 }
 
-async function buildCommonConditions(
-  query: ListProductsQuery
-): Promise<Record<string, unknown>[]> {
-  const AND: Record<string, unknown>[] = [];
+async function buildCommonConditions(query: ListProductsQuery): Promise<Prisma.ProductWhereInput[]> {
+  const AND: Prisma.ProductWhereInput[] = [];
 
   if (query.categorySlug) {
     const category = await prisma.category.findUnique({ where: { slug: query.categorySlug } });
@@ -107,7 +101,7 @@ export async function listProductsStorefront(query: ListProductsQuery) {
   const AND = await buildCommonConditions(query);
   AND.push({ status: "PUBLISHED" });
 
-  const where = { AND };
+  const where: Prisma.ProductWhereInput = { AND };
   const orderBy = buildSortOrder(query.sort);
 
   const [items, total] = await Promise.all([
@@ -121,10 +115,7 @@ export async function listProductsStorefront(query: ListProductsQuery) {
     prisma.product.count({ where }),
   ]);
 
-  return {
-    items: (items as unknown as (Product & ProductLike)[]).map(serializeProduct),
-    meta: buildPaginationMeta(total, pagination),
-  };
+  return { items, meta: buildPaginationMeta(total, pagination) };
 }
 
 export async function listProductsAdmin(query: AdminListProductsQuery) {
@@ -132,7 +123,7 @@ export async function listProductsAdmin(query: AdminListProductsQuery) {
   const AND = await buildCommonConditions(query);
   if (query.status) AND.push({ status: query.status });
 
-  const where = AND.length > 0 ? { AND } : {};
+  const where: Prisma.ProductWhereInput = AND.length > 0 ? { AND } : {};
   const orderBy = buildSortOrder(query.sort);
 
   const [items, total] = await Promise.all([
@@ -146,19 +137,11 @@ export async function listProductsAdmin(query: AdminListProductsQuery) {
     prisma.product.count({ where }),
   ]);
 
-  return {
-    items: (items as unknown as (Product & ProductLike)[]).map(serializeProduct),
-    meta: buildPaginationMeta(total, pagination),
-  };
+  return { items, meta: buildPaginationMeta(total, pagination) };
 }
 
-// ----------------------------------------------------------------------------
-// متادیتای فیلتر برای ساخت UI صفحه‌ی فروشگاه (بدون شمارش تعداد محصول هر گزینه —
-// اگر بعداً لازم شد، می‌توان با چند کوئری groupBy اضافه اضافه کرد)
-// ----------------------------------------------------------------------------
-
 export async function getStorefrontFilters(categorySlug?: string) {
-  let categoryIds: string[] | undefined;
+  let categoryIds: number[] | undefined;
 
   if (categorySlug) {
     const category = await prisma.category.findUnique({ where: { slug: categorySlug } });
@@ -166,8 +149,8 @@ export async function getStorefrontFilters(categorySlug?: string) {
     categoryIds = await getDescendantCategoryIds(category.id);
   }
 
-  const productWhere = {
-    status: "PUBLISHED" as const,
+  const productWhere: Prisma.ProductWhereInput = {
+    status: "PUBLISHED",
     ...(categoryIds ? { categories: { some: { categoryId: { in: categoryIds } } } } : {}),
   };
 
@@ -175,7 +158,6 @@ export async function getStorefrontFilters(categorySlug?: string) {
     prisma.brand.findMany({
       where: { isActive: true, products: { some: productWhere } },
       orderBy: { name: "asc" },
-      include: { logo: true },
     }),
     prisma.product.aggregate({
       where: productWhere,
@@ -184,28 +166,26 @@ export async function getStorefrontFilters(categorySlug?: string) {
     }),
   ]);
 
-  let attributes: (Attribute & { values: AttributeValue[] })[];
+  let attributes: Awaited<ReturnType<typeof prisma.attribute.findMany>>;
 
   if (categoryIds) {
-    const links = (await prisma.categoryAttribute.findMany({
+    const links = await prisma.categoryAttribute.findMany({
       where: { categoryId: { in: categoryIds } },
       include: { attribute: { include: { values: true } } },
-    })) as unknown as { attribute: Attribute & { values: AttributeValue[] } }[];
+    });
 
-    const unique = new Map<string, Attribute & { values: AttributeValue[] }>();
+    const unique = new Map<number, Awaited<ReturnType<typeof prisma.attribute.findMany>>[number]>();
     for (const link of links) unique.set(link.attribute.id, link.attribute);
     attributes = Array.from(unique.values());
   } else {
-    attributes = (await prisma.attribute.findMany({
+    attributes = await prisma.attribute.findMany({
       where: { isFilterable: true },
       include: { values: true },
-    })) as (Attribute & { values: AttributeValue[] })[];
+    });
   }
 
   return {
-    brands: (brands as unknown as (Brand & { logo: { url: string; alt: string | null } | null })[]).map(
-      serializeBrand
-    ),
+    brands,
     priceRange: {
       min: priceAgg._min.minPrice ?? 0,
       max: priceAgg._max.maxPrice ?? 0,

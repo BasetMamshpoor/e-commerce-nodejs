@@ -2,7 +2,7 @@ import { Request } from "express";
 import { getOrAssignGuestToken } from "./guestToken";
 
 // مقایسه‌ی چند محصول با هم — آیتم ۶ (هم برای مهمان هم کاربر عضو)
-export type ComparisonIdentity = { userId: string } | { sessionToken: string };
+export type ComparisonIdentity = { userId: number } | { sessionToken: string };
 
 export function resolveComparisonIdentity(req: Request): {
   identity: ComparisonIdentity;

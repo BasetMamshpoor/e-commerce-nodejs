@@ -14,7 +14,7 @@ export async function blockIp(input: CreateBlockedIpInput): Promise<BlockedIp> {
   return prisma.blockedIp.create({ data: input });
 }
 
-export async function unblockIp(id: string): Promise<void> {
+export async function unblockIp(id: number): Promise<void> {
   const blocked = await prisma.blockedIp.findUnique({ where: { id } });
   if (!blocked) throw ApiError.notFound("این آی‌پی در لیست مسدودها پیدا نشد");
   await prisma.blockedIp.delete({ where: { id } });

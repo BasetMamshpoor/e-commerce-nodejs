@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { ApiResponse } from "../utils/ApiResponse";
 import { ApiError } from "../utils/ApiError";
-import { paramStr } from "../utils/params";
+import { paramInt } from "../utils/params";
 import * as commentService from "../services/comment/comment.service";
 
-function userId(req: Request): string {
+function userId(req: Request): number {
   if (!req.user) throw ApiError.unauthorized();
   return req.user.id;
 }
@@ -12,8 +12,9 @@ function userId(req: Request): string {
 export async function listForProduct(req: Request, res: Response) {
   const result = await commentService.listApprovedComments(
     "PRODUCT",
-    paramStr(req.params.productId),
-    req.validatedQuery as never
+    paramInt(req.params.productId),
+    req.validatedQuery as never,
+    req.user?.id
   );
   return ApiResponse.ok(res, result);
 }
@@ -22,7 +23,7 @@ export async function createForProduct(req: Request, res: Response) {
   const comment = await commentService.createComment(
     userId(req),
     "PRODUCT",
-    paramStr(req.params.productId),
+    paramInt(req.params.productId),
     req.body
   );
   return ApiResponse.created(res, comment, "دیدگاه شما ثبت شد و پس از بررسی نمایش داده می‌شود");
@@ -31,8 +32,9 @@ export async function createForProduct(req: Request, res: Response) {
 export async function listForBlogPost(req: Request, res: Response) {
   const result = await commentService.listApprovedComments(
     "BLOG_POST",
-    paramStr(req.params.postId),
-    req.validatedQuery as never
+    paramInt(req.params.postId),
+    req.validatedQuery as never,
+    req.user?.id
   );
   return ApiResponse.ok(res, result);
 }
@@ -41,25 +43,25 @@ export async function createForBlogPost(req: Request, res: Response) {
   const comment = await commentService.createComment(
     userId(req),
     "BLOG_POST",
-    paramStr(req.params.postId),
+    paramInt(req.params.postId),
     req.body
   );
   return ApiResponse.created(res, comment, "دیدگاه شما ثبت شد و پس از بررسی نمایش داده می‌شود");
 }
 
 export async function update(req: Request, res: Response) {
-  const comment = await commentService.updateComment(userId(req), paramStr(req.params.id), req.body);
+  const comment = await commentService.updateComment(userId(req), paramInt(req.params.id), req.body);
   return ApiResponse.ok(res, comment, "دیدگاه ویرایش شد و دوباره در صف بررسی قرار گرفت");
 }
 
 export async function remove(req: Request, res: Response) {
   const isStaff = req.user ? req.user.role !== "CUSTOMER" : false;
-  await commentService.deleteComment(userId(req), paramStr(req.params.id), isStaff);
+  await commentService.deleteComment(userId(req), paramInt(req.params.id), isStaff);
   return ApiResponse.ok(res, null, "دیدگاه حذف شد");
 }
 
 export async function like(req: Request, res: Response) {
-  const result = await commentService.toggleLike(userId(req), paramStr(req.params.id));
+  const result = await commentService.toggleLike(userId(req), paramInt(req.params.id));
   return ApiResponse.ok(res, result);
 }
 
@@ -70,6 +72,6 @@ export async function listAdmin(req: Request, res: Response) {
 }
 
 export async function moderate(req: Request, res: Response) {
-  const comment = await commentService.moderateComment(paramStr(req.params.id), req.body);
+  const comment = await commentService.moderateComment(paramInt(req.params.id), req.body);
   return ApiResponse.ok(res, comment, "دیدگاه به‌روزرسانی شد");
 }

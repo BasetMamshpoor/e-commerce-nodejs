@@ -15,7 +15,7 @@ import { DiscountCode } from "../../generated/prisma";
 // ----------------------------------------------------------------------------
 
 export interface DiscountEvaluationResult {
-  discountCodeId: string;
+  discountCodeId: number;
   code: string;
   type: "PERCENT" | "FIXED";
   value: number;
@@ -23,13 +23,13 @@ export interface DiscountEvaluationResult {
   eligibleSubtotal: number;
   discountAmount: number;
   payableTotal: number;
-  eligibleVariantIds: string[];
+  eligibleVariantIds: number[];
 }
 
 type DiscountCodeWithRestrictions = DiscountCode & {
-  products: { productId: string }[];
-  categories: { categoryId: string }[];
-  users: { userId: string }[];
+  products: { productId: number }[];
+  categories: { categoryId: number }[];
+  users: { userId: number }[];
 };
 
 async function findActiveCodeOrThrow(rawCode: string): Promise<DiscountCodeWithRestrictions> {
@@ -63,7 +63,7 @@ async function findActiveCodeOrThrow(rawCode: string): Promise<DiscountCodeWithR
 
 async function assertUserEligibility(
   discountCode: DiscountCodeWithRestrictions,
-  userId?: string
+  userId?: number
 ): Promise<void> {
   const requiresLogin = discountCode.users.length > 0 || discountCode.maxUsagePerUser !== null;
 
@@ -92,7 +92,7 @@ async function assertUserEligibility(
 
 export function isItemEligible(
   discountCode: DiscountCodeWithRestrictions,
-  item: { productId: string; categoryIds: string[] }
+  item: { productId: number; categoryIds: number[] }
 ): boolean {
   const hasProductRestriction = discountCode.products.length > 0;
   const hasCategoryRestriction = discountCode.categories.length > 0;
@@ -183,9 +183,9 @@ export async function evaluateDiscountCode(
 
 export async function recordDiscountCodeUsage(
   params: {
-    discountCodeId: string;
-    userId: string;
-    orderId: string;
+    discountCodeId: number;
+    userId: number;
+    orderId: number;
     discountAmount: number;
   },
   client: Pick<typeof prisma, "discountCodeUsage" | "discountCode"> = prisma

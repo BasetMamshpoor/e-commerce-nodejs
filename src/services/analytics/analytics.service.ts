@@ -100,10 +100,10 @@ export async function getTopProducts(query: TopProductsQuery) {
   })) as unknown as {
     quantity: number;
     price: number;
-    variant: { productId: string };
+    variant: { productId: number };
   }[];
 
-  const aggregated = new Map<string, { quantitySold: number; revenue: number }>();
+  const aggregated = new Map<number, { quantitySold: number; revenue: number }>();
   for (const item of items) {
     const productId = item.variant.productId;
     const entry = aggregated.get(productId) ?? { quantitySold: 0, revenue: 0 };

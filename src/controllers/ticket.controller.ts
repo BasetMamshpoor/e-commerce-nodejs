@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { ApiResponse } from "../utils/ApiResponse";
 import { ApiError } from "../utils/ApiError";
-import { paramStr } from "../utils/params";
+import { paramInt } from "../utils/params";
 import * as ticketService from "../services/ticket/ticket.service";
 import * as departmentService from "../services/ticket/department.service";
 
-function userId(req: Request): string {
+function userId(req: Request): number {
   if (!req.user) throw ApiError.unauthorized();
   return req.user.id;
 }
@@ -22,13 +22,13 @@ export async function listMine(req: Request, res: Response) {
 }
 
 export async function getMine(req: Request, res: Response) {
-  return ApiResponse.ok(res, await ticketService.getTicketDetail(paramStr(req.params.id), userId(req)));
+  return ApiResponse.ok(res, await ticketService.getTicketDetail(paramInt(req.params.id), userId(req)));
 }
 
 export async function addMessage(req: Request, res: Response) {
   if (!req.user) throw ApiError.unauthorized();
   const ticket = await ticketService.addMessage(
-    paramStr(req.params.id),
+    paramInt(req.params.id),
     req.user.id,
     req.user.role,
     req.body
@@ -43,11 +43,11 @@ export async function listAdmin(req: Request, res: Response) {
 }
 
 export async function getByIdAdmin(req: Request, res: Response) {
-  return ApiResponse.ok(res, await ticketService.getTicketDetail(paramStr(req.params.id)));
+  return ApiResponse.ok(res, await ticketService.getTicketDetail(paramInt(req.params.id)));
 }
 
 export async function updateMeta(req: Request, res: Response) {
-  const ticket = await ticketService.updateTicketMeta(paramStr(req.params.id), req.body);
+  const ticket = await ticketService.updateTicketMeta(paramInt(req.params.id), req.body);
   return ApiResponse.ok(res, ticket, "تیکت به‌روزرسانی شد");
 }
 
@@ -58,12 +58,12 @@ export async function createDepartment(req: Request, res: Response) {
 }
 
 export async function updateDepartment(req: Request, res: Response) {
-  const department = await departmentService.updateDepartment(paramStr(req.params.id), req.body);
+  const department = await departmentService.updateDepartment(paramInt(req.params.id), req.body);
   return ApiResponse.ok(res, department, "بخش به‌روزرسانی شد");
 }
 
 export async function removeDepartment(req: Request, res: Response) {
-  await departmentService.deleteDepartment(paramStr(req.params.id));
+  await departmentService.deleteDepartment(paramInt(req.params.id));
   return ApiResponse.ok(res, null, "بخش حذف شد");
 }
 

@@ -1,18 +1,10 @@
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import { parsePagination, buildPaginationMeta } from "../../utils/pagination";
-import { Notification, NotificationType } from "../../generated/prisma";
-
-// ----------------------------------------------------------------------------
-// نوتیفیکیشن‌های کاربری — آیتم ۱۵.
-// createNotification توسط بقیه‌ی ماژول‌ها (سفارش، تیکت، کیف‌پول، کامنت) صدا
-// زده می‌شود؛ اگر خطایی در ساخت نوتیف رخ دهد نباید کل عملیات اصلی (مثل
-// ثبت سفارش) را خراب کند، پس همیشه با ()catch بی‌صدا فراخوانی کنید:
-//   notifyUser(...).catch(() => undefined)
-// ----------------------------------------------------------------------------
+import { Notification, NotificationType, Prisma } from "../../generated/prisma";
 
 export async function notifyUser(params: {
-  userId: string;
+  userId: number;
   type: NotificationType;
   title: string;
   message: string;
@@ -30,7 +22,7 @@ export async function notifyUser(params: {
 }
 
 export async function notifyUsers(
-  userIds: string[],
+  userIds: number[],
   params: { type: NotificationType; title: string; message: string; link?: string }
 ): Promise<void> {
   if (userIds.length === 0) return;
@@ -46,11 +38,11 @@ export async function notifyUsers(
 }
 
 export async function listNotifications(
-  userId: string,
+  userId: number,
   query: { page?: number; limit?: number; isRead?: boolean }
 ) {
   const pagination = parsePagination({ page: query.page, limit: query.limit });
-  const where = { userId, ...(query.isRead !== undefined ? { isRead: query.isRead } : {}) };
+  const where: Prisma.NotificationWhereInput = { userId, ...(query.isRead !== undefined ? { isRead: query.isRead } : {}) };
 
   const [items, total] = await Promise.all([
     prisma.notification.findMany({
@@ -65,11 +57,11 @@ export async function listNotifications(
   return { items, meta: buildPaginationMeta(total, pagination) };
 }
 
-export async function getUnreadCount(userId: string): Promise<number> {
+export async function getUnreadCount(userId: number): Promise<number> {
   return prisma.notification.count({ where: { userId, isRead: false } });
 }
 
-export async function markAsRead(userId: string, id: string): Promise<Notification> {
+export async function markAsRead(userId: number, id: number): Promise<Notification> {
   const notification = await prisma.notification.findUnique({ where: { id } });
   if (!notification || notification.userId !== userId) {
     throw ApiError.notFound("نوتیفیکیشن پیدا نشد");
@@ -77,11 +69,11 @@ export async function markAsRead(userId: string, id: string): Promise<Notificati
   return prisma.notification.update({ where: { id }, data: { isRead: true } });
 }
 
-export async function markAllAsRead(userId: string): Promise<void> {
+export async function markAllAsRead(userId: number): Promise<void> {
   await prisma.notification.updateMany({ where: { userId, isRead: false }, data: { isRead: true } });
 }
 
-export async function deleteNotification(userId: string, id: string): Promise<void> {
+export async function deleteNotification(userId: number, id: number): Promise<void> {
   const notification = await prisma.notification.findUnique({ where: { id } });
   if (!notification || notification.userId !== userId) {
     throw ApiError.notFound("نوتیفیکیشن پیدا نشد");
@@ -89,13 +81,8 @@ export async function deleteNotification(userId: string, id: string): Promise<vo
   await prisma.notification.delete({ where: { id } });
 }
 
-// ----------------------------------------------------------------------------
-// پخش همگانی برای ادمین (مثلاً اطلاع‌رسانی جشنواره) — اگر userIds نباشد،
-// برای همه‌ی کاربران ارسال می‌شود.
-// ----------------------------------------------------------------------------
-
 export async function broadcastNotification(input: {
-  userIds?: string[];
+  userIds?: number[];
   type: NotificationType;
   title: string;
   message: string;

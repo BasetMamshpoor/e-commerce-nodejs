@@ -7,22 +7,22 @@ export const updateDepartmentSchema = createDepartmentSchema.partial();
 
 export const createTicketSchema = z.object({
   subject: z.string().trim().min(3).max(200),
-  departmentId: z.string().optional(),
+  departmentId: z.coerce.number().int().optional(),
   priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]).optional().default("NORMAL"),
-  orderId: z.string().optional(),
+  orderId: z.coerce.number().int().optional(),
   message: z.string().trim().min(1).max(5000),
-  attachmentMediaIds: z.array(z.string()).optional().default([]),
+  attachmentMediaIds: z.array(z.coerce.number().int().positive()).optional().default([]),
 });
 
 export const addTicketMessageSchema = z.object({
   message: z.string().trim().min(1).max(5000),
-  attachmentMediaIds: z.array(z.string()).optional().default([]),
+  attachmentMediaIds: z.array(z.coerce.number().int().positive()).optional().default([]),
 });
 
 export const updateTicketMetaSchema = z.object({
   status: z.enum(["OPEN", "ANSWERED", "CLOSED", "PENDING_CUSTOMER"]).optional(),
   priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]).optional(),
-  departmentId: z.string().optional(),
+  departmentId: z.coerce.number().int().optional(),
 });
 
 export const listTicketsQuerySchema = z.object({
@@ -32,9 +32,10 @@ export const listTicketsQuerySchema = z.object({
 });
 
 export const adminListTicketsQuerySchema = listTicketsQuerySchema.extend({
-  departmentId: z.string().optional(),
+  departmentId: z.coerce.number().int().optional(),
   priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]).optional(),
   search: z.string().optional(),
+  userId: z.coerce.number().int().optional(),
 });
 
 export type CreateDepartmentInput = z.infer<typeof createDepartmentSchema>;

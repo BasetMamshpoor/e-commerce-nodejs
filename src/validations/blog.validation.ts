@@ -12,8 +12,11 @@ export const createBlogPostSchema = z.object({
   slug: z.string().trim().min(2).max(260).optional(),
   excerpt: z.string().max(500).optional(),
   content: z.string().min(1), // HTML از تکست ادیتور
-  coverImageId: z.string().optional(),
-  categoryId: z.string().optional(),
+  // coverImageUrl توسط middleware آپلود تنظیم می‌شود
+  coverImageUrl: z.string().optional(),
+  coverImageMediaId: z.coerce.number().int().positive().optional(),
+  categoryId: z.coerce.number().int().optional(),
+  productIds: z.array(z.coerce.number().int()).optional(),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional().default("DRAFT"),
   metaTitle: z.string().max(160).optional(),
   metaDescription: z.string().max(300).optional(),

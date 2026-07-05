@@ -14,7 +14,7 @@ import { getOrAssignGuestToken } from "./guestToken";
 // guestToken، سبد مهمان با سبد کاربر ادغام می‌شود.
 // ----------------------------------------------------------------------------
 
-export type CartIdentity = { userId: string } | { guestToken: string };
+export type CartIdentity = { userId: number } | { guestToken: string };
 
 export function resolveCartIdentity(req: Request): {
   identity: CartIdentity;

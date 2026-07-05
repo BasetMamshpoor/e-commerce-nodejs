@@ -2,28 +2,27 @@ import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import { slugify, ensureUniqueSlug } from "../../utils/slug";
 import { parsePagination, buildPaginationMeta } from "../../utils/pagination";
-import { serializeBlogPost } from "../../utils/serialize";
 import {
   CreateBlogPostInput,
   UpdateBlogPostInput,
   ListBlogPostsQuery,
   AdminListBlogPostsQuery,
 } from "../../validations/blog.validation";
-import { BlogPost, Media, BlogCategory } from "../../generated/prisma";
+import { BlogPost, BlogCategory, BlogPostProduct, Product } from "../../generated/prisma";
 
 type PostWithRelations = BlogPost & {
-  coverImage: Media | null;
   category: BlogCategory | null;
+  products: (BlogPostProduct & { product: Product })[];
 };
 
-const DETAIL_INCLUDE = { coverImage: true, category: true };
+const DETAIL_INCLUDE = { category: true, coverImage: true, products: { include: { product: true } } };
 
-async function isSlugTaken(slug: string, excludeId?: string): Promise<boolean> {
+async function isSlugTaken(slug: string, excludeId?: number): Promise<boolean> {
   const existing = await prisma.blogPost.findUnique({ where: { slug } });
   return Boolean(existing && existing.id !== excludeId);
 }
 
-export async function createBlogPost(authorId: string | undefined, input: CreateBlogPostInput) {
+export async function createBlogPost(authorId: number | undefined, input: CreateBlogPostInput) {
   if (input.categoryId) {
     const category = await prisma.blogCategory.findUnique({ where: { id: input.categoryId } });
     if (!category) throw ApiError.badRequest("دسته‌بندی انتخاب‌شده معتبر نیست");
@@ -37,13 +36,13 @@ export async function createBlogPost(authorId: string | undefined, input: Create
     throw ApiError.conflict("این slug قبلاً استفاده شده است");
   }
 
-  const post = (await prisma.blogPost.create({
+  return prisma.blogPost.create({
     data: {
       title: input.title,
       slug,
       excerpt: input.excerpt,
       content: input.content,
-      coverImageId: input.coverImageId,
+      coverImageMediaId: input.coverImageMediaId,
       categoryId: input.categoryId,
       status: input.status,
       metaTitle: input.metaTitle,
@@ -51,14 +50,15 @@ export async function createBlogPost(authorId: string | undefined, input: Create
       canonicalUrl: input.canonicalUrl,
       authorId,
       publishedAt: input.status === "PUBLISHED" ? new Date() : null,
+      products: input.productIds?.length
+        ? { create: input.productIds.map((productId) => ({ productId })) }
+        : undefined,
     },
     include: DETAIL_INCLUDE,
-  })) as unknown as PostWithRelations;
-
-  return serializeBlogPost(post);
+  }) as Promise<PostWithRelations>;
 }
 
-export async function updateBlogPost(id: string, input: UpdateBlogPostInput) {
+export async function updateBlogPost(id: number, input: UpdateBlogPostInput) {
   const post = await prisma.blogPost.findUnique({ where: { id } });
   if (!post) throw ApiError.notFound("پست وبلاگ پیدا نشد");
 
@@ -76,16 +76,32 @@ export async function updateBlogPost(id: string, input: UpdateBlogPostInput) {
   // اولین بار که وضعیت به PUBLISHED تغییر می‌کند، publishedAt ست می‌شود
   const becomingPublished = input.status === "PUBLISHED" && post.status !== "PUBLISHED";
 
+  const { productIds, ...postData } = input;
+
   const updated = (await prisma.blogPost.update({
     where: { id },
-    data: { ...input, slug, ...(becomingPublished ? { publishedAt: new Date() } : {}) },
+    data: { ...postData, slug, ...(becomingPublished ? { publishedAt: new Date() } : {}) },
     include: DETAIL_INCLUDE,
-  })) as unknown as PostWithRelations;
+  })) as PostWithRelations;
 
-  return serializeBlogPost(updated);
+  if (productIds !== undefined) {
+    await prisma.blogPostProduct.deleteMany({ where: { blogPostId: id } });
+    if (productIds.length) {
+      await prisma.blogPostProduct.createMany({
+        data: productIds.map((productId) => ({ blogPostId: id, productId })),
+        skipDuplicates: true,
+      });
+    }
+    return (await prisma.blogPost.findUnique({
+      where: { id },
+      include: DETAIL_INCLUDE,
+    })) as PostWithRelations;
+  }
+
+  return updated;
 }
 
-export async function deleteBlogPost(id: string): Promise<void> {
+export async function deleteBlogPost(id: number): Promise<void> {
   const post = await prisma.blogPost.findUnique({ where: { id } });
   if (!post) throw ApiError.notFound("پست وبلاگ پیدا نشد");
   await prisma.blogPost.delete({ where: { id } });
@@ -97,21 +113,21 @@ export async function getBlogPostBySlugPublic(slug: string) {
   const post = (await prisma.blogPost.findUnique({
     where: { slug },
     include: DETAIL_INCLUDE,
-  })) as unknown as PostWithRelations | null;
+  })) as PostWithRelations | null;
   if (!post || post.status !== "PUBLISHED") throw ApiError.notFound("پست وبلاگ پیدا نشد");
-  return serializeBlogPost(post);
+  return post;
 }
 
-export async function getBlogPostByIdAdmin(id: string) {
+export async function getBlogPostByIdAdmin(id: number) {
   const post = (await prisma.blogPost.findUnique({
     where: { id },
     include: DETAIL_INCLUDE,
-  })) as unknown as PostWithRelations | null;
+  })) as PostWithRelations | null;
   if (!post) throw ApiError.notFound("پست وبلاگ پیدا نشد");
-  return serializeBlogPost(post);
+  return post;
 }
 
-export async function trackBlogPostView(id: string): Promise<void> {
+export async function trackBlogPostView(id: number): Promise<void> {
   await prisma.blogPost.update({ where: { id }, data: { viewCount: { increment: 1 } } });
 }
 
@@ -147,7 +163,7 @@ export async function listBlogPostsPublic(query: ListBlogPostsQuery) {
   ]);
 
   return {
-    items: (items as unknown as PostWithRelations[]).map(serializeBlogPost),
+    items: items as unknown as PostWithRelations[],
     meta: buildPaginationMeta(total, pagination),
   };
 }
@@ -168,7 +184,7 @@ export async function listBlogPostsAdmin(query: AdminListBlogPostsQuery) {
   ]);
 
   return {
-    items: (items as unknown as PostWithRelations[]).map(serializeBlogPost),
+    items: items as unknown as PostWithRelations[],
     meta: buildPaginationMeta(total, pagination),
   };
 }

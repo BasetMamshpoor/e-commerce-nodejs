@@ -33,7 +33,7 @@ describe("وبلاگ — روتینگ", () => {
 
 describe("کامنت پلی‌مورفیک روی پست وبلاگ — روتینگ", () => {
   it("GET /comments/blog/:postId عمومی است و باید 200 با ساختار درست بدهد", async () => {
-    const res = await request(app).get("/api/v1/comments/blog/some-post-id");
+    const res = await request(app).get("/api/v1/comments/blog/99999");
     expect(res.status).toBe(200);
     expect(res.body.data.items).toEqual([]);
     expect(res.body.data.ratingSummary).toEqual({ average: 0, count: 0 });
@@ -41,7 +41,7 @@ describe("کامنت پلی‌مورفیک روی پست وبلاگ — روتی
 
   it("POST /comments/blog/:postId بدون توکن باید 401 بدهد", async () => {
     const res = await request(app)
-      .post("/api/v1/comments/blog/some-post-id")
+      .post("/api/v1/comments/blog/99999")
       .send({ content: "دیدگاه تستی" });
     expect(res.status).toBe(401);
   });

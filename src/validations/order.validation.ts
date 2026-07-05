@@ -2,8 +2,8 @@ import { z } from "zod";
 
 export const createOrderSchema = z
   .object({
-    addressId: z.string().min(1, "آدرس ارسال الزامی است"),
-    shippingCompanyId: z.string().min(1, "انتخاب شرکت ارسال الزامی است"),
+    addressId: z.coerce.number().int().positive("آدرس ارسال الزامی است"),
+    shippingCompanyId: z.coerce.number().int().positive("انتخاب شرکت ارسال الزامی است"),
     paymentMethod: z.enum(["GATEWAY", "WALLET", "MIXED"]),
     gatewaySlug: z.string().optional(),
     discountCode: z.string().trim().optional(),
@@ -18,9 +18,9 @@ export const cancelOrderSchema = z.object({
 });
 
 export const returnOrderSchema = z.object({
-  orderItemId: z.string().optional(),
+  orderItemId: z.coerce.number().int().positive().optional(),
   reason: z.string().trim().min(3, "دلیل مرجوعی الزامی است").max(500),
-  imageMediaIds: z.array(z.string()).optional().default([]),
+  imageMediaIds: z.array(z.coerce.number().int().positive()).optional().default([]),
 });
 
 export const initiateOrderPaymentSchema = z.object({
@@ -44,6 +44,8 @@ export const adminUpdateOrderStatusSchema = z.object({
     "FAILED",
   ]),
   note: z.string().max(500).optional(),
+  trackingCode: z.string().max(100).optional(),
+  packageNumber: z.string().max(100).optional(),
 });
 
 export const adminUpdateReturnSchema = z.object({
@@ -72,13 +74,15 @@ export const listOrdersQuerySchema = z.object({
 
 export const adminListOrdersQuerySchema = listOrdersQuerySchema.extend({
   search: z.string().optional(),
-  userId: z.string().optional(),
+  userId: z.coerce.number().int().positive().optional(),
 });
 
 export const adminListReturnsQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().optional(),
   status: z.enum(["PENDING", "APPROVED", "REJECTED", "RECEIVED", "REFUNDED"]).optional(),
+  orderId: z.coerce.number().int().positive().optional(),
+  userId: z.coerce.number().int().positive().optional(),
 });
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;

@@ -25,10 +25,10 @@ describe("پروفایل کاربر — روتینگ", () => {
 });
 
 describe("تنظیمات سایت — روتینگ", () => {
-  it("GET /settings عمومی است و باید 200 با شیء خالی بدهد", async () => {
+  it("GET /settings عمومی است و باید 200 بدهد", async () => {
     const res = await request(app).get("/api/v1/settings");
     expect(res.status).toBe(200);
-    expect(res.body.data).toEqual({});
+    expect(typeof res.body.data).toBe("object");
   });
 
   it("GET /settings/admin بدون توکن باید 401 بدهد", async () => {

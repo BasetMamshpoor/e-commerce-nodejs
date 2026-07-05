@@ -10,19 +10,17 @@ import { recomputeProductAggregates } from "../services/catalog/product.service"
 // ----------------------------------------------------------------------------
 
 export async function runRefreshDiscountAggregatesJob(): Promise<void> {
-  const variants = await prisma.productVariant.findMany({
+  const products = await prisma.product.findMany({
     where: {
-      isActive: true,
-      OR: [{ discountStartAt: { not: null } }, { discountEndAt: { not: null } }],
+      OR: [{ discountType: { not: null } }, { discountValue: { not: null } }],
     },
-    select: { productId: true },
+    select: { id: true },
   });
 
-  const productIds = Array.from(new Set(variants.map((v) => v.productId)));
-  await Promise.all(productIds.map((id) => recomputeProductAggregates(id)));
+  await Promise.all(products.map((p) => recomputeProductAggregates(p.id)));
 
-  if (productIds.length > 0) {
+  if (products.length > 0) {
     // eslint-disable-next-line no-console
-    console.log(`[jobs] فیلدهای محاسبه‌شده‌ی ${productIds.length} محصول با تخفیف زمان‌دار بازمحاسبه شد`);
+    console.log(`[jobs] فیلدهای محاسبه‌شده‌ی ${products.length} محصول با تخفیف بازمحاسبه شد`);
   }
 }

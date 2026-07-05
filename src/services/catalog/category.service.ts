@@ -1,31 +1,29 @@
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import { slugify, ensureUniqueSlug } from "../../utils/slug";
-import { serializeCategory } from "../../utils/serialize";
 import { CreateCategoryInput, UpdateCategoryInput } from "../../validations/category.validation";
-import { Category, Media } from "../../generated/prisma";
+import { Prisma } from "../../generated/prisma";
 
-// ----------------------------------------------------------------------------
-// دسته‌بندی چندلایه (درختی) — آیتم ۳
-// ----------------------------------------------------------------------------
-
-type CategoryWithImage = Category & { image: Media | null };
-
-export interface CategoryTreeNode extends CategoryWithImage {
+export interface CategoryTreeNode {
+  id: number;
+  name: string;
+  slug: string;
   imageUrl: string | null;
+  parentId: number | null;
   children: CategoryTreeNode[];
+  [key: string]: unknown;
 }
 
-async function isSlugTaken(slug: string, excludeId?: string): Promise<boolean> {
+async function isSlugTaken(slug: string, excludeId?: number): Promise<boolean> {
   const existing = await prisma.category.findUnique({ where: { slug } });
   return Boolean(existing && existing.id !== excludeId);
 }
 
-async function assertParentValid(parentId: string, categoryId?: string): Promise<void> {
+async function assertParentValid(parentId: number, categoryId?: number): Promise<void> {
   const parent = await prisma.category.findUnique({ where: { id: parentId } });
   if (!parent) throw ApiError.badRequest("دسته‌بندی والد پیدا نشد");
 
-  if (!categoryId) return; // در حالت ایجاد، خودِ دسته هنوز وجود ندارد، چرخش ممکن نیست
+  if (!categoryId) return;
 
   if (parentId === categoryId) {
     throw ApiError.badRequest("یک دسته‌بندی نمی‌تواند والد خودش باشد");
@@ -50,12 +48,12 @@ export async function createCategory(input: CreateCategoryInput) {
     throw ApiError.conflict("این slug قبلاً استفاده شده است");
   }
 
-  const category = (await prisma.category.create({
+  return prisma.category.create({
     data: {
       name: input.name,
       slug,
       description: input.description,
-      imageId: input.imageId,
+      imageUrl: input.imageUrl,
       parentId: input.parentId,
       order: input.order ?? 0,
       isActive: input.isActive ?? true,
@@ -63,13 +61,10 @@ export async function createCategory(input: CreateCategoryInput) {
       metaDescription: input.metaDescription,
       canonicalUrl: input.canonicalUrl,
     },
-    include: { image: true },
-  })) as unknown as CategoryWithImage;
-
-  return serializeCategory(category);
+  });
 }
 
-export async function updateCategory(id: string, input: UpdateCategoryInput) {
+export async function updateCategory(id: number, input: UpdateCategoryInput) {
   const category = await prisma.category.findUnique({ where: { id } });
   if (!category) throw ApiError.notFound("دسته‌بندی پیدا نشد");
 
@@ -85,96 +80,66 @@ export async function updateCategory(id: string, input: UpdateCategoryInput) {
     }
   }
 
-  const updated = (await prisma.category.update({
+  return prisma.category.update({
     where: { id },
     data: { ...input, slug },
-    include: { image: true },
-  })) as unknown as CategoryWithImage;
-
-  return serializeCategory(updated);
+  });
 }
 
-export async function deleteCategory(id: string): Promise<void> {
+export async function deleteCategory(id: number): Promise<void> {
   const category = await prisma.category.findUnique({ where: { id } });
   if (!category) throw ApiError.notFound("دسته‌بندی پیدا نشد");
 
   const childCount = await prisma.category.count({ where: { parentId: id } });
   if (childCount > 0) {
-    throw ApiError.conflict(
-      "این دسته‌بندی زیرمجموعه دارد؛ ابتدا زیرمجموعه‌ها را حذف یا منتقل کنید"
-    );
+    throw ApiError.conflict("این دسته‌بندی زیرمجموعه دارد؛ ابتدا زیرمجموعه‌ها را حذف یا منتقل کنید");
   }
 
-  // پیوندهای ProductCategory / CategoryAttribute / DiscountCodeCategory به‌صورت
-  // خودکار (onDelete: Cascade در schema) حذف می‌شوند؛ خودِ محصولات دست‌نخورده باقی می‌مانند.
   await prisma.category.delete({ where: { id } });
 }
 
-export async function getCategoryById(id: string) {
-  const category = (await prisma.category.findUnique({
-    where: { id },
-    include: { image: true },
-  })) as unknown as CategoryWithImage | null;
+export async function getCategoryById(id: number) {
+  const category = await prisma.category.findUnique({ where: { id } });
   if (!category) throw ApiError.notFound("دسته‌بندی پیدا نشد");
-  return serializeCategory(category);
+  return category;
 }
 
 export async function getCategoryBySlug(slug: string) {
-  const category = (await prisma.category.findUnique({
-    where: { slug },
-    include: { image: true },
-  })) as unknown as CategoryWithImage | null;
+  const category = await prisma.category.findUnique({ where: { slug } });
   if (!category) throw ApiError.notFound("دسته‌بندی پیدا نشد");
-  return serializeCategory(category);
+  return category;
 }
 
 export async function listCategoriesFlat(includeInactive: boolean) {
-  const categories = (await prisma.category.findMany({
+  return prisma.category.findMany({
     where: includeInactive ? {} : { isActive: true },
     orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-    include: { image: true },
-  })) as unknown as CategoryWithImage[];
-
-  return categories.map(serializeCategory);
+  });
 }
 
 export async function getCategoryTree(includeInactive: boolean): Promise<CategoryTreeNode[]> {
-  const all = (await prisma.category.findMany({
+  const all = await prisma.category.findMany({
     where: includeInactive ? {} : { isActive: true },
     orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-    include: { image: true },
-  })) as unknown as CategoryWithImage[];
+  });
 
-  const flatWithUrl = all.map(serializeCategory) as (ReturnType<typeof serializeCategory> & {
-    id: string;
-    parentId: string | null;
-  })[];
-
-  return buildTree(flatWithUrl, null) as unknown as CategoryTreeNode[];
+  return buildTree(all, null) as unknown as CategoryTreeNode[];
 }
 
-function buildTree<T extends { id: string; parentId: string | null }>(
+function buildTree<T extends { id: number; parentId: number | null }>(
   all: T[],
-  parentId: string | null
-): (T & { children: T[] })[] {
+  parentId: number | null
+): (T & { children: unknown[] })[] {
   return all
     .filter((c) => c.parentId === parentId)
-    .map((c) => ({ ...c, children: buildTree(all, c.id) })) as (T & { children: T[] })[];
+    .map((c) => ({ ...c, children: buildTree(all, c.id) })) as (T & { children: unknown[] })[];
 }
 
-/**
- * شناسه‌ی خودِ دسته به‌همراه تمام زیرمجموعه‌ها (در همه‌ی سطوح) را برمی‌گرداند.
- * در فیلتر محصولات بر اساس دسته استفاده می‌شود تا با انتخاب یک دسته‌ی والد،
- * محصولات زیرمجموعه‌ها هم نمایش داده شوند.
- */
-export async function getDescendantCategoryIds(
-  categoryId: string,
-  includeSelf = true
-): Promise<string[]> {
+export async function getDescendantCategoryIds(categoryId: number, includeSelf = true): Promise<number[]> {
   const all = await prisma.category.findMany({ select: { id: true, parentId: true } });
 
-  const result: string[] = includeSelf ? [categoryId] : [];
-  let frontier = [categoryId];
+  const result: number[] = includeSelf ? [categoryId] : [];
+  let frontier: number[] = [categoryId];
 
   while (frontier.length > 0) {
     const children = all.filter((c) => c.parentId && frontier.includes(c.parentId)).map((c) => c.id);
@@ -185,11 +150,7 @@ export async function getDescendantCategoryIds(
   return result;
 }
 
-// ----------------------------------------------------------------------------
-// پیوند ویژگی‌ها به دسته‌بندی (برای ساخت فیلترهای مرتبط با هر دسته)
-// ----------------------------------------------------------------------------
-
-export async function attachAttributeToCategory(categoryId: string, attributeId: string) {
+export async function attachAttributeToCategory(categoryId: number, attributeId: number) {
   const exists = await prisma.category.findUnique({ where: { id: categoryId } });
   if (!exists) throw ApiError.notFound("دسته‌بندی پیدا نشد");
 
@@ -203,11 +164,11 @@ export async function attachAttributeToCategory(categoryId: string, attributeId:
   });
 }
 
-export async function detachAttributeFromCategory(categoryId: string, attributeId: string) {
+export async function detachAttributeFromCategory(categoryId: number, attributeId: number) {
   await prisma.categoryAttribute.deleteMany({ where: { categoryId, attributeId } });
 }
 
-export async function listCategoryAttributes(categoryId: string) {
+export async function listCategoryAttributes(categoryId: number) {
   return prisma.categoryAttribute.findMany({
     where: { categoryId },
     include: { attribute: { include: { values: true } } },

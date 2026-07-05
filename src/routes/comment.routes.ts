@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as commentController from "../controllers/comment.controller";
 import { validate } from "../middlewares/validate";
-import { authenticate, authorize } from "../middlewares/auth.middleware";
+import { authenticate, authorize, optionalAuthenticate } from "../middlewares/auth.middleware";
 import {
   createCommentSchema,
   updateCommentSchema,
@@ -16,6 +16,7 @@ const manageOnly = [authenticate, authorize("ADMIN", "EDITOR")] as const;
 // عمومی — لیست دیدگاه‌های تاییدشده‌ی یک محصول (SSR-friendly)
 router.get(
   "/product/:productId",
+  optionalAuthenticate,
   validate(listCommentsQuerySchema, "query"),
   commentController.listForProduct
 );
@@ -29,6 +30,7 @@ router.post(
 // عمومی — لیست دیدگاه‌های تاییدشده‌ی یک پست وبلاگ (همان مدل Comment، پلی‌مورفیک)
 router.get(
   "/blog/:postId",
+  optionalAuthenticate,
   validate(listCommentsQuerySchema, "query"),
   commentController.listForBlogPost
 );

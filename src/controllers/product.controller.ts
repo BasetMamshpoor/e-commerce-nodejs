@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { ApiResponse } from "../utils/ApiResponse";
-import { paramStr } from "../utils/params";
+import { ApiError } from "../utils/ApiError";
+import { paramInt } from "../utils/params";
 import * as productService from "../services/catalog/product.service";
 import * as variantService from "../services/catalog/product-variant.service";
-import * as imageService from "../services/catalog/product-image.service";
 import * as queryService from "../services/catalog/product-query.service";
 
 export async function create(req: Request, res: Response) {
@@ -12,22 +12,58 @@ export async function create(req: Request, res: Response) {
 }
 
 export async function update(req: Request, res: Response) {
-  const product = await productService.updateProduct(paramStr(req.params.id), req.body);
+  const id = paramInt(req.params.id);
+
+  // پردازش حذف تصاویر
+  const deletedImages: number[] = Array.isArray(req.body.deletedImages)
+    ? req.body.deletedImages.map((x: string | number) => Number(x)).filter((n: number) => n > 0)
+    : [];
+  if (deletedImages.length > 0) {
+    await productService.deleteProductImages(id, deletedImages);
+  }
+
+  // پردازش تصاویر جدید آپلودشده
+  const uploadedImages: Array<{ mediaId: number; url: string }> =
+    (req as unknown as Record<string, unknown>).uploadedImages as Array<{ mediaId: number; url: string }> | undefined ?? [];
+
+  // حذف فیلدهای کمکی از body قبل از ارسال به سرویس
+  const { deletedImages: _, ...cleanBody } = req.body;
+
+  const product = await productService.updateProduct(id, cleanBody);
+
+  // افزودن تصاویر جدید بعد از به‌روزرسانی محصول
+  if (uploadedImages.length > 0) {
+    const updatedProduct = await productService.addProductImages(id, uploadedImages.map((img) => ({
+      mediaId: img.mediaId,
+      order: 0,
+      isMain: false,
+    })));
+    return ApiResponse.ok(res, updatedProduct, "محصول به‌روزرسانی شد");
+  }
+
   return ApiResponse.ok(res, product, "محصول به‌روزرسانی شد");
 }
 
 export async function remove(req: Request, res: Response) {
-  await productService.deleteProduct(paramStr(req.params.id));
+  await productService.deleteProduct(paramInt(req.params.id));
   return ApiResponse.ok(res, null, "محصول حذف شد");
 }
 
 export async function getBySlugPublic(req: Request, res: Response) {
-  const product = await productService.getProductBySlugPublic(paramStr(req.params.slug));
+  const product = await productService.getProductBySlugPublic(
+    typeof req.params.slug === "string" ? req.params.slug : "",
+    req.user?.id
+  );
+  return ApiResponse.ok(res, product);
+}
+
+export async function getByIdPublic(req: Request, res: Response) {
+  const product = await productService.getProductByIdPublic(paramInt(req.params.id), req.user?.id);
   return ApiResponse.ok(res, product);
 }
 
 export async function getByIdAdmin(req: Request, res: Response) {
-  const product = await productService.getProductByIdAdmin(paramStr(req.params.id));
+  const product = await productService.getProductByIdAdmin(paramInt(req.params.id));
   return ApiResponse.ok(res, product);
 }
 
@@ -48,56 +84,25 @@ export async function filters(req: Request, res: Response) {
   return ApiResponse.ok(res, result);
 }
 
-export async function trackView(req: Request, res: Response) {
-  await productService.trackProductView(paramStr(req.params.id), {
-    userId: req.user?.id,
-    ip: req.ip,
-  });
-  return ApiResponse.ok(res, null);
-}
-
 // --- تنوع‌ها ---
 
 export async function addVariant(req: Request, res: Response) {
-  const variant = await variantService.addVariant(paramStr(req.params.id), req.body);
+  const variant = await variantService.addVariant(paramInt(req.params.id), req.body);
   return ApiResponse.created(res, variant, "تنوع کالا اضافه شد");
 }
 
 export async function updateVariant(req: Request, res: Response) {
   const variant = await variantService.updateVariant(
-    paramStr(req.params.id),
-    paramStr(req.params.variantId),
+    paramInt(req.params.id),
+    paramInt(req.params.variantId),
     req.body
   );
   return ApiResponse.ok(res, variant, "تنوع کالا به‌روزرسانی شد");
 }
 
 export async function removeVariant(req: Request, res: Response) {
-  await variantService.deleteVariant(paramStr(req.params.id), paramStr(req.params.variantId));
+  await variantService.deleteVariant(paramInt(req.params.id), paramInt(req.params.variantId));
   return ApiResponse.ok(res, null, "تنوع کالا حذف شد");
 }
 
-export async function addVariantImage(req: Request, res: Response) {
-  const image = await variantService.addVariantImage(paramStr(req.params.variantId), req.body);
-  return ApiResponse.created(res, image, "تصویر تنوع اضافه شد");
-}
 
-export async function removeVariantImage(req: Request, res: Response) {
-  await variantService.removeVariantImage(
-    paramStr(req.params.variantId),
-    paramStr(req.params.imageId)
-  );
-  return ApiResponse.ok(res, null, "تصویر تنوع حذف شد");
-}
-
-// --- تصاویر محصول ---
-
-export async function addImage(req: Request, res: Response) {
-  const image = await imageService.addProductImage(paramStr(req.params.id), req.body);
-  return ApiResponse.created(res, image, "تصویر محصول اضافه شد");
-}
-
-export async function removeImage(req: Request, res: Response) {
-  await imageService.removeProductImage(paramStr(req.params.id), paramStr(req.params.imageId));
-  return ApiResponse.ok(res, null, "تصویر محصول حذف شد");
-}

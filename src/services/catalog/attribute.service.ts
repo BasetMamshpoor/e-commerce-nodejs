@@ -7,14 +7,13 @@ import {
   CreateAttributeValueInput,
   UpdateAttributeValueInput,
 } from "../../validations/attribute.validation";
-import { Attribute, AttributeValue } from "../../generated/prisma";
 
-async function isSlugTaken(slug: string, excludeId?: string): Promise<boolean> {
+async function isSlugTaken(slug: string, excludeId?: number): Promise<boolean> {
   const existing = await prisma.attribute.findUnique({ where: { slug } });
   return Boolean(existing && existing.id !== excludeId);
 }
 
-export async function createAttribute(input: CreateAttributeInput): Promise<Attribute> {
+export async function createAttribute(input: CreateAttributeInput) {
   const slug = input.slug
     ? slugify(input.slug)
     : await ensureUniqueSlug(input.name, (c) => isSlugTaken(c));
@@ -30,14 +29,12 @@ export async function createAttribute(input: CreateAttributeInput): Promise<Attr
       inputType: input.inputType,
       isFilterable: input.isFilterable,
       isVariant: input.isVariant,
+      isDisplay: input.isDisplay ?? false,
     },
   });
 }
 
-export async function updateAttribute(
-  id: string,
-  input: UpdateAttributeInput
-): Promise<Attribute> {
+export async function updateAttribute(id: number, input: UpdateAttributeInput) {
   const attribute = await prisma.attribute.findUnique({ where: { id } });
   if (!attribute) throw ApiError.notFound("ویژگی پیدا نشد");
 
@@ -52,7 +49,7 @@ export async function updateAttribute(
   return prisma.attribute.update({ where: { id }, data: { ...input, slug } });
 }
 
-export async function deleteAttribute(id: string): Promise<void> {
+export async function deleteAttribute(id: number): Promise<void> {
   const attribute = await prisma.attribute.findUnique({ where: { id } });
   if (!attribute) throw ApiError.notFound("ویژگی پیدا نشد");
 
@@ -60,40 +57,29 @@ export async function deleteAttribute(id: string): Promise<void> {
     where: { attributeValue: { attributeId: id } },
   });
   if (usedInVariants > 0) {
-    throw ApiError.conflict(
-      "این ویژگی در حال استفاده توسط تنوع‌های محصول است و قابل حذف نیست"
-    );
+    throw ApiError.conflict("این ویژگی در حال استفاده توسط تنوع‌های محصول است و قابل حذف نیست");
   }
 
   await prisma.attribute.delete({ where: { id } });
 }
 
-export async function listAttributes(): Promise<(Attribute & { values: AttributeValue[] })[]> {
+export async function listAttributes() {
   return prisma.attribute.findMany({
     include: { values: { orderBy: { order: "asc" } } },
     orderBy: { name: "asc" },
-  }) as Promise<(Attribute & { values: AttributeValue[] })[]>;
+  });
 }
 
-export async function getAttributeById(
-  id: string
-): Promise<Attribute & { values: AttributeValue[] }> {
-  const attribute = (await prisma.attribute.findUnique({
+export async function getAttributeById(id: number) {
+  const attribute = await prisma.attribute.findUnique({
     where: { id },
     include: { values: { orderBy: { order: "asc" } } },
-  })) as (Attribute & { values: AttributeValue[] }) | null;
+  });
   if (!attribute) throw ApiError.notFound("ویژگی پیدا نشد");
   return attribute;
 }
 
-// ----------------------------------------------------------------------------
-// مقادیر ویژگی (مثلاً برای ویژگی «رنگ»: قرمز، آبی، سبز)
-// ----------------------------------------------------------------------------
-
-export async function addAttributeValue(
-  attributeId: string,
-  input: CreateAttributeValueInput
-): Promise<AttributeValue> {
+export async function addAttributeValue(attributeId: number, input: CreateAttributeValueInput) {
   await getAttributeById(attributeId);
 
   const duplicate = await prisma.attributeValue.findUnique({
@@ -113,10 +99,7 @@ export async function addAttributeValue(
   });
 }
 
-export async function updateAttributeValue(
-  valueId: string,
-  input: UpdateAttributeValueInput
-): Promise<AttributeValue> {
+export async function updateAttributeValue(valueId: number, input: UpdateAttributeValueInput) {
   const value = await prisma.attributeValue.findUnique({ where: { id: valueId } });
   if (!value) throw ApiError.notFound("مقدار ویژگی پیدا نشد");
 
@@ -130,7 +113,7 @@ export async function updateAttributeValue(
   return prisma.attributeValue.update({ where: { id: valueId }, data: input });
 }
 
-export async function deleteAttributeValue(valueId: string): Promise<void> {
+export async function deleteAttributeValue(valueId: number): Promise<void> {
   const value = await prisma.attributeValue.findUnique({ where: { id: valueId } });
   if (!value) throw ApiError.notFound("مقدار ویژگی پیدا نشد");
 
@@ -138,9 +121,7 @@ export async function deleteAttributeValue(valueId: string): Promise<void> {
     where: { attributeValueId: valueId },
   });
   if (usedInVariants > 0) {
-    throw ApiError.conflict(
-      "این مقدار در حال استفاده توسط تنوع‌های محصول است و قابل حذف نیست"
-    );
+    throw ApiError.conflict("این مقدار در حال استفاده توسط تنوع‌های محصول است و قابل حذف نیست");
   }
 
   await prisma.attributeValue.delete({ where: { id: valueId } });

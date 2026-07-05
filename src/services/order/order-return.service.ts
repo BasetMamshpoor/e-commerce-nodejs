@@ -1,24 +1,19 @@
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
+import { parsePagination, buildPaginationMeta } from "../../utils/pagination";
 import { notifyUser } from "../notification/notification.service";
 import { ReturnOrderInput, AdminUpdateReturnInput } from "../../validations/order.validation";
-import { OrderReturn, Order, OrderItem } from "../../generated/prisma";
-
-// ----------------------------------------------------------------------------
-// مرجوعی سفارش — آیتم ۱۰. برخلاف لغو (که خودکار است)، مرجوعی نیاز به بررسی
-// ادمین دارد (وضعیت اولیه PENDING) چون معمولاً باید کالای فیزیکی برگشتی
-// بررسی شود.
-// ----------------------------------------------------------------------------
+import { OrderReturn, Prisma } from "../../generated/prisma";
 
 export async function requestReturn(
-  userId: string,
-  orderId: string,
+  userId: number,
+  orderId: number,
   input: ReturnOrderInput
 ): Promise<OrderReturn> {
-  const order = (await prisma.order.findUnique({
+  const order = await prisma.order.findUnique({
     where: { id: orderId },
     include: { items: true },
-  })) as (Order & { items: OrderItem[] }) | null;
+  });
   if (!order || order.userId !== userId) throw ApiError.notFound("سفارش پیدا نشد");
 
   if (order.status !== "DELIVERED") {
@@ -56,23 +51,67 @@ export async function listReturnsAdmin(query: {
   page?: number;
   limit?: number;
   status?: string;
+  orderId?: number;
+  userId?: number;
 }) {
-  const where = query.status ? { status: query.status as never } : {};
-  return prisma.orderReturn.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    include: { images: true, order: { select: { orderNumber: true, userId: true } } },
+  const pagination = parsePagination({ page: query.page, limit: query.limit });
+  const where: Prisma.OrderReturnWhereInput = {};
+  if (query.status) where.status = query.status as never;
+  if (query.orderId) where.orderId = query.orderId;
+  if (query.userId) where.order = { userId: query.userId };
+
+  const [items, total] = await Promise.all([
+    prisma.orderReturn.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: pagination.skip,
+      take: pagination.take,
+      include: {
+        images: true,
+        order: {
+          select: {
+            orderNumber: true,
+            userId: true,
+            totalAmount: true,
+            user: { select: { id: true, fullName: true, phone: true, email: true } },
+          },
+        },
+      },
+    }),
+    prisma.orderReturn.count({ where }),
+  ]);
+
+  return { items, meta: buildPaginationMeta(total, pagination) };
+}
+
+export async function getReturnDetailAdmin(returnId: number) {
+  const orderReturn = await prisma.orderReturn.findUnique({
+    where: { id: returnId },
+    include: {
+      images: true,
+      order: {
+        include: {
+          items: true,
+          user: { select: { id: true, fullName: true, phone: true, email: true } },
+          address: true,
+          shippingCompany: true,
+        },
+      },
+      orderItem: true,
+    },
   });
+  if (!orderReturn) throw ApiError.notFound("درخواست مرجوعی پیدا نشد");
+  return orderReturn;
 }
 
 export async function updateReturnAdmin(
-  returnId: string,
+  returnId: number,
   input: AdminUpdateReturnInput
 ): Promise<OrderReturn> {
-  const orderReturn = (await prisma.orderReturn.findUnique({
+  const orderReturn = await prisma.orderReturn.findUnique({
     where: { id: returnId },
     include: { order: { include: { items: true } }, orderItem: true },
-  })) as (OrderReturn & { order: Order & { items: OrderItem[] }; orderItem: OrderItem | null }) | null;
+  });
   if (!orderReturn) throw ApiError.notFound("درخواست مرجوعی پیدا نشد");
 
   const updated = await prisma.$transaction(async (tx) => {

@@ -8,7 +8,7 @@ export async function createDepartment(input: CreateDepartmentInput): Promise<Ti
 }
 
 export async function updateDepartment(
-  id: string,
+  id: number,
   input: UpdateDepartmentInput
 ): Promise<TicketDepartment> {
   const department = await prisma.ticketDepartment.findUnique({ where: { id } });
@@ -16,7 +16,7 @@ export async function updateDepartment(
   return prisma.ticketDepartment.update({ where: { id }, data: input });
 }
 
-export async function deleteDepartment(id: string): Promise<void> {
+export async function deleteDepartment(id: number): Promise<void> {
   const department = await prisma.ticketDepartment.findUnique({ where: { id } });
   if (!department) throw ApiError.notFound("بخش پشتیبانی پیدا نشد");
 

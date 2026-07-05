@@ -7,7 +7,7 @@ import {
 } from "../../validations/blog.validation";
 import { BlogCategory } from "../../generated/prisma";
 
-async function isSlugTaken(slug: string, excludeId?: string): Promise<boolean> {
+async function isSlugTaken(slug: string, excludeId?: number): Promise<boolean> {
   const existing = await prisma.blogCategory.findUnique({ where: { slug } });
   return Boolean(existing && existing.id !== excludeId);
 }
@@ -25,7 +25,7 @@ export async function createBlogCategory(input: CreateBlogCategoryInput): Promis
 }
 
 export async function updateBlogCategory(
-  id: string,
+  id: number,
   input: UpdateBlogCategoryInput
 ): Promise<BlogCategory> {
   const category = await prisma.blogCategory.findUnique({ where: { id } });
@@ -40,7 +40,7 @@ export async function updateBlogCategory(
   return prisma.blogCategory.update({ where: { id }, data: { ...input, slug } });
 }
 
-export async function deleteBlogCategory(id: string): Promise<void> {
+export async function deleteBlogCategory(id: number): Promise<void> {
   const category = await prisma.blogCategory.findUnique({ where: { id } });
   if (!category) throw ApiError.notFound("دسته‌بندی وبلاگ پیدا نشد");
 

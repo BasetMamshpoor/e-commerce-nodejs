@@ -7,18 +7,13 @@ import { env } from "../../config/env";
 import { notifyUser } from "../notification/notification.service";
 import { Wallet } from "../../generated/prisma";
 
-// ----------------------------------------------------------------------------
-// کیف پول — آیتم ۱۲. شارژ کیف پول از طریق درگاه پرداخت انجام می‌شود (همان
-// اینترفیس IPaymentGateway که برای پرداخت سفارش هم استفاده می‌شود).
-// ----------------------------------------------------------------------------
-
-export async function getOrCreateWallet(userId: string): Promise<Wallet> {
+export async function getOrCreateWallet(userId: number): Promise<Wallet> {
   const existing = await prisma.wallet.findUnique({ where: { userId } });
   if (existing) return existing;
   return prisma.wallet.create({ data: { userId, balance: 0 } });
 }
 
-export async function getWalletOverview(userId: string, page?: number, limit?: number) {
+export async function getWalletOverview(userId: number, page?: number, limit?: number) {
   const wallet = await getOrCreateWallet(userId);
   const pagination = parsePagination({ page, limit });
 
@@ -35,11 +30,7 @@ export async function getWalletOverview(userId: string, page?: number, limit?: n
   return { balance: wallet.balance, transactions, meta: buildPaginationMeta(total, pagination) };
 }
 
-export async function initiateWalletCharge(
-  userId: string,
-  amount: number,
-  gatewaySlug: string
-) {
+export async function initiateWalletCharge(userId: number, amount: number, gatewaySlug: string) {
   const gatewayRecord = await getPaymentGatewayBySlug(gatewaySlug);
   const gateway = getGateway(gatewayRecord.slug);
 
@@ -48,7 +39,7 @@ export async function initiateWalletCharge(
   });
 
   const result = await gateway.initiatePayment({
-    orderId: transaction.id, // برای شارژ کیف‌پول، شناسه‌ی تراکنش به‌جای سفارش استفاده می‌شود
+    orderId: String(transaction.id),
     amount,
     description: "شارژ کیف پول",
     callbackUrl: `${env.APP_BASE_URL}/api/v1/wallet/charge/${transaction.id}/verify`,
@@ -63,8 +54,8 @@ export async function initiateWalletCharge(
 }
 
 export async function verifyWalletCharge(
-  userId: string,
-  transactionId: string,
+  userId: number,
+  transactionId: number,
   providerParams: Record<string, string>
 ) {
   const transaction = await prisma.transaction.findUnique({ where: { id: transactionId } });
@@ -83,7 +74,7 @@ export async function verifyWalletCharge(
 
   const gateway = getGateway(gatewayRecord.slug);
   const result = await gateway.verifyPayment({
-    orderId: transaction.id,
+    orderId: String(transaction.id),
     amount: transaction.amount,
     providerParams,
   });

@@ -23,11 +23,15 @@ const TICKET_DETAIL_INCLUDE = {
   department: true,
   messages: {
     orderBy: { createdAt: "asc" as const },
-    include: { attachments: { include: { media: true } } },
+    include: {
+      attachments: {
+        include: { media: true },
+      },
+    },
   },
 };
 
-export async function createTicket(userId: string, input: CreateTicketInput): Promise<Ticket> {
+export async function createTicket(userId: number, input: CreateTicketInput): Promise<Ticket> {
   if (input.departmentId) {
     const department = await prisma.ticketDepartment.findUnique({
       where: { id: input.departmentId },
@@ -49,7 +53,7 @@ export async function createTicket(userId: string, input: CreateTicketInput): Pr
           senderType: "USER",
           message: input.message,
           attachments: {
-            create: input.attachmentMediaIds.map((mediaId) => ({ mediaId })),
+            create: (input.attachmentMediaIds ?? []).map((mediaId) => ({ mediaId })),
           },
         },
       },
@@ -58,8 +62,8 @@ export async function createTicket(userId: string, input: CreateTicketInput): Pr
 }
 
 export async function addMessage(
-  ticketId: string,
-  senderId: string,
+  ticketId: number,
+  senderId: number,
   senderRole: Role,
   input: AddTicketMessageInput
 ): Promise<Ticket> {
@@ -77,7 +81,7 @@ export async function addMessage(
       senderId,
       senderType: isStaff ? "ADMIN" : "USER",
       message: input.message,
-      attachments: { create: input.attachmentMediaIds.map((mediaId) => ({ mediaId })) },
+      attachments: { create: (input.attachmentMediaIds ?? []).map((mediaId) => ({ mediaId })) },
     },
   });
 
@@ -100,7 +104,7 @@ export async function addMessage(
   return updated;
 }
 
-export async function getTicketDetail(ticketId: string, userId?: string) {
+export async function getTicketDetail(ticketId: number, userId?: number) {
   const ticket = await prisma.ticket.findUnique({
     where: { id: ticketId },
     include: TICKET_DETAIL_INCLUDE,
@@ -110,7 +114,7 @@ export async function getTicketDetail(ticketId: string, userId?: string) {
   return ticket;
 }
 
-export async function listMyTickets(userId: string, query: ListTicketsQuery) {
+export async function listMyTickets(userId: number, query: ListTicketsQuery) {
   const pagination = parsePagination({ page: query.page, limit: query.limit });
   const where = { userId, ...(query.status ? { status: query.status } : {}) };
 
@@ -134,7 +138,8 @@ export async function listTicketsAdmin(query: AdminListTicketsQuery) {
     ...(query.status ? { status: query.status } : {}),
     ...(query.departmentId ? { departmentId: query.departmentId } : {}),
     ...(query.priority ? { priority: query.priority } : {}),
-    ...(query.search ? { subject: { contains: query.search, mode: "insensitive" as const } } : {}),
+    ...(query.userId ? { userId: query.userId } : {}),
+    ...(query.search ? { OR: [{ subject: { contains: query.search, mode: "insensitive" as const } }, { id: isNaN(Number(query.search)) ? undefined : Number(query.search) }] } : {}),
   };
 
   const [items, total] = await Promise.all([
@@ -155,7 +160,7 @@ export async function listTicketsAdmin(query: AdminListTicketsQuery) {
 }
 
 export async function updateTicketMeta(
-  ticketId: string,
+  ticketId: number,
   input: UpdateTicketMetaInput
 ): Promise<Ticket> {
   const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });

@@ -6,6 +6,7 @@ export const createAttributeSchema = z.object({
   inputType: z.enum(["TEXT", "COLOR", "SELECT"]).optional().default("SELECT"),
   isFilterable: z.coerce.boolean().optional().default(true),
   isVariant: z.coerce.boolean().optional().default(true),
+  isDisplay: z.coerce.boolean().optional().default(false),
 });
 export const updateAttributeSchema = createAttributeSchema.partial();
 

@@ -3,7 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse";
 import { ApiError } from "../utils/ApiError";
 import * as profileService from "../services/user/profile.service";
 
-function userId(req: Request): string {
+function userId(req: Request): number {
   if (!req.user) throw ApiError.unauthorized();
   return req.user.id;
 }
@@ -15,11 +15,6 @@ export async function getMe(req: Request, res: Response) {
 export async function updateMe(req: Request, res: Response) {
   const user = await profileService.updateMyProfile(userId(req), req.body);
   return ApiResponse.ok(res, user, "پروفایل به‌روزرسانی شد");
-}
-
-export async function setAvatar(req: Request, res: Response) {
-  const user = await profileService.setMyAvatar(userId(req), req.body.mediaId);
-  return ApiResponse.ok(res, user, "تصویر پروفایل به‌روزرسانی شد");
 }
 
 export async function changePassword(req: Request, res: Response) {

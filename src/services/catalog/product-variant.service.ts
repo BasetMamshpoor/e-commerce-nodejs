@@ -2,30 +2,26 @@ import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import { VariantInput } from "../../validations/product.validation";
 import { recomputeProductAggregates } from "./product.service";
-import { ProductVariant } from "../../generated/prisma";
+import { Prisma } from "../../generated/prisma";
 
-function comboKey(attributeValueIds: string[]): string {
+function comboKey(attributeValueIds: number[]): string {
   return [...attributeValueIds].sort().join("|");
 }
 
-async function assertSkuFree(sku: string, excludeVariantId?: string): Promise<void> {
+async function assertSkuFree(sku: string, excludeVariantId?: number): Promise<void> {
   const existing = await prisma.productVariant.findUnique({ where: { sku } });
   if (existing && existing.id !== excludeVariantId) {
     throw ApiError.conflict("این SKU قبلاً استفاده شده است");
   }
 }
 
-async function assertComboFree(
-  productId: string,
-  attributeValueIds: string[],
-  excludeVariantId?: string
-): Promise<void> {
+async function assertComboFree(productId: number, attributeValueIds: number[], excludeVariantId?: number): Promise<void> {
   if (attributeValueIds.length === 0) return;
 
-  const siblings = (await prisma.productVariant.findMany({
+  const siblings = await prisma.productVariant.findMany({
     where: { productId, ...(excludeVariantId ? { NOT: { id: excludeVariantId } } : {}) },
     include: { attributeValues: true },
-  })) as (ProductVariant & { attributeValues: { attributeValueId: string }[] })[];
+  });
 
   const targetKey = comboKey(attributeValueIds);
   const conflict = siblings.some(
@@ -36,15 +32,12 @@ async function assertComboFree(
   }
 }
 
-async function assertProductExists(productId: string): Promise<void> {
+async function assertProductExists(productId: number): Promise<void> {
   const product = await prisma.product.findUnique({ where: { id: productId } });
   if (!product) throw ApiError.notFound("محصول پیدا نشد");
 }
 
-export async function addVariant(
-  productId: string,
-  input: VariantInput
-): Promise<ProductVariant> {
+export async function addVariant(productId: number, input: VariantInput) {
   await assertProductExists(productId);
   await assertSkuFree(input.sku);
   await assertComboFree(productId, input.attributeValueIds);
@@ -60,12 +53,7 @@ export async function addVariant(
     data: {
       productId,
       sku: input.sku,
-      price: input.price,
-      compareAtPrice: input.compareAtPrice,
-      discountType: input.discountType,
-      discountValue: input.discountValue,
-      discountStartAt: input.discountStartAt,
-      discountEndAt: input.discountEndAt,
+      priceAdjustment: input.priceAdjustment,
       stock: input.stock,
       weight: input.weight,
       isDefault: input.isDefault,
@@ -80,11 +68,7 @@ export async function addVariant(
   return variant;
 }
 
-export async function updateVariant(
-  productId: string,
-  variantId: string,
-  input: Partial<VariantInput>
-): Promise<ProductVariant> {
+export async function updateVariant(productId: number, variantId: number, input: Partial<VariantInput>) {
   const variant = await prisma.productVariant.findUnique({ where: { id: variantId } });
   if (!variant || variant.productId !== productId) {
     throw ApiError.notFound("تنوع کالا پیدا نشد");
@@ -124,7 +108,7 @@ export async function updateVariant(
   return updated;
 }
 
-export async function deleteVariant(productId: string, variantId: string): Promise<void> {
+export async function deleteVariant(productId: number, variantId: number): Promise<void> {
   const variant = await prisma.productVariant.findUnique({ where: { id: variantId } });
   if (!variant || variant.productId !== productId) {
     throw ApiError.notFound("تنوع کالا پیدا نشد");
@@ -137,35 +121,9 @@ export async function deleteVariant(productId: string, variantId: string): Promi
 
   const orderedCount = await prisma.orderItem.count({ where: { variantId } });
   if (orderedCount > 0) {
-    throw ApiError.conflict(
-      "این تنوع در سفارش‌های قبلی استفاده شده و قابل حذف نیست؛ به‌جای حذف، آن را غیرفعال (isActive=false) کنید"
-    );
+    throw ApiError.conflict("این تنوع در سفارش‌های قبلی استفاده شده و قابل حذف نیست؛ به‌جای حذف، آن را غیرفعال (isActive=false) کنید");
   }
 
   await prisma.productVariant.delete({ where: { id: variantId } });
   await recomputeProductAggregates(productId);
-}
-
-// ----------------------------------------------------------------------------
-// تصاویر مخصوص هر تنوع
-// ----------------------------------------------------------------------------
-
-export async function addVariantImage(
-  variantId: string,
-  input: { mediaId: string; order?: number }
-) {
-  const variant = await prisma.productVariant.findUnique({ where: { id: variantId } });
-  if (!variant) throw ApiError.notFound("تنوع کالا پیدا نشد");
-
-  return prisma.productVariantImage.create({
-    data: { variantId, mediaId: input.mediaId, order: input.order ?? 0 },
-  });
-}
-
-export async function removeVariantImage(variantId: string, imageId: string): Promise<void> {
-  const image = await prisma.productVariantImage.findUnique({ where: { id: imageId } });
-  if (!image || image.variantId !== variantId) {
-    throw ApiError.notFound("تصویر پیدا نشد");
-  }
-  await prisma.productVariantImage.delete({ where: { id: imageId } });
 }

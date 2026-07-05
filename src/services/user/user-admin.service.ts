@@ -3,22 +3,16 @@ import { ApiError } from "../../utils/ApiError";
 import { parsePagination, buildPaginationMeta } from "../../utils/pagination";
 import { revokeSession, revokeAllSessions } from "../auth/session.service";
 import { notifyUser } from "../notification/notification.service";
-import { serializeUserAvatar } from "../../utils/serialize";
 import {
   AdminListUsersQuery,
   BlockUserInput,
   UpdateUserRoleInput,
 } from "../../validations/user-admin.validation";
-import { User, Media } from "../../generated/prisma";
+import { User } from "../../generated/prisma";
 
-// ----------------------------------------------------------------------------
-// مدیریت کاربران از پنل ادمین — آیتم ۲۵ (بلاک‌کردن کاربر، محدودیت/مدیریت
-// نشست‌ها). فیلدهای امن (بدون password) برگردانده می‌شوند.
-// ----------------------------------------------------------------------------
-
-function publicUser(user: User & { avatar?: Media | null }) {
+function publicUser(user: User) {
   const { password, ...rest } = user;
-  return serializeUserAvatar(rest);
+  return rest;
 }
 
 export async function listUsersAdmin(query: AdminListUsersQuery) {
@@ -43,7 +37,6 @@ export async function listUsersAdmin(query: AdminListUsersQuery) {
       orderBy: { createdAt: "desc" },
       skip: pagination.skip,
       take: pagination.take,
-      include: { avatar: true },
     }),
     prisma.user.count({ where }),
   ]);
@@ -51,14 +44,20 @@ export async function listUsersAdmin(query: AdminListUsersQuery) {
   return { items: items.map(publicUser), meta: buildPaginationMeta(total, pagination) };
 }
 
-export async function getUserDetailAdmin(userId: string) {
-  const user = await prisma.user.findUnique({ where: { id: userId }, include: { avatar: true } });
+export async function getUserDetailAdmin(userId: number) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw ApiError.notFound("کاربر پیدا نشد");
 
-  const [activeSessionCount, orderCount, wallet] = await Promise.all([
+  const [activeSessionCount, orderCount, wallet, orders] = await Promise.all([
     prisma.userSession.count({ where: { userId, isActive: true } }),
     prisma.order.count({ where: { userId } }),
     prisma.wallet.findUnique({ where: { userId } }),
+    prisma.order.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: { id: true, orderNumber: true, status: true, totalAmount: true, createdAt: true },
+    }),
   ]);
 
   return {
@@ -66,10 +65,11 @@ export async function getUserDetailAdmin(userId: string) {
     activeSessionCount,
     orderCount,
     walletBalance: wallet?.balance ?? 0,
+    recentOrders: orders,
   };
 }
 
-export async function blockUser(userId: string, input: BlockUserInput) {
+export async function blockUser(userId: number, input: BlockUserInput) {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw ApiError.notFound("کاربر پیدا نشد");
   if (user.role === "ADMIN") {
@@ -79,25 +79,20 @@ export async function blockUser(userId: string, input: BlockUserInput) {
   const updated = await prisma.user.update({
     where: { id: userId },
     data: { isBlocked: true, blockedReason: input.reason, blockedAt: new Date() },
-    include: { avatar: true },
   });
 
-  // بلاک‌شدن باید همان لحظه همه‌ی نشست‌های فعال کاربر را باطل کند —
-  // authenticate middleware با چک isBlocked این کار را تایید می‌کند، اما
-  // باطل‌کردن صریح نشست‌ها هم سریع‌تر و هم شفاف‌تر است.
   await revokeAllSessions(userId);
 
   return publicUser(updated);
 }
 
-export async function unblockUser(userId: string) {
+export async function unblockUser(userId: number) {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw ApiError.notFound("کاربر پیدا نشد");
 
   const updated = await prisma.user.update({
     where: { id: userId },
     data: { isBlocked: false, blockedReason: null, blockedAt: null },
-    include: { avatar: true },
   });
 
   notifyUser({
@@ -110,35 +105,54 @@ export async function unblockUser(userId: string) {
   return publicUser(updated);
 }
 
-export async function updateUserRole(userId: string, input: UpdateUserRoleInput) {
+export async function updateUserRole(userId: number, input: UpdateUserRoleInput) {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw ApiError.notFound("کاربر پیدا نشد");
 
   const updated = await prisma.user.update({
     where: { id: userId },
     data: { role: input.role },
-    include: { avatar: true },
   });
   return publicUser(updated);
 }
 
-// ----------------------------------------------------------------------------
-// مدیریت نشست‌های یک کاربر از پنل ادمین
-// ----------------------------------------------------------------------------
+export async function adjustUserWallet(userId: number, amount: number, description: string) {
+  const wallet = await prisma.wallet.upsert({
+    where: { userId },
+    create: { userId, balance: 0 },
+    update: {},
+  });
 
-export async function listUserSessions(userId: string) {
+  const updated = await prisma.wallet.update({
+    where: { id: wallet.id },
+    data: { balance: { increment: amount } },
+  });
+
+  await prisma.walletTransaction.create({
+    data: {
+      walletId: wallet.id,
+      type: "ADMIN_ADJUST",
+      amount: Math.abs(amount),
+      description: description || (amount >= 0 ? "افزایش موجودی توسط ادمین" : "کاهش موجودی توسط ادمین"),
+    },
+  });
+
+  return { balance: updated.balance };
+}
+
+export async function listUserSessions(userId: number) {
   return prisma.userSession.findMany({
     where: { userId },
     orderBy: { lastActivityAt: "desc" },
   });
 }
 
-export async function revokeUserSessionAdmin(userId: string, sessionId: string): Promise<void> {
+export async function revokeUserSessionAdmin(userId: number, sessionId: number): Promise<void> {
   const session = await prisma.userSession.findUnique({ where: { id: sessionId } });
   if (!session || session.userId !== userId) throw ApiError.notFound("نشست پیدا نشد");
-  await revokeSession(sessionId);
+  await revokeSession(String(sessionId));
 }
 
-export async function revokeAllUserSessionsAdmin(userId: string): Promise<void> {
+export async function revokeAllUserSessionsAdmin(userId: number): Promise<void> {
   await revokeAllSessions(userId);
 }

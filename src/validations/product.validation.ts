@@ -1,69 +1,78 @@
 import { z } from "zod";
 
-const isoDate = z.coerce.date();
-
 export const variantInputSchema = z.object({
   sku: z.string().trim().min(1).max(80),
-  price: z.coerce.number().int().positive(),
-  compareAtPrice: z.coerce.number().int().positive().optional(),
-  discountType: z.enum(["PERCENT", "FIXED"]).optional(),
-  discountValue: z.coerce.number().int().positive().optional(),
-  discountStartAt: isoDate.optional(),
-  discountEndAt: isoDate.optional(),
+  priceAdjustment: z.coerce.number().int().min(0).default(0),
   stock: z.coerce.number().int().min(0).default(0),
   weight: z.coerce.number().positive().optional(),
   isDefault: z.coerce.boolean().optional().default(false),
   isActive: z.coerce.boolean().optional().default(true),
-  // شناسه‌ی AttributeValue هایی که این تنوع را تعریف می‌کنند (مثلاً [قرمز, سایزL])
-  attributeValueIds: z.array(z.string()).default([]),
+  attributeValueIds: z.array(z.coerce.number()).default([]),
 });
 
 const imageInputSchema = z.object({
-  mediaId: z.string().min(1),
+  mediaId: z.coerce.number().int().positive(),
   order: z.coerce.number().int().optional().default(0),
   isMain: z.coerce.boolean().optional().default(false),
+});
+
+const displayAttributeSchema = z.object({
+  attributeId: z.coerce.number().int().positive(),
+  value: z.string().min(1),
 });
 
 export const createProductSchema = z.object({
   name: z.string().trim().min(2).max(250),
   slug: z.string().trim().min(2).max(260).optional(),
-  brandId: z.string().optional(),
+  brandId: z.coerce.number().int().positive().optional(),
   shortDescription: z.string().max(500).optional(),
-  description: z.string().optional(), // HTML از تکست ادیتور
+  description: z.string().optional(),
+  basePrice: z.coerce.number().int().min(0).default(0),
+  discountType: z.enum(["PERCENT", "FIXED"]).optional(),
+  discountValue: z.coerce.number().int().positive().optional(),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional().default("DRAFT"),
   isFeatured: z.coerce.boolean().optional().default(false),
   metaTitle: z.string().max(160).optional(),
   metaDescription: z.string().max(300).optional(),
   canonicalUrl: z.string().url().optional(),
-  categoryIds: z.array(z.string()).min(1, "حداقل یک دسته‌بندی الزامی است"),
+  categoryIds: z.array(z.coerce.number()).min(1, "حداقل یک دسته‌بندی الزامی است"),
   images: z.array(imageInputSchema).optional().default([]),
   variants: z.array(variantInputSchema).min(1, "حداقل یک تنوع کالا الزامی است"),
+  displayAttributes: z.array(displayAttributeSchema).optional().default([]),
 });
 
 export const updateProductSchema = z.object({
   name: z.string().trim().min(2).max(250).optional(),
   slug: z.string().trim().min(2).max(260).optional(),
-  brandId: z.string().nullable().optional(),
+  brandId: z.coerce.number().int().positive().nullable().optional(),
   shortDescription: z.string().max(500).optional(),
   description: z.string().optional(),
+  basePrice: z.coerce.number().int().min(0).optional(),
+  discountType: z.enum(["PERCENT", "FIXED"]).nullable().optional(),
+  discountValue: z.coerce.number().int().positive().nullable().optional(),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional(),
   isFeatured: z.coerce.boolean().optional(),
   metaTitle: z.string().max(160).optional(),
   metaDescription: z.string().max(300).optional(),
   canonicalUrl: z.string().url().optional(),
-  categoryIds: z.array(z.string()).min(1).optional(),
+  categoryIds: z.array(z.coerce.number()).min(1).optional(),
 });
 
 export const addVariantSchema = variantInputSchema;
 export const updateVariantSchema = variantInputSchema.partial();
-export const addProductImageSchema = imageInputSchema;
+
+// تصاویر در حین ایجاد محصول از طریق images[] ارسال می‌شوند
+// و در حین ویرایش از طریق deletedImages + آپلود فایل جدید
+export const deleteProductImagesSchema = z.object({
+  deletedImages: z.array(z.coerce.number().int().positive()).optional().default([]),
+});
 
 export const listProductsQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().optional(),
   categorySlug: z.string().optional(),
-  brandIds: z.string().optional(), // comma-separated
-  attributeValueIds: z.string().optional(), // comma-separated
+  brandIds: z.string().optional(),
+  attributeValueIds: z.string().optional(),
   minPrice: z.coerce.number().int().nonnegative().optional(),
   maxPrice: z.coerce.number().int().nonnegative().optional(),
   inStock: z.coerce.boolean().optional(),
@@ -71,7 +80,7 @@ export const listProductsQuerySchema = z.object({
   isFeatured: z.coerce.boolean().optional(),
   search: z.string().optional(),
   sort: z
-    .enum(["newest", "price_asc", "price_desc", "popular"])
+    .enum(["newest", "price_asc", "price_desc", "popular", "bestselling", "most_viewed", "most_popular"])
     .optional()
     .default("newest"),
 });

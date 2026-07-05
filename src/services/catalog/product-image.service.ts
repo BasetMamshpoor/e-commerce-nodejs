@@ -2,8 +2,8 @@ import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 
 export async function addProductImage(
-  productId: string,
-  input: { mediaId: string; order?: number; isMain?: boolean }
+  productId: number,
+  input: { mediaId: number; order?: number; isMain?: boolean }
 ) {
   const product = await prisma.product.findUnique({ where: { id: productId } });
   if (!product) throw ApiError.notFound("محصول پیدا نشد");
@@ -22,7 +22,7 @@ export async function addProductImage(
   });
 }
 
-export async function removeProductImage(productId: string, imageId: string): Promise<void> {
+export async function removeProductImage(productId: number, imageId: number): Promise<void> {
   const image = await prisma.productImage.findUnique({ where: { id: imageId } });
   if (!image || image.productId !== productId) {
     throw ApiError.notFound("تصویر پیدا نشد");

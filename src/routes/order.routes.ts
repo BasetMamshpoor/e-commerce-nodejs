@@ -28,6 +28,7 @@ router.get(
   orderController.listAdmin
 );
 router.get("/admin/returns", ...staffOnly, validate(adminListReturnsQuerySchema, "query"), orderController.listReturnsAdmin);
+router.get("/admin/returns/:returnId", ...staffOnly, orderController.getReturnByIdAdmin);
 router.put(
   "/admin/returns/:returnId",
   ...staffOnly,
@@ -44,7 +45,7 @@ router.put(
 
 // --- مشتری ---
 router.get("/", validate(listOrdersQuerySchema, "query"), orderController.listMine);
-router.post("/", validate(createOrderSchema), orderController.create);
+router.post("/", authorize("CUSTOMER"), validate(createOrderSchema), orderController.create);
 router.get("/:id", orderController.getMine);
 
 router.post("/:id/cancel", validate(cancelOrderSchema), orderController.cancel);

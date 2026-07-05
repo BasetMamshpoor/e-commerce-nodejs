@@ -18,9 +18,9 @@ const baseDiscountFields = {
   startsAt: isoDate.optional(),
   expiresAt: isoDate.optional(),
   isActive: z.coerce.boolean().optional().default(true),
-  productIds: z.array(z.string()).optional().default([]),
-  categoryIds: z.array(z.string()).optional().default([]),
-  userIds: z.array(z.string()).optional().default([]),
+  productIds: z.array(z.coerce.number().int()).optional().default([]),
+  categoryIds: z.array(z.coerce.number().int()).optional().default([]),
+  userIds: z.array(z.coerce.number().int()).optional().default([]),
 };
 
 export const createDiscountCodeSchema = z
@@ -46,9 +46,9 @@ export const updateDiscountCodeSchema = z
     startsAt: baseDiscountFields.startsAt,
     expiresAt: baseDiscountFields.expiresAt,
     isActive: z.coerce.boolean().optional(),
-    productIds: z.array(z.string()).optional(),
-    categoryIds: z.array(z.string()).optional(),
-    userIds: z.array(z.string()).optional(),
+    productIds: z.array(z.coerce.number().int()).optional(),
+    categoryIds: z.array(z.coerce.number().int()).optional(),
+    userIds: z.array(z.coerce.number().int()).optional(),
   })
   .refine((d) => d.type !== "PERCENT" || !d.value || d.value <= 100, {
     message: "مقدار تخفیف درصدی نمی‌تواند بیشتر از ۱۰۰ باشد",

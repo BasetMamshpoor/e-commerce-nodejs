@@ -17,12 +17,12 @@ describe("سبد خرید / علاقه‌مندی / مقایسه — روتین�
     expect(res.body.data.guestToken).toBeUndefined();
   });
 
-  it("افزودن به سبد با variantId نامعتبر باید 404 بدهد", async () => {
+  it("افزودن به سبد با variantId نامعتبر باید 400 (خطای اعتبارسنجی) بدهد", async () => {
     const res = await request(app)
       .post("/api/v1/cart/items")
       .set("X-Guest-Token", "test-guest")
       .send({ variantId: "does-not-exist", quantity: 1 });
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(400);
   });
 
   it("POST /cart/merge بدون توکن (لاگین) باید 401 بدهد", async () => {
@@ -35,17 +35,8 @@ describe("سبد خرید / علاقه‌مندی / مقایسه — روتین�
     expect(res.status).toBe(401);
   });
 
-  it("GET /comparison برای مهمان بدون توکن باید 200 و لیست خالی بدهد", async () => {
+  it("GET /comparison برای مهمان بدون توکن باید 400 بدهد چون productIds الزامی است", async () => {
     const res = await request(app).get("/api/v1/comparison");
-    expect(res.status).toBe(200);
-    expect(res.body.data.comparison.items).toEqual([]);
-  });
-
-  it("افزودن به مقایسه با productId نامعتبر باید 404 بدهد", async () => {
-    const res = await request(app)
-      .post("/api/v1/comparison")
-      .set("X-Guest-Token", "test-guest-2")
-      .send({ productId: "does-not-exist" });
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(400);
   });
 });

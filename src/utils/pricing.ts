@@ -1,4 +1,4 @@
-import { ProductVariant } from "../generated/prisma";
+import { DiscountType } from "../generated/prisma";
 
 // ----------------------------------------------------------------------------
 // محاسبه‌ی قیمت نهایی یک تنوع کالا با درنظرگرفتن تخفیف مخصوص همان تنوع
@@ -14,38 +14,41 @@ export interface EffectivePrice {
   isDiscounted: boolean;
 }
 
-export function computeVariantEffectivePrice(
-  variant: Pick<
-    ProductVariant,
-    "price" | "discountType" | "discountValue" | "discountStartAt" | "discountEndAt"
-  >
+export function computeProductEffectivePrice(
+  basePrice: number,
+  priceAdjustment: number,
+  discountType: DiscountType | null,
+  discountValue: number | null,
+  discountStartAt: Date | null,
+  discountEndAt: Date | null
 ): EffectivePrice {
+  const originalPrice = basePrice + priceAdjustment;
   const now = new Date();
 
   const isActiveWindow =
-    (!variant.discountStartAt || variant.discountStartAt <= now) &&
-    (!variant.discountEndAt || variant.discountEndAt >= now);
+    (!discountStartAt || discountStartAt <= now) &&
+    (!discountEndAt || discountEndAt >= now);
 
-  if (!variant.discountType || !variant.discountValue || !isActiveWindow) {
+  if (!discountType || !discountValue || !isActiveWindow) {
     return {
-      originalPrice: variant.price,
-      unitPrice: variant.price,
+      originalPrice,
+      unitPrice: originalPrice,
       discountAmount: 0,
       isDiscounted: false,
     };
   }
 
   const discountAmount =
-    variant.discountType === "PERCENT"
-      ? Math.round((variant.price * variant.discountValue) / 100)
-      : variant.discountValue;
+    discountType === "PERCENT"
+      ? Math.round((originalPrice * discountValue) / 100)
+      : discountValue;
 
-  const unitPrice = Math.max(variant.price - discountAmount, 0);
+  const unitPrice = Math.max(originalPrice - discountAmount, 0);
 
   return {
-    originalPrice: variant.price,
+    originalPrice,
     unitPrice,
-    discountAmount: variant.price - unitPrice,
+    discountAmount: originalPrice - unitPrice,
     isDiscounted: true,
   };
 }

@@ -30,7 +30,7 @@ export async function assertNotLockedOut(identifier: string): Promise<void> {
 
 export async function recordLoginAttempt(params: {
   identifier: string;
-  userId?: string;
+  userId?: number;
   ip?: string;
   userAgent?: string;
   isSuccessful: boolean;

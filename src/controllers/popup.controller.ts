@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { ApiResponse } from "../utils/ApiResponse";
-import { paramStr } from "../utils/params";
+import { paramInt } from "../utils/params";
 import * as popupService from "../services/cms/popup.service";
 
 export async function create(req: Request, res: Response) {
@@ -8,12 +8,12 @@ export async function create(req: Request, res: Response) {
 }
 
 export async function update(req: Request, res: Response) {
-  const popup = await popupService.updatePopup(paramStr(req.params.id), req.body);
+  const popup = await popupService.updatePopup(paramInt(req.params.id), req.body);
   return ApiResponse.ok(res, popup, "پاپ‌آپ به‌روزرسانی شد");
 }
 
 export async function remove(req: Request, res: Response) {
-  await popupService.deletePopup(paramStr(req.params.id));
+  await popupService.deletePopup(paramInt(req.params.id));
   return ApiResponse.ok(res, null, "پاپ‌آپ حذف شد");
 }
 

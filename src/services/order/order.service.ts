@@ -9,6 +9,7 @@ import * as walletService from "../wallet/wallet.service";
 import * as gatewayAdminService from "../payment/payment-gateway-admin.service";
 import { recomputeProductAggregates } from "../catalog/product.service";
 import { notifyUser } from "../notification/notification.service";
+import { createAdminNotification } from "../notification/admin-notification.service";
 import {
   CreateOrderInput,
   ListOrdersQuery,
@@ -41,7 +42,7 @@ const ORDER_DETAIL_INCLUDE = {
   transactions: true,
 };
 
-export async function createOrder(userId: string, input: CreateOrderInput): Promise<Order> {
+export async function createOrder(userId: number, input: CreateOrderInput): Promise<Order> {
   const cart = await cartService.getCart({ userId });
   if (cart.items.length === 0) throw ApiError.badRequest("سبد خرید شما خالی است");
 
@@ -66,8 +67,8 @@ export async function createOrder(userId: string, input: CreateOrderInput): Prom
   const shippingCost = shippingCompany.baseCost;
 
   let discountAmount = 0;
-  let discountCodeId: string | undefined;
-  let eligibleVariantIds: string[] = [];
+  let discountCodeId: number | undefined;
+  let eligibleVariantIds: number[] = [];
 
   if (input.discountCode) {
     const evaluation = await discountApplyService.evaluateDiscountCode(input.discountCode, {
@@ -80,7 +81,7 @@ export async function createOrder(userId: string, input: CreateOrderInput): Prom
 
   const totalAmount = Math.max(0, subtotal + shippingCost - discountAmount);
 
-  let wallet: { id: string; balance: number } | null = null;
+  let wallet: { id: number; balance: number } | null = null;
   if (input.paymentMethod !== "GATEWAY") {
     wallet = await walletService.getOrCreateWallet(userId);
   }
@@ -96,7 +97,7 @@ export async function createOrder(userId: string, input: CreateOrderInput): Prom
   }
   const gatewayPortion = totalAmount - walletPortion;
 
-  let gatewayRecord: { id: string; slug: string } | null = null;
+  let gatewayRecord: { id: number; slug: string } | null = null;
   if (gatewayPortion > 0) {
     if (!input.gatewaySlug) throw ApiError.badRequest("انتخاب درگاه پرداخت الزامی است");
     gatewayRecord = await gatewayAdminService.getPaymentGatewayBySlug(input.gatewaySlug);
@@ -104,7 +105,7 @@ export async function createOrder(userId: string, input: CreateOrderInput): Prom
 
   // تخصیص متناسب تخفیف بین آیتم‌های واجدشرایط — فقط برای ثبت تاریخچه‌ی دقیق هر آیتم،
   // جمع‌کل discountAmount از قبل محاسبه و قطعی شده است.
-  const discountPerVariant = new Map<string, number>();
+  const discountPerVariant = new Map<number, number>();
   if (discountAmount > 0 && eligibleVariantIds.length > 0) {
     const eligibleItems = cart.items.filter((i) => eligibleVariantIds.includes(i.variantId));
     const shares = allocateProportionally(discountAmount, eligibleItems.map((i) => i.lineTotal));
@@ -216,10 +217,25 @@ export async function createOrder(userId: string, input: CreateOrderInput): Prom
     .then((rows) => Array.from(new Set(rows.map((r) => r.productId))));
   await Promise.all(affectedProductIds.map((id) => recomputeProductAggregates(id)));
 
+  notifyUser({
+    userId,
+    type: "ORDER",
+    title: `سفارش ${order.orderNumber}`,
+    message: "سفارش شما با موفقیت ثبت شد",
+    link: `/orders/${order.id}`,
+  }).catch(() => undefined);
+
+  createAdminNotification({
+    type: "ORDER",
+    title: "سفارش جدید",
+    message: `سفارش ${order.orderNumber} ثبت شد`,
+    link: `/admin/orders/${order.id}`,
+  }).catch(() => undefined);
+
   return order;
 }
 
-export async function getOrderDetail(orderId: string, userId?: string) {
+export async function getOrderDetail(orderId: number, userId?: number) {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
     include: ORDER_DETAIL_INCLUDE,
@@ -229,7 +245,7 @@ export async function getOrderDetail(orderId: string, userId?: string) {
   return order;
 }
 
-export async function listOrders(userId: string, query: ListOrdersQuery) {
+export async function listOrders(userId: number, query: ListOrdersQuery) {
   const pagination = parsePagination({ page: query.page, limit: query.limit });
   const where = { userId, ...(query.status ? { status: query.status } : {}) };
 
@@ -284,17 +300,37 @@ const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
 };
 
 export async function updateOrderStatusAdmin(
-  orderId: string,
+  orderId: number,
   input: AdminUpdateOrderStatusInput
 ): Promise<Order> {
   const order = await prisma.order.findUnique({ where: { id: orderId } });
   if (!order) throw ApiError.notFound("سفارش پیدا نشد");
 
+  const wasDelivered = order.status !== "DELIVERED" && input.status === "DELIVERED";
+
   const updated = await prisma.$transaction(async (tx) => {
     const updatedOrder = await tx.order.update({
       where: { id: orderId },
-      data: { status: input.status as OrderStatus },
+      data: {
+        status: input.status as OrderStatus,
+        ...(input.trackingCode !== undefined ? { trackingCode: input.trackingCode } : {}),
+        ...(input.packageNumber !== undefined ? { packageNumber: input.packageNumber } : {}),
+      },
     });
+
+    if (wasDelivered) {
+      const orderItems = await tx.orderItem.findMany({
+        where: { orderId },
+        select: { productId: true, quantity: true },
+      });
+      for (const item of orderItems) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { totalSold: { increment: item.quantity } },
+        });
+      }
+    }
+
     await tx.orderStatusHistory.create({
       data: { orderId, status: input.status as OrderStatus, note: input.note },
     });

@@ -3,6 +3,7 @@ import * as userAdminController from "../controllers/user-admin.controller";
 import * as profileController from "../controllers/profile.controller";
 import { validate } from "../middlewares/validate";
 import { authenticate, authorize } from "../middlewares/auth.middleware";
+import { z } from "zod";
 import {
   adminListUsersQuerySchema,
   blockUserSchema,
@@ -10,7 +11,6 @@ import {
 } from "../validations/user-admin.validation";
 import {
   updateMyProfileSchema,
-  setAvatarSchema,
   changePasswordSchema,
   requestChangeIdentifierSchema,
   verifyChangeIdentifierSchema,
@@ -22,10 +22,9 @@ const adminOnly = [authenticate, authorize("ADMIN")] as const;
 // --- پروفایل خودِ کاربر ---
 router.get("/me", authenticate, profileController.getMe);
 router.put("/me", authenticate, validate(updateMyProfileSchema), profileController.updateMe);
-router.put("/me/avatar", authenticate, validate(setAvatarSchema), profileController.setAvatar);
 router.put(
   "/me/password",
-  authenticate,
+  authenticate, 
   validate(changePasswordSchema),
   profileController.changePassword
 );

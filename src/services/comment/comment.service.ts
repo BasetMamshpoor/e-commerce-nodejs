@@ -9,25 +9,17 @@ import {
   AdminListCommentsQuery,
   ModerateCommentInput,
 } from "../../validations/comment.validation";
-import { Comment, CommentableType } from "../../generated/prisma";
-
-// ----------------------------------------------------------------------------
-// سیستم کامنت‌های تودرتو (nested) — آیتم ۱۴.
-// از این مدل هم برای محصول و هم برای پست وبلاگ استفاده می‌شود (پلی‌مورفیک:
-// commentableType + commentableId — معادل polymorphic relation در Laravel،
-// چون پریزما رابطه‌ی پلی‌مورفیک بومی ندارد).
-//
-// دیدگاه‌های جدید با وضعیت PENDING ثبت می‌شوند و فقط بعد از تایید ادمین/ادیتور
-// عمومی نمایش داده می‌شوند (ضدِ اسپم/محتوای نامناسب).
-// SSR-friendly یعنی این endpoint می‌تواند مستقیم سمت سرور فرانت صدا زده شود.
-// ----------------------------------------------------------------------------
+import { Comment, CommentableType, Prisma } from "../../generated/prisma";
+import { recomputeProductRating } from "../catalog/product.service";
 
 export interface CommentTreeNode extends Comment {
   replies: CommentTreeNode[];
   likeCount: number;
+  isLiked: boolean;
+  authorName: string | null;
 }
 
-async function assertCommentableExists(type: CommentableType, id: string): Promise<void> {
+async function assertCommentableExists(type: CommentableType, id: number): Promise<void> {
   if (type === "PRODUCT") {
     const product = await prisma.product.findUnique({ where: { id } });
     if (!product) throw ApiError.notFound("محصول پیدا نشد");
@@ -37,7 +29,7 @@ async function assertCommentableExists(type: CommentableType, id: string): Promi
   }
 }
 
-async function getDescendantCommentIds(rootIds: string[]): Promise<string[]> {
+async function getDescendantCommentIds(rootIds: number[]): Promise<number[]> {
   if (rootIds.length === 0) return [];
 
   const all = await prisma.comment.findMany({
@@ -60,29 +52,32 @@ async function getDescendantCommentIds(rootIds: string[]): Promise<string[]> {
 }
 
 function buildTree(
-  all: (Comment & { _count: { likes: number } })[],
-  parentId: string | null
+  all: (Comment & { _count: { likes: number }; likes: { userId: number }[]; user: { fullName: string | null } | null })[],
+  parentId: number | null,
+  currentUserId?: number
 ): CommentTreeNode[] {
   return all
     .filter((c) => c.parentId === parentId)
-    .map((c) => ({ ...c, likeCount: c._count.likes, replies: buildTree(all, c.id) }));
+    .map((c) => ({
+      ...c,
+      likeCount: c._count.likes,
+      isLiked: currentUserId ? c.likes.some((l) => l.userId === currentUserId) : false,
+      authorName: c.user?.fullName ?? null,
+      replies: buildTree(all, c.id, currentUserId),
+    }));
 }
 
 export async function createComment(
-  userId: string,
+  userId: number,
   commentableType: CommentableType,
-  commentableId: string,
+  commentableId: number,
   input: CreateCommentInput
 ): Promise<Comment> {
   await assertCommentableExists(commentableType, commentableId);
 
   if (input.parentId) {
     const parent = await prisma.comment.findUnique({ where: { id: input.parentId } });
-    if (
-      !parent ||
-      parent.commentableType !== commentableType ||
-      parent.commentableId !== commentableId
-    ) {
+    if (!parent || parent.commentableType !== commentableType || parent.commentableId !== commentableId) {
       throw ApiError.badRequest("دیدگاه والد پیدا نشد");
     }
   }
@@ -96,27 +91,26 @@ export async function createComment(
       content: input.content,
       rating: input.rating,
       status: "PENDING",
-      attachments: { create: input.attachmentMediaIds.map((mediaId) => ({ mediaId })) },
+      attachments: { create: (input.attachmentMediaIds ?? []).map((mediaId) => ({ mediaId })) },
     },
   });
 }
 
 export async function updateComment(
-  userId: string,
-  commentId: string,
+  userId: number,
+  commentId: number,
   input: UpdateCommentInput
 ): Promise<Comment> {
   const comment = await prisma.comment.findUnique({ where: { id: commentId } });
   if (!comment || comment.userId !== userId) throw ApiError.notFound("دیدگاه پیدا نشد");
 
-  // ویرایش، دیدگاه را دوباره به بررسی می‌فرستد (جلوگیری از تغییر محتوا بعد از تایید)
   return prisma.comment.update({
     where: { id: commentId },
     data: { content: input.content, status: "PENDING" },
   });
 }
 
-export async function deleteComment(userId: string, commentId: string, isStaff: boolean): Promise<void> {
+export async function deleteComment(userId: number, commentId: number, isStaff: boolean): Promise<void> {
   const comment = await prisma.comment.findUnique({ where: { id: commentId } });
   if (!comment) throw ApiError.notFound("دیدگاه پیدا نشد");
   if (!isStaff && comment.userId !== userId) throw ApiError.notFound("دیدگاه پیدا نشد");
@@ -129,7 +123,7 @@ export async function deleteComment(userId: string, commentId: string, isStaff: 
   await prisma.comment.delete({ where: { id: commentId } });
 }
 
-export async function toggleLike(userId: string, commentId: string): Promise<{ liked: boolean }> {
+export async function toggleLike(userId: number, commentId: number): Promise<{ liked: boolean }> {
   const comment = await prisma.comment.findUnique({ where: { id: commentId } });
   if (!comment) throw ApiError.notFound("دیدگاه پیدا نشد");
 
@@ -148,12 +142,18 @@ export async function toggleLike(userId: string, commentId: string): Promise<{ l
 
 export async function listApprovedComments(
   commentableType: CommentableType,
-  commentableId: string,
-  query: ListCommentsQuery
+  commentableId: number,
+  query: ListCommentsQuery,
+  currentUserId?: number
 ) {
   const pagination = parsePagination({ page: query.page, limit: query.limit });
 
-  const topLevelWhere = { commentableType, commentableId, parentId: null, status: "APPROVED" as const };
+  const topLevelWhere: Prisma.CommentWhereInput = {
+    commentableType,
+    commentableId,
+    parentId: null,
+    status: "APPROVED",
+  };
 
   const [topLevel, total, ratingAgg] = await Promise.all([
     prisma.comment.findMany({
@@ -174,14 +174,18 @@ export async function listApprovedComments(
   const rootIds = topLevel.map((c) => c.id);
   const allIds = await getDescendantCommentIds(rootIds);
 
-  const all = (await prisma.comment.findMany({
+  const all = await prisma.comment.findMany({
     where: { id: { in: allIds }, status: "APPROVED" },
     orderBy: { createdAt: "asc" },
-    include: { _count: { select: { likes: true } } },
-  })) as unknown as (Comment & { _count: { likes: number } })[];
+    include: {
+      _count: { select: { likes: true } },
+      ...(currentUserId ? { likes: { where: { userId: currentUserId }, select: { userId: true } } } : {}),
+      user: { select: { fullName: true } },
+    },
+  });
 
   const tree = rootIds
-    .map((id) => buildTree(all, null).find((c) => c.id === id))
+    .map((id) => buildTree(all as never, null, currentUserId).find((c) => c.id === id))
     .filter((c): c is CommentTreeNode => Boolean(c));
 
   return {
@@ -194,17 +198,21 @@ export async function listApprovedComments(
   };
 }
 
-// ----------------------------------------------------------------------------
-// مدیریت/بررسی ادمین — چون پلی‌مورفیک است، عنوان محصول/پست را جدا resolve
-// می‌کنیم (نه با include مستقیم چون رابطه‌ی Prisma واقعی وجود ندارد)
-// ----------------------------------------------------------------------------
-
 export async function listCommentsAdmin(query: AdminListCommentsQuery) {
   const pagination = parsePagination({ page: query.page, limit: query.limit });
-  const where = {
-    ...(query.status ? { status: query.status } : {}),
-    ...(query.commentableType ? { commentableType: query.commentableType } : {}),
-  };
+  const where: Prisma.CommentWhereInput = {};
+  if (query.status) where.status = query.status;
+  if (query.commentableType) where.commentableType = query.commentableType;
+  if (query.isReviewed !== undefined) {
+    where.status = query.isReviewed ? { not: "PENDING" } : "PENDING";
+  }
+  if (query.productSearch) {
+    where.commentableType = "PRODUCT";
+    where.commentableId = { in: (await prisma.product.findMany({
+      where: { name: { contains: query.productSearch, mode: "insensitive" } },
+      select: { id: true },
+    })).map(p => p.id) };
+  }
 
   const [items, total] = await Promise.all([
     prisma.comment.findMany({
@@ -248,7 +256,7 @@ export async function listCommentsAdmin(query: AdminListCommentsQuery) {
 }
 
 export async function moderateComment(
-  commentId: string,
+  commentId: number,
   input: ModerateCommentInput
 ): Promise<Comment> {
   const comment = await prisma.comment.findUnique({ where: { id: commentId } });
@@ -269,6 +277,10 @@ export async function moderateComment(
         message: comment.content.slice(0, 200),
       }).catch(() => undefined);
     }
+  }
+
+  if (comment.commentableType === "PRODUCT" && ["APPROVED", "REJECTED"].includes(input.status)) {
+    recomputeProductRating(comment.commentableId).catch(() => undefined);
   }
 
   return updated;

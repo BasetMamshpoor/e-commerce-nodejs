@@ -7,13 +7,13 @@ export async function createBanner(input: CreateBannerInput): Promise<Banner> {
   return prisma.banner.create({ data: input });
 }
 
-export async function updateBanner(id: string, input: UpdateBannerInput): Promise<Banner> {
+export async function updateBanner(id: number, input: UpdateBannerInput): Promise<Banner> {
   const banner = await prisma.banner.findUnique({ where: { id } });
   if (!banner) throw ApiError.notFound("بنر پیدا نشد");
   return prisma.banner.update({ where: { id }, data: input });
 }
 
-export async function deleteBanner(id: string): Promise<void> {
+export async function deleteBanner(id: number): Promise<void> {
   const banner = await prisma.banner.findUnique({ where: { id } });
   if (!banner) throw ApiError.notFound("بنر پیدا نشد");
   await prisma.banner.delete({ where: { id } });

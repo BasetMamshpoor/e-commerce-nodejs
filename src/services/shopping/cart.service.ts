@@ -1,20 +1,15 @@
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import { CartIdentity } from "../../utils/cartIdentity";
-import { computeVariantEffectivePrice } from "../../utils/pricing";
-import { Cart, CartItem, DiscountType, ProductVariant } from "../../generated/prisma";
-
-// ----------------------------------------------------------------------------
-// سبد خرید بدون احراز هویت و با احراز هویت — آیتم ۷
-// ----------------------------------------------------------------------------
+import { computeProductEffectivePrice } from "../../utils/pricing";
+import { Prisma } from "../../generated/prisma";
 
 const CART_INCLUDE = {
   items: {
     include: {
       variant: {
         include: {
-          product: { select: { id: true, name: true, slug: true, status: true } },
-          images: { take: 1, orderBy: { order: "asc" as const }, include: { media: true } },
+          product: { select: { id: true, name: true, slug: true, status: true, basePrice: true, discountType: true, discountValue: true } },
           attributeValues: {
             include: { attributeValue: { include: { attribute: true } } },
           },
@@ -22,42 +17,20 @@ const CART_INCLUDE = {
       },
     },
   },
-};
-
-type CartWithItems = Cart & {
-  items: {
-    id: string;
-    quantity: number;
-    variant: {
-      id: string;
-      price: number;
-      stock: number;
-      isActive: boolean;
-      discountType: DiscountType | null;
-      discountValue: number | null;
-      discountStartAt: Date | null;
-      discountEndAt: Date | null;
-      product: { id: string; name: string; slug: string; status: string };
-      images: { media: { url: string } }[];
-      attributeValues: {
-        attributeValue: { value: string; colorHex: string | null; attribute: { name: string } };
-      }[];
-    };
-  }[];
-};
+} satisfies Prisma.CartInclude;
 
 function whereForIdentity(identity: CartIdentity) {
   return "userId" in identity ? { userId: identity.userId } : { guestToken: identity.guestToken };
 }
 
-async function findRawCart(identity: CartIdentity): Promise<CartWithItems | null> {
+async function findRawCart(identity: CartIdentity) {
   return prisma.cart.findUnique({
     where: whereForIdentity(identity),
     include: CART_INCLUDE,
-  }) as Promise<CartWithItems | null>;
+  });
 }
 
-async function getOrCreateCart(identity: CartIdentity): Promise<Cart> {
+async function getOrCreateCart(identity: CartIdentity) {
   const where = whereForIdentity(identity);
   const existing = await prisma.cart.findUnique({ where });
   if (existing) return existing;
@@ -65,18 +38,18 @@ async function getOrCreateCart(identity: CartIdentity): Promise<Cart> {
 }
 
 export interface CartSummary {
-  id: string | null;
+  id: number | null;
   itemCount: number;
   subtotal: number;
   totalDiscount: number;
   total: number;
   items: Array<{
-    id: string;
-    variantId: string;
+    id: number;
+    variantId: number;
     productName: string;
     productSlug: string;
     image: string | null;
-    attributesLabel: string; // مثلا "رنگ: قرمز، سایز: L"
+    attributesLabel: string;
     quantity: number;
     unitPrice: number;
     originalPrice: number;
@@ -86,40 +59,61 @@ export interface CartSummary {
   }>;
 }
 
-function summarize(cart: CartWithItems | null): CartSummary {
+function summarize(cart: Record<string, unknown> | null): CartSummary {
   if (!cart) {
     return { id: null, itemCount: 0, subtotal: 0, totalDiscount: 0, total: 0, items: [] };
   }
 
-  const items = cart.items.map((item) => {
-    const price = computeVariantEffectivePrice(item.variant);
-    const isAvailable =
-      item.variant.isActive &&
-      item.variant.product.status === "PUBLISHED" &&
-      item.variant.stock > 0;
+  const items = ((cart as { items: Array<Record<string, unknown>> }).items || []).map((item: Record<string, unknown>) => {
+    const variant = item.variant as Record<string, unknown>;
+    const product = variant.product as Record<string, unknown>;
+    const basePrice = product.basePrice as number;
+    const priceAdjustment = variant.priceAdjustment as number;
+    const discountType = product.discountType as string | null;
+    const discountValue = product.discountValue as number | null;
 
-    const attributesLabel = item.variant.attributeValues
-      .map((av) => `${av.attributeValue.attribute.name}: ${av.attributeValue.value}`)
+    const price = computeProductEffectivePrice(
+      basePrice,
+      priceAdjustment,
+      discountType as "PERCENT" | "FIXED" | null,
+      discountValue,
+      null,
+      null
+    );
+
+    const isAvailable =
+      (variant.isActive as boolean) &&
+      (product.status as string) === "PUBLISHED" &&
+      (variant.stock as number) > 0;
+
+    const attributesLabel = (variant.attributeValues as Array<Record<string, unknown>>)
+      .map((av: Record<string, unknown>) => {
+        const attrVal = av.attributeValue as Record<string, unknown>;
+        const attr = attrVal.attribute as Record<string, unknown>;
+        return `${attr.name}: ${attrVal.value}`;
+      })
       .join("، ");
 
+    const productImage = (product as { image?: string }).image ?? null;
+
     return {
-      id: item.id,
-      variantId: item.variant.id,
-      productName: item.variant.product.name,
-      productSlug: item.variant.product.slug,
-      image: item.variant.images[0]?.media.url ?? null,
+      id: item.id as number,
+      variantId: variant.id as number,
+      productName: product.name as string,
+      productSlug: product.slug as string,
+      image: productImage as string | null,
       attributesLabel,
-      quantity: item.quantity,
+      quantity: item.quantity as number,
       unitPrice: price.unitPrice,
       originalPrice: price.originalPrice,
-      lineTotal: price.unitPrice * item.quantity,
+      lineTotal: price.unitPrice * (item.quantity as number),
       isAvailable,
-      availableStock: item.variant.stock,
+      availableStock: variant.stock as number,
     };
   });
 
   return {
-    id: cart.id,
+    id: cart.id as number,
     itemCount: items.reduce((sum, i) => sum + i.quantity, 0),
     subtotal: items.reduce((sum, i) => sum + i.originalPrice * i.quantity, 0),
     totalDiscount: items.reduce((sum, i) => sum + (i.originalPrice - i.unitPrice) * i.quantity, 0),
@@ -132,15 +126,11 @@ export async function getCart(identity: CartIdentity): Promise<CartSummary> {
   return summarize(await findRawCart(identity));
 }
 
-export async function addItem(
-  identity: CartIdentity,
-  variantId: string,
-  quantity: number
-): Promise<{ cart: CartSummary; wasAdjusted: boolean }> {
-  const variant = (await prisma.productVariant.findUnique({
+export async function addItem(identity: CartIdentity, variantId: number, quantity: number): Promise<{ cart: CartSummary; wasAdjusted: boolean }> {
+  const variant = await prisma.productVariant.findUnique({
     where: { id: variantId },
     include: { product: { select: { status: true } } },
-  })) as (ProductVariant & { product: { status: string } }) | null;
+  });
 
   if (!variant || !variant.isActive) {
     throw ApiError.notFound("این تنوع کالا پیدا نشد یا غیرفعال است");
@@ -170,13 +160,9 @@ export async function addItem(
   return { cart: await getCart(identity), wasAdjusted: finalQty !== desiredQty };
 }
 
-export async function updateItemQuantity(
-  identity: CartIdentity,
-  itemId: string,
-  quantity: number
-): Promise<{ cart: CartSummary; wasAdjusted: boolean }> {
+export async function updateItemQuantity(identity: CartIdentity, itemId: number, quantity: number): Promise<{ cart: CartSummary; wasAdjusted: boolean }> {
   const cart = await findRawCart(identity);
-  const item = cart?.items.find((i) => i.id === itemId);
+  const item = (cart?.items as Array<Record<string, unknown>> | undefined)?.find((i: Record<string, unknown>) => i.id === itemId);
   if (!cart || !item) throw ApiError.notFound("آیتم سبد خرید پیدا نشد");
 
   if (quantity === 0) {
@@ -184,15 +170,16 @@ export async function updateItemQuantity(
     return { cart: await getCart(identity), wasAdjusted: false };
   }
 
-  const finalQty = Math.min(quantity, item.variant.stock);
+  const variant = item.variant as Record<string, unknown>;
+  const finalQty = Math.min(quantity, variant.stock as number);
   await prisma.cartItem.update({ where: { id: itemId }, data: { quantity: finalQty } });
 
   return { cart: await getCart(identity), wasAdjusted: finalQty !== quantity };
 }
 
-export async function removeItem(identity: CartIdentity, itemId: string): Promise<CartSummary> {
+export async function removeItem(identity: CartIdentity, itemId: number): Promise<CartSummary> {
   const cart = await findRawCart(identity);
-  const item = cart?.items.find((i) => i.id === itemId);
+  const item = (cart?.items as Array<Record<string, unknown>> | undefined)?.find((i: Record<string, unknown>) => i.id === itemId);
   if (!cart || !item) throw ApiError.notFound("آیتم سبد خرید پیدا نشد");
 
   await prisma.cartItem.delete({ where: { id: itemId } });
@@ -207,19 +194,11 @@ export async function clearCart(identity: CartIdentity): Promise<CartSummary> {
   return getCart(identity);
 }
 
-/**
- * بعد از لاگین، سبد خرید مهمان (با guestToken) را با سبد خرید کاربر ادغام
- * می‌کند: اگر همان تنوع در هر دو سبد بود جمع می‌شوند (با رعایت سقف موجودی)،
- * در غیر این صورت آیتم جدید اضافه می‌شود. در پایان سبد مهمان حذف می‌شود.
- */
-export async function mergeGuestCartIntoUser(
-  userId: string,
-  guestToken: string
-): Promise<CartSummary> {
-  const guestCart = (await prisma.cart.findUnique({
+export async function mergeGuestCartIntoUser(userId: number, guestToken: string): Promise<CartSummary> {
+  const guestCart = await prisma.cart.findUnique({
     where: { guestToken },
     include: { items: true },
-  })) as (Cart & { items: CartItem[] }) | null;
+  });
 
   if (!guestCart || guestCart.items.length === 0) {
     return getCart({ userId });
@@ -252,57 +231,49 @@ export async function mergeGuestCartIntoUser(
   return getCart({ userId });
 }
 
-// ----------------------------------------------------------------------------
-// برای ماژول کد تخفیف: شکل ساده‌شده‌ی آیتم‌های سبد به‌همراه دسته‌بندی هر
-// محصول (برای تشخیص اینکه کد تخفیف محصول‌محور/دسته‌محور روی کدام آیتم‌ها
-// قابل‌اعمال است) و قیمت مؤثر هر واحد (بعد از تخفیف خودِ تنوع، قبل از کد
-// تخفیف). این یک کوئری مستقل و سبک است تا شکل اصلی CartSummary/CART_INCLUDE
-// دست‌نخورده بماند.
-// ----------------------------------------------------------------------------
-
 export interface CartLineItemForDiscount {
-  variantId: string;
-  productId: string;
-  categoryIds: string[];
+  variantId: number;
+  productId: number;
+  categoryIds: number[];
   quantity: number;
   unitPrice: number;
 }
 
-export async function getCartLineItemsForDiscount(
-  identity: CartIdentity
-): Promise<CartLineItemForDiscount[]> {
-  const cart = (await prisma.cart.findUnique({
+export async function getCartLineItemsForDiscount(identity: CartIdentity): Promise<CartLineItemForDiscount[]> {
+  const cart = await prisma.cart.findUnique({
     where: whereForIdentity(identity),
     include: {
       items: {
         include: {
           variant: {
             include: {
-              product: { include: { categories: { select: { categoryId: true } } } },
+              product: {
+                include: { categories: { select: { categoryId: true } } },
+                select: { id: true, basePrice: true, discountType: true, discountValue: true, categories: true },
+              },
             },
           },
         },
       },
     },
-  })) as
-    | (Cart & {
-        items: {
-          quantity: number;
-          variant: ProductVariant & {
-            product: { id: string; categories: { categoryId: string }[] };
-          };
-        }[];
-      })
-    | null;
+  });
 
   if (!cart) return [];
 
   return cart.items.map((item) => {
-    const price = computeVariantEffectivePrice(item.variant);
+    const product = item.variant.product;
+    const price = computeProductEffectivePrice(
+      product.basePrice,
+      item.variant.priceAdjustment,
+      product.discountType,
+      product.discountValue,
+      null,
+      null
+    );
     return {
       variantId: item.variant.id,
-      productId: item.variant.product.id,
-      categoryIds: item.variant.product.categories.map((c) => c.categoryId),
+      productId: product.id,
+      categoryIds: product.categories.map((c) => c.categoryId),
       quantity: item.quantity,
       unitPrice: price.unitPrice,
     };

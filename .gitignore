@@ -9,3 +9,6 @@ npm-debug.log*
 coverage
 # src/generated
 uploads
+opencode.json
+opencode2.json
+postman.json

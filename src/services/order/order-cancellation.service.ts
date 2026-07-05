@@ -98,8 +98,8 @@ async function performCancellation(order: OrderWithItems, reason: string): Promi
 }
 
 export async function cancelOrder(
-  userId: string,
-  orderId: string,
+  userId: number,
+  orderId: number,
   reason: string
 ): Promise<Order> {
   const order = (await prisma.order.findUnique({
@@ -135,7 +135,7 @@ export async function cancelOrder(
  * هیچ‌وقت پرداخت را تکمیل نکرده) — توسط cron job صدا زده می‌شود، نه از
  * کنترلر. مالکیت چک نمی‌شود چون caller سیستم است نه کاربر.
  */
-export async function expireStaleOrder(orderId: string): Promise<Order> {
+export async function expireStaleOrder(orderId: number): Promise<Order> {
   const order = (await prisma.order.findUnique({
     where: { id: orderId },
     include: { items: true },

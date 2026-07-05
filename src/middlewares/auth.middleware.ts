@@ -31,17 +31,18 @@ export async function authenticate(
 
     const payload = verifyAccessToken(token);
 
+    const sessionId = Number(payload.sid);
     const session = await prisma.userSession.findUnique({
-      where: { id: payload.sid },
+      where: { id: sessionId },
       select: { isActive: true, userId: true },
     });
 
-    if (!session || !session.isActive || session.userId !== payload.sub) {
+    if (!session || !session.isActive || session.userId !== Number(payload.sub)) {
       throw ApiError.unauthorized("نشست شما منقضی یا باطل شده است. دوباره وارد شوید");
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: payload.sub },
+      where: { id: Number(payload.sub) },
       select: { id: true, role: true, isBlocked: true },
     });
 
@@ -57,7 +58,7 @@ export async function authenticate(
 
     // به‌روزرسانی آخرین فعالیت نشست — بدون منتظرماندن برای پاسخ
     prisma.userSession
-      .update({ where: { id: payload.sid }, data: { lastActivityAt: new Date() } })
+      .update({ where: { id: sessionId }, data: { lastActivityAt: new Date() } })
       .catch(() => undefined);
 
     next();

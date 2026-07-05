@@ -1,43 +1,72 @@
 import { Request, Response } from "express";
+import path from "node:path";
+import fs from "node:fs";
 import { ApiResponse } from "../utils/ApiResponse";
 import { ApiError } from "../utils/ApiError";
-import { paramStr } from "../utils/params";
+import { paramInt } from "../utils/params";
+import { env } from "../config/env";
+import { getStorageProvider } from "../services/media/local-storage.provider";
 import * as mediaService from "../services/media/media.service";
 
-export async function uploadOne(req: Request, res: Response) {
+export async function upload(req: Request, res: Response) {
   if (!req.file) throw ApiError.badRequest("فایلی ارسال نشده است");
-  const media = await mediaService.createMediaRecord(
-    req.file,
-    req.user!.id,
-    typeof req.body?.alt === "string" ? req.body.alt : undefined
-  );
-  return ApiResponse.created(res, media, "فایل با موفقیت آپلود شد");
+  const entityType = (req.query.entityType as string) || "misc";
+  const media = await mediaService.saveFileToMedia(req.file, entityType, req.user?.id);
+  return ApiResponse.created(res, media, "فایل آپلود شد");
 }
 
-export async function uploadMany(req: Request, res: Response) {
-  const files = (req.files as Express.Multer.File[] | undefined) ?? [];
-  if (files.length === 0) throw ApiError.badRequest("فایلی ارسال نشده است");
-  const media = await mediaService.createMediaRecords(files, req.user!.id);
-  return ApiResponse.created(res, media, "فایل‌ها با موفقیت آپلود شدند");
+export async function uploadBulk(req: Request, res: Response) {
+  if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+    throw ApiError.badRequest("فایلی ارسال نشده است");
+  }
+  const entityType = (req.query.entityType as string) || "misc";
+  const items = await mediaService.saveFilesToMedia(req.files, entityType, req.user?.id);
+  return ApiResponse.created(res, { items }, `${items.length} فایل آپلود شد`);
 }
 
 export async function list(req: Request, res: Response) {
-  return ApiResponse.ok(res, await mediaService.listMedia(req.validatedQuery as never));
-}
-
-export async function getByIds(req: Request, res: Response) {
-  const ids = (req.validatedQuery?.ids as string)
-    .split(",")
-    .map((id) => id.trim())
-    .filter(Boolean);
-  return ApiResponse.ok(res, await mediaService.getMediaByIds(ids));
+  const { page, limit, type, entityType, search } = req.query as Record<string, string | undefined>;
+  const result = await mediaService.listMedia({
+    page: page ? Number(page) : undefined,
+    limit: limit ? Number(limit) : undefined,
+    type,
+    entityType,
+    search,
+  });
+  return ApiResponse.ok(res, result);
 }
 
 export async function getById(req: Request, res: Response) {
-  return ApiResponse.ok(res, await mediaService.getMediaById(paramStr(req.params.id)));
+  const media = await mediaService.getMediaById(paramInt(req.params.id));
+  return ApiResponse.ok(res, mediaService.serializeMedia(media));
+}
+
+export async function getUsage(req: Request, res: Response) {
+  const usages = await mediaService.checkMediaUsage(paramInt(req.params.id));
+  return ApiResponse.ok(res, { usages });
+}
+
+export async function download(req: Request, res: Response) {
+  const media = await mediaService.getMediaById(paramInt(req.params.id));
+  const storage = getStorageProvider();
+  const urlToFilePath = (storage as unknown as { urlToFilePath?: (url: string) => string }).urlToFilePath;
+  const absolutePath = urlToFilePath
+    ? urlToFilePath(media.url)
+    : path.join(
+        path.isAbsolute(env.UPLOAD_DIR) ? env.UPLOAD_DIR : path.join(process.cwd(), env.UPLOAD_DIR),
+        media.filePath
+      );
+
+  if (!fs.existsSync(absolutePath)) {
+    throw ApiError.notFound("فایل روی دیسک پیدا نشد");
+  }
+
+  res.setHeader("Content-Type", media.mimeType);
+  res.setHeader("Content-Disposition", `inline; filename="${media.originalName}"`);
+  res.sendFile(absolutePath);
 }
 
 export async function remove(req: Request, res: Response) {
-  await mediaService.deleteMedia(paramStr(req.params.id));
+  await mediaService.deleteMedia(paramInt(req.params.id));
   return ApiResponse.ok(res, null, "فایل حذف شد");
 }

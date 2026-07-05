@@ -6,15 +6,15 @@ import { getPaymentGatewayBySlug } from "../payment/payment-gateway-admin.servic
 import { notifyUser } from "../notification/notification.service";
 import { Order } from "../../generated/prisma";
 
-async function getOwnedOrder(userId: string, orderId: string): Promise<Order> {
+async function getOwnedOrder(userId: number, orderId: number): Promise<Order> {
   const order = await prisma.order.findUnique({ where: { id: orderId } });
   if (!order || order.userId !== userId) throw ApiError.notFound("سفارش پیدا نشد");
   return order;
 }
 
 export async function initiateOrderPayment(
-  userId: string,
-  orderId: string,
+  userId: number,
+  orderId: number,
   gatewaySlug?: string
 ) {
   const order = await getOwnedOrder(userId, orderId);
@@ -49,7 +49,7 @@ export async function initiateOrderPayment(
   const gateway = getGateway(gatewaySlugToUse);
 
   const result = await gateway.initiatePayment({
-    orderId: order.id,
+    orderId: String(order.id),
     amount: transaction.amount,
     description: `پرداخت سفارش ${order.orderNumber}`,
     callbackUrl: `${env.APP_BASE_URL}/api/v1/orders/${order.id}/payment/verify`,
@@ -64,8 +64,8 @@ export async function initiateOrderPayment(
 }
 
 export async function verifyOrderPayment(
-  userId: string,
-  orderId: string,
+  userId: number,
+  orderId: number,
   providerParams: Record<string, string>
 ): Promise<Order> {
   const order = await getOwnedOrder(userId, orderId);
@@ -84,7 +84,7 @@ export async function verifyOrderPayment(
 
   const gateway = getGateway(gatewayRecord.slug);
   const result = await gateway.verifyPayment({
-    orderId: order.id,
+    orderId: String(order.id),
     amount: transaction.amount,
     providerParams,
   });

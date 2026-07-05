@@ -13,9 +13,9 @@ import { DiscountCode } from "../../generated/prisma";
 // ----------------------------------------------------------------------------
 
 async function assertReferencesExist(input: {
-  productIds?: string[];
-  categoryIds?: string[];
-  userIds?: string[];
+  productIds?: number[];
+  categoryIds?: number[];
+  userIds?: number[];
 }): Promise<void> {
   if (input.productIds && input.productIds.length > 0) {
     const count = await prisma.product.count({ where: { id: { in: input.productIds } } });
@@ -37,7 +37,7 @@ async function assertReferencesExist(input: {
   }
 }
 
-async function assertCodeFree(code: string, excludeId?: string): Promise<void> {
+async function assertCodeFree(code: string, excludeId?: number): Promise<void> {
   const existing = await prisma.discountCode.findUnique({ where: { code } });
   if (existing && existing.id !== excludeId) {
     throw ApiError.conflict("این کد تخفیف قبلاً ثبت شده است");
@@ -71,7 +71,7 @@ export async function createDiscountCode(
 }
 
 export async function updateDiscountCode(
-  id: string,
+  id: number,
   input: UpdateDiscountCodeInput
 ): Promise<DiscountCode> {
   const existing = await prisma.discountCode.findUnique({ where: { id } });
@@ -110,7 +110,7 @@ export async function updateDiscountCode(
   });
 }
 
-export async function deleteDiscountCode(id: string): Promise<void> {
+export async function deleteDiscountCode(id: number): Promise<void> {
   const discountCode = await prisma.discountCode.findUnique({ where: { id } });
   if (!discountCode) throw ApiError.notFound("کد تخفیف پیدا نشد");
 
@@ -129,7 +129,7 @@ const ADMIN_DETAIL_INCLUDE = {
   users: { include: { user: { select: { id: true, fullName: true, email: true, phone: true } } } },
 };
 
-export async function getDiscountCodeById(id: string) {
+export async function getDiscountCodeById(id: number) {
   const discountCode = await prisma.discountCode.findUnique({
     where: { id },
     include: ADMIN_DETAIL_INCLUDE,

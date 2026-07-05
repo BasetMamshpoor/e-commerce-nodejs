@@ -30,7 +30,7 @@ export async function createPaymentGateway(
 }
 
 export async function updatePaymentGateway(
-  id: string,
+  id: number,
   input: UpdatePaymentGatewayInput
 ): Promise<PaymentGateway> {
   const gateway = await prisma.paymentGateway.findUnique({ where: { id } });
@@ -50,7 +50,7 @@ export async function updatePaymentGateway(
   });
 }
 
-export async function deletePaymentGateway(id: string): Promise<void> {
+export async function deletePaymentGateway(id: number): Promise<void> {
   const gateway = await prisma.paymentGateway.findUnique({ where: { id } });
   if (!gateway) throw ApiError.notFound("درگاه پرداخت پیدا نشد");
   await prisma.paymentGateway.delete({ where: { id } });

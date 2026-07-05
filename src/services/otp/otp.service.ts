@@ -33,7 +33,7 @@ export interface IssueOtpResult {
 export async function issueOtp(params: {
   identifier: string;
   purpose: OtpPurpose;
-  userId?: string;
+  userId?: number;
 }): Promise<IssueOtpResult> {
   const channel: OtpChannel =
     detectIdentifierChannel(params.identifier) === "SMS" ? "SMS" : "EMAIL";

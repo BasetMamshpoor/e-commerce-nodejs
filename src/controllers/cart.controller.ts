@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { ApiResponse } from "../utils/ApiResponse";
-import { paramStr } from "../utils/params";
+import { paramInt } from "../utils/params";
 import { resolveCartIdentity } from "../utils/cartIdentity";
 import * as cartService from "../services/shopping/cart.service";
 
@@ -39,7 +39,7 @@ export async function updateItem(req: Request, res: Response) {
   const { identity, guestToken } = resolveCartIdentity(req);
   const result = await cartService.updateItemQuantity(
     identity,
-    paramStr(req.params.itemId),
+    paramInt(req.params.itemId),
     req.body.quantity
   );
   return ApiResponse.ok(
@@ -51,7 +51,7 @@ export async function updateItem(req: Request, res: Response) {
 
 export async function removeItem(req: Request, res: Response) {
   const { identity, guestToken } = resolveCartIdentity(req);
-  const cart = await cartService.removeItem(identity, paramStr(req.params.itemId));
+  const cart = await cartService.removeItem(identity, paramInt(req.params.itemId));
   return ApiResponse.ok(res, withGuestToken({ cart }, guestToken), "آیتم از سبد خرید حذف شد");
 }
 

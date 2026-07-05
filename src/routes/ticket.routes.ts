@@ -11,6 +11,7 @@ import {
   createDepartmentSchema,
   updateDepartmentSchema,
 } from "../validations/ticket.validation";
+import { uploadTicketAttachmentsMiddleware } from "../services/media/upload-helper";
 
 const router = Router();
 const staffOnly = [authenticate, authorize("ADMIN", "SUPPORT")] as const;
@@ -50,14 +51,15 @@ router.put(
 router.post(
   "/admin/:id/messages",
   ...staffOnly,
+  uploadTicketAttachmentsMiddleware(),
   validate(addTicketMessageSchema),
   ticketController.addMessage
 );
 
 // --- مشتری ---
 router.get("/", validate(listTicketsQuerySchema, "query"), ticketController.listMine);
-router.post("/", validate(createTicketSchema), ticketController.create);
+router.post("/", uploadTicketAttachmentsMiddleware(), validate(createTicketSchema), ticketController.create);
 router.get("/:id", ticketController.getMine);
-router.post("/:id/messages", validate(addTicketMessageSchema), ticketController.addMessage);
+router.post("/:id/messages", uploadTicketAttachmentsMiddleware(), validate(addTicketMessageSchema), ticketController.addMessage);
 
 export default router;

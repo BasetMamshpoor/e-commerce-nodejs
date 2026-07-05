@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const createShippingCompanySchema = z.object({
   name: z.string().trim().min(2).max(150),
-  logoId: z.string().optional(),
+  logoUrl: z.string().optional(),
   description: z.string().max(500).optional(),
   baseCost: z.coerce.number().int().nonnegative().default(0),
   estimatedDaysMin: z.coerce.number().int().nonnegative().optional(),

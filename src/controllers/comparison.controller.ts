@@ -1,39 +1,23 @@
 import { Request, Response } from "express";
 import { ApiResponse } from "../utils/ApiResponse";
-import { paramStr } from "../utils/params";
-import { resolveComparisonIdentity } from "../utils/comparisonIdentity";
+import { ApiError } from "../utils/ApiError";
 import * as comparisonService from "../services/shopping/comparison.service";
 
-function withGuestToken<T extends Record<string, unknown>>(
-  data: T,
-  guestToken: string | undefined
-) {
-  return guestToken ? { ...data, guestToken } : data;
-}
+export async function compare(req: Request, res: Response) {
+  const productIdsParam = req.query.productIds;
+  if (typeof productIdsParam !== "string" || productIdsParam.length === 0) {
+    throw ApiError.badRequest("productIds را به‌صورت query ارسال کنید (مثلا ?productIds=1,2,3)");
+  }
 
-export async function get(req: Request, res: Response) {
-  const { identity, guestToken } = resolveComparisonIdentity(req);
-  const comparison = await comparisonService.getComparison(identity);
-  return ApiResponse.ok(res, withGuestToken({ comparison }, guestToken));
-}
+  const productIds = productIdsParam
+    .split(",")
+    .map((id) => Number(id.trim()))
+    .filter((id) => Number.isInteger(id) && id > 0);
 
-export async function add(req: Request, res: Response) {
-  const { identity, guestToken } = resolveComparisonIdentity(req);
-  const comparison = await comparisonService.addToComparison(identity, req.body.productId);
-  return ApiResponse.created(res, withGuestToken({ comparison }, guestToken), "محصول به لیست مقایسه اضافه شد");
-}
+  if (productIds.length < 1 || productIds.length > 4) {
+    throw ApiError.badRequest("حداقل ۱ و حداکثر ۴ محصول را ارسال کنید");
+  }
 
-export async function remove(req: Request, res: Response) {
-  const { identity, guestToken } = resolveComparisonIdentity(req);
-  const comparison = await comparisonService.removeFromComparison(
-    identity,
-    paramStr(req.params.productId)
-  );
-  return ApiResponse.ok(res, withGuestToken({ comparison }, guestToken), "محصول از لیست مقایسه حذف شد");
-}
-
-export async function clear(req: Request, res: Response) {
-  const { identity, guestToken } = resolveComparisonIdentity(req);
-  const comparison = await comparisonService.clearComparison(identity);
-  return ApiResponse.ok(res, withGuestToken({ comparison }, guestToken), "لیست مقایسه خالی شد");
+  const result = await comparisonService.getComparisonByProductIds(productIds);
+  return ApiResponse.ok(res, result);
 }

@@ -7,13 +7,13 @@ export async function createPopup(input: CreatePopupInput): Promise<Popup> {
   return prisma.popup.create({ data: input });
 }
 
-export async function updatePopup(id: string, input: UpdatePopupInput): Promise<Popup> {
+export async function updatePopup(id: number, input: UpdatePopupInput): Promise<Popup> {
   const popup = await prisma.popup.findUnique({ where: { id } });
   if (!popup) throw ApiError.notFound("پاپ‌آپ پیدا نشد");
   return prisma.popup.update({ where: { id }, data: input });
 }
 
-export async function deletePopup(id: string): Promise<void> {
+export async function deletePopup(id: number): Promise<void> {
   const popup = await prisma.popup.findUnique({ where: { id } });
   if (!popup) throw ApiError.notFound("پاپ‌آپ پیدا نشد");
   await prisma.popup.delete({ where: { id } });

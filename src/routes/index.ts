@@ -24,10 +24,11 @@ import securityRoutes from "./security.routes";
 import analyticsRoutes from "./analytics.routes";
 import settingsRoutes from "./settings.routes";
 import blogRoutes from "./blog.routes";
-
-// ----------------------------------------------------------------------------
-// هر ماژول جدید را همین‌جا mount کنید.
-// ----------------------------------------------------------------------------
+import storyRoutes from "./story.routes";
+import newsletterRoutes from "./newsletter.routes";
+import searchRoutes from "./search.routes";
+import landingRoutes from "./landing.routes";
+import adminNotificationRoutes from "./admin-notification.routes";
 
 const router = Router();
 
@@ -56,5 +57,10 @@ router.use("/security", securityRoutes);
 router.use("/analytics", analyticsRoutes);
 router.use("/settings", settingsRoutes);
 router.use("/blog", blogRoutes);
+router.use("/stories", storyRoutes);
+router.use("/newsletter", newsletterRoutes);
+router.use("/search", searchRoutes);
+router.use("/landing", landingRoutes);
+router.use("/admin/notifications", adminNotificationRoutes);
 
 export default router;

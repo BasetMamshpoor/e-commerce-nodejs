@@ -9,5 +9,17 @@ export const verifyPaymentSchema = z.object({
   providerParams: z.record(z.string(), z.string()).optional().default({}),
 });
 
+export const withdrawalRequestSchema = z.object({
+  amount: z.coerce.number().int().positive(),
+  description: z.string().max(500).optional(),
+});
+
+export const adminReviewWithdrawalSchema = z.object({
+  status: z.enum(["APPROVED", "REJECTED"]),
+  adminNote: z.string().max(500).optional(),
+});
+
 export type ChargeWalletInput = z.infer<typeof chargeWalletSchema>;
 export type VerifyPaymentInput = z.infer<typeof verifyPaymentSchema>;
+export type WithdrawalRequestInput = z.infer<typeof withdrawalRequestSchema>;
+export type AdminReviewWithdrawalInput = z.infer<typeof adminReviewWithdrawalSchema>;
