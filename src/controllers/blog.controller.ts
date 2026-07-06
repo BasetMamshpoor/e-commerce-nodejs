@@ -37,11 +37,6 @@ export async function listAdmin(req: Request, res: Response) {
   return ApiResponse.ok(res, await postService.listBlogPostsAdmin(req.validatedQuery as never));
 }
 
-export async function trackView(req: Request, res: Response) {
-  await postService.trackBlogPostView(paramInt(req.params.id));
-  return ApiResponse.ok(res, null);
-}
-
 // --- دسته‌بندی‌ها ---
 
 export async function createCategory(req: Request, res: Response) {

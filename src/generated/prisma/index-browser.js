@@ -352,26 +352,6 @@ exports.Prisma.ProductDisplayAttributeValueScalarFieldEnum = {
   value: 'value'
 };
 
-exports.Prisma.ProductViewScalarFieldEnum = {
-  id: 'id',
-  productId: 'productId',
-  userId: 'userId',
-  ip: 'ip',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.ProductRelatedScalarFieldEnum = {
-  id: 'id',
-  productId: 'productId',
-  relatedId: 'relatedId'
-};
-
-exports.Prisma.ProductAlsoBoughtScalarFieldEnum = {
-  id: 'id',
-  productId: 'productId',
-  alsoBoughtId: 'alsoBoughtId'
-};
-
 exports.Prisma.WishlistScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -946,9 +926,6 @@ exports.Prisma.ModelName = {
   ProductVariant: 'ProductVariant',
   ProductVariantAttributeValue: 'ProductVariantAttributeValue',
   ProductDisplayAttributeValue: 'ProductDisplayAttributeValue',
-  ProductView: 'ProductView',
-  ProductRelated: 'ProductRelated',
-  ProductAlsoBought: 'ProductAlsoBought',
   Wishlist: 'Wishlist',
   Cart: 'Cart',
   CartItem: 'CartItem',

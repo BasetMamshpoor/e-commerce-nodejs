@@ -71,7 +71,8 @@ export async function createComment(
   userId: number,
   commentableType: CommentableType,
   commentableId: number,
-  input: CreateCommentInput
+  input: CreateCommentInput,
+  uploadedMediaIds: number[] = []
 ): Promise<Comment> {
   await assertCommentableExists(commentableType, commentableId);
 
@@ -91,7 +92,9 @@ export async function createComment(
       content: input.content,
       rating: input.rating,
       status: "PENDING",
-      attachments: { create: (input.attachmentMediaIds ?? []).map((mediaId) => ({ mediaId })) },
+      attachments: uploadedMediaIds.length > 0
+        ? { create: uploadedMediaIds.map((mediaId) => ({ mediaId })) }
+        : undefined,
     },
   });
 }

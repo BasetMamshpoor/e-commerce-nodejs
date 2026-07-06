@@ -115,6 +115,9 @@ export async function getBlogPostBySlugPublic(slug: string) {
     include: DETAIL_INCLUDE,
   })) as PostWithRelations | null;
   if (!post || post.status !== "PUBLISHED") throw ApiError.notFound("پست وبلاگ پیدا نشد");
+
+  await prisma.blogPost.update({ where: { id: post.id }, data: { viewCount: { increment: 1 } } });
+
   return post;
 }
 
@@ -125,10 +128,6 @@ export async function getBlogPostByIdAdmin(id: number) {
   })) as PostWithRelations | null;
   if (!post) throw ApiError.notFound("پست وبلاگ پیدا نشد");
   return post;
-}
-
-export async function trackBlogPostView(id: number): Promise<void> {
-  await prisma.blogPost.update({ where: { id }, data: { viewCount: { increment: 1 } } });
 }
 
 async function buildWhere(query: ListBlogPostsQuery) {

@@ -5,7 +5,6 @@ export const createCommentSchema = z
     content: z.string().trim().min(1).max(2000),
     parentId: z.coerce.number().int().optional(),
     rating: z.coerce.number().int().min(1).max(5).optional(),
-    attachmentMediaIds: z.array(z.coerce.number().int().positive()).optional().default([]),
   })
   .refine((d) => !d.parentId || d.rating === undefined, {
     message: "امتیاز (rating) فقط برای دیدگاه اصلی (نه پاسخ) معنا دارد",

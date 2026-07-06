@@ -1,229 +1,2103 @@
 {
   "info": {
-    "name": "e-commerce",
-    "_postman_id": "f4d3d8b5-a5d1-4f93-b0f5-123456789abc",
-    "description": "Authentication APIs",
+    "name": "MrKafshdoz API",
+    "description": "مجموعه کامل APIهای بک‌اند فروشگاه مرکافش‌دوز\n\n## نحوه استفاده\n1. متغیر `base_url` را به آدرس سرور خود تغییر دهید (پیش‌فرض: `http://localhost:4000`)\n2.先从 `Auth` > `ثبت‌نام/ورود` 使用، سپس `access_token` به‌طور خودکار تنظیم می‌شود\n3. برای سبد خرید مهمان از `guest_token` استفاده کنید\n\n## نکات\n- تمام درخواست‌های نیازمند احراز هویت از هدر `Authorization: Bearer {{access_token}}` استفاده می‌کنند\n- مسیرهای عمومی (`GET /`, `GET /health`) نیاز به توکن ندارند\n- کاربرانی که نقش `ADMIN`/`EDITOR` دارند می‌توانند به مسیرهای مدیریتی دسترسی داشته باشند\n",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:4000/api/v1"
-    },
-    {
-      "key": "identifier",
-      "value": "[test@example.com](mailto:test@example.com)"
-    },
-    {
-      "key": "password",
-      "value": "Password123"
-    },
-    {
-      "key": "otp",
-      "value": "123456"
-    },
-    {
-      "key": "refreshToken",
-      "value": ""
-    },
-    {
-      "key": "accessToken",
-      "value": ""
-    }
+    { "key": "base_url", "value": "http://localhost:4000", "type": "string" },
+    { "key": "api", "value": "{{base_url}}/api/v1", "type": "string" },
+    { "key": "access_token", "value": "", "type": "string" },
+    { "key": "guest_token", "value": "", "type": "string" },
+    { "key": "admin_token", "value": "", "type": "string" },
+    { "key": "product_id", "value": "1", "type": "string" },
+    { "key": "variant_id", "value": "1", "type": "string" },
+    { "key": "category_id", "value": "1", "type": "string" },
+    { "key": "brand_id", "value": "1", "type": "string" },
+    { "key": "order_id", "value": "1", "type": "string" },
+    { "key": "ticket_id", "value": "1", "type": "string" },
+    { "key": "media_id", "value": "1", "type": "string" },
+    { "key": "comment_id", "value": "1", "type": "string" }
   ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }]
+  },
   "item": [
     {
-      "name": "Register",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "POST /auth/register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["if (pm.response.code === 201) { pm.collectionVariables.set('identifier', 'test@example.com'); }"],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"کاربر تست\",\n  \"identifier\": \"test@example.com\",\n  \"password\": \"Test@12345\"\n}"
+            },
+            "url": { "raw": "{{api}}/auth/register", "host": ["{{api}}"], "path": ["auth", "register"] }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  'fullName': 'Test User',\n  'identifier': '{{identifier}}',\n  'password': '{{password}}'\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/auth/register",
-          "host": ["{{baseUrl}}"],
-          "path": ["auth", "register"]
-        }
-      }
-    },
-    {
-      "name": "Verify Register OTP",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+        {
+          "name": "POST /auth/register/verify-otp",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"test@example.com\",\n  \"code\": \"12345\",\n  \"deviceName\": \"Postman\"\n}"
+            },
+            "url": { "raw": "{{api}}/auth/register/verify-otp", "host": ["{{api}}"], "path": ["auth", "register", "verify-otp"] }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  'identifier': '{{identifier}}',\n  'code': '{{otp}}',\n  'deviceName': 'Windows Chrome'\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/auth/register/verify-otp",
-          "path": ["auth", "register", "verify-otp"]
-        }
-      }
-    },
-    {
-      "name": "Login",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+        {
+          "name": "POST /auth/login (با رمز)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var json = pm.response.json();",
+                  "  pm.collectionVariables.set('access_token', json.data.accessToken);",
+                  "  pm.collectionVariables.set('admin_token', json.data.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"admin@mrkafshdoz.com\",\n  \"password\": \"Admin@1234\",\n  \"deviceName\": \"Postman\"\n}"
+            },
+            "url": { "raw": "{{api}}/auth/login", "host": ["{{api}}"], "path": ["auth", "login"] }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  'identifier': '{{identifier}}',\n  'password': '{{password}}',\n  'deviceName': 'Windows Chrome'\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/auth/login",
-          "path": ["auth", "login"]
-        }
-      }
-    },
-    {
-      "name": "Request Login OTP",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+        {
+          "name": "POST /auth/login (مشتری)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var json = pm.response.json();",
+                  "  pm.collectionVariables.set('access_token', json.data.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"ali@example.com\",\n  \"password\": \"Customer@1234\",\n  \"deviceName\": \"Postman\"\n}"
+            },
+            "url": { "raw": "{{api}}/auth/login", "host": ["{{api}}"], "path": ["auth", "login"] }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  'identifier': '{{identifier}}'\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/auth/login/otp/request",
-          "path": ["auth", "login", "otp", "request"]
-        }
-      }
-    },
-    {
-      "name": "Verify Login OTP",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+        {
+          "name": "POST /auth/login/otp/request",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"identifier\": \"admin@mrkafshdoz.com\"\n}" },
+            "url": { "raw": "{{api}}/auth/login/otp/request", "host": ["{{api}}"], "path": ["auth", "login", "otp", "request"] }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  'identifier': '{{identifier}}',\n  'code': '{{otp}}',\n  'deviceName': 'Windows Chrome'\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/auth/login/otp/verify",
-          "path": ["auth", "login", "otp", "verify"]
-        }
-      }
-    },
-    {
-      "name": "Refresh Token",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+        {
+          "name": "POST /auth/login/otp/verify",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"identifier\": \"admin@mrkafshdoz.com\",\n  \"code\": \"12345\",\n  \"deviceName\": \"Postman\"\n}" },
+            "url": { "raw": "{{api}}/auth/login/otp/verify", "host": ["{{api}}"], "path": ["auth", "login", "otp", "verify"] }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  'refreshToken': '{{refreshToken}}'\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/auth/refresh-token",
-          "path": ["auth", "refresh-token"]
-        }
-      }
-    },
-    {
-      "name": "Logout",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{accessToken}}"
+        {
+          "name": "POST /auth/forgot-password",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"identifier\": \"admin@mrkafshdoz.com\"\n}" },
+            "url": { "raw": "{{api}}/auth/forgot-password", "host": ["{{api}}"], "path": ["auth", "forgot-password"] }
           }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/auth/logout",
-          "path": ["auth", "logout"]
-        }
-      }
-    },
-    {
-      "name": "Logout All Devices",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{accessToken}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/auth/logout-all",
-          "path": ["auth", "logout-all"]
-        }
-      }
-    },
-    {
-      "name": "Forgot Password",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  'identifier': '{{identifier}}'\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/auth/forgot-password",
-          "path": ["auth", "forgot-password"]
+        {
+          "name": "POST /auth/reset-password",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"identifier\": \"admin@mrkafshdoz.com\",\n  \"code\": \"12345\",\n  \"newPassword\": \"NewPass@1234\"\n}" },
+            "url": { "raw": "{{api}}/auth/reset-password", "host": ["{{api}}"], "path": ["auth", "reset-password"] }
+          }
+        },
+        {
+          "name": "POST /auth/refresh-token",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"...\"\n}" },
+            "url": { "raw": "{{api}}/auth/refresh-token", "host": ["{{api}}"], "path": ["auth", "refresh-token"] }
+          }
+        },
+        {
+          "name": "POST /auth/logout",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{api}}/auth/logout", "host": ["{{api}}"], "path": ["auth", "logout"] }
+          }
+        },
+        {
+          "name": "POST /auth/logout-all",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{api}}/auth/logout-all", "host": ["{{api}}"], "path": ["auth", "logout-all"] }
+          }
         }
-      }
+      ]
     },
     {
-      "name": "Reset Password",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  'identifier': '{{identifier}}',\n  'code': '{{otp}}',\n  'newPassword': 'NewPassword123'\n}"
+      "name": "📁 Categories",
+      "item": [
+        {
+          "name": "GET /categories/tree",
+          "request": { "method": "GET", "url": { "raw": "{{api}}/categories/tree", "host": ["{{api}}"], "path": ["categories", "tree"] } }
         },
-        "url": {
-          "raw": "{{baseUrl}}/auth/reset-password",
-          "path": ["auth", "reset-password"]
+        {
+          "name": "GET /categories",
+          "request": { "method": "GET", "url": { "raw": "{{api}}/categories", "host": ["{{api}}"], "path": ["categories"] } }
+        },
+        {
+          "name": "GET /categories?includeInactive=true",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/categories?includeInactive=true",
+              "host": ["{{api}}"], "path": ["categories"],
+              "query": [{ "key": "includeInactive", "value": "true" }]
+            }
+          }
+        },
+        {
+          "name": "GET /categories/slug/:slug",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/categories/slug/clothing", "host": ["{{api}}"], "path": ["categories", "slug", "clothing"] }
+          }
+        },
+        {
+          "name": "GET /categories/:id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/categories/{{category_id}}", "host": ["{{api}}"], "path": ["categories", "{{category_id}}"] }
+          }
+        },
+        {
+          "name": "GET /categories/:id/attributes",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/categories/{{category_id}}/attributes", "host": ["{{api}}"], "path": ["categories", "{{category_id}}", "attributes"] }
+          }
+        },
+        {
+          "name": "POST /categories (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"دسته جدید\",\n  \"slug\": \"new-category\",\n  \"description\": \"توضیحات دسته جدید\",\n  \"parentId\": 1,\n  \"order\": 5,\n  \"isActive\": true\n}"
+            },
+            "url": { "raw": "{{api}}/categories", "host": ["{{api}}"], "path": ["categories"] }
+          }
+        },
+        {
+          "name": "PUT /categories/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"دسته ویرایش‌شده\",\n  \"isActive\": true\n}" },
+            "url": { "raw": "{{api}}/categories/{{category_id}}", "host": ["{{api}}"], "path": ["categories", "{{category_id}}"] }
+          }
+        },
+        {
+          "name": "DELETE /categories/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/categories/{{category_id}}", "host": ["{{api}}"], "path": ["categories", "{{category_id}}"] }
+          }
+        },
+        {
+          "name": "POST /categories/:id/attributes (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"attributeId\": 1\n}" },
+            "url": { "raw": "{{api}}/categories/{{category_id}}/attributes", "host": ["{{api}}"], "path": ["categories", "{{category_id}}", "attributes"] }
+          }
+        },
+        {
+          "name": "DELETE /categories/:id/attributes/:attrId (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/categories/{{category_id}}/attributes/1", "host": ["{{api}}"], "path": ["categories", "{{category_id}}", "attributes", "1"] }
+          }
         }
-      }
+      ]
+    },
+    {
+      "name": "🏷️ Brands",
+      "item": [
+        {
+          "name": "GET /brands",
+          "request": { "method": "GET", "url": { "raw": "{{api}}/brands", "host": ["{{api}}"], "path": ["brands"] } }
+        },
+        {
+          "name": "GET /brands/slug/:slug",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/brands/slug/nike", "host": ["{{api}}"], "path": ["brands", "slug", "nike"] }
+          }
+        },
+        {
+          "name": "GET /brands/:id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/brands/{{brand_id}}", "host": ["{{api}}"], "path": ["brands", "{{brand_id}}"] }
+          }
+        },
+        {
+          "name": "POST /brands (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"برند جدید\",\n  \"description\": \"توضیحات برند\",\n  \"isActive\": true\n}" },
+            "url": { "raw": "{{api}}/brands", "host": ["{{api}}"], "path": ["brands"] }
+          }
+        },
+        {
+          "name": "PUT /brands/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"برند ویرایش‌شده\"\n}" },
+            "url": { "raw": "{{api}}/brands/{{brand_id}}", "host": ["{{api}}"], "path": ["brands", "{{brand_id}}"] }
+          }
+        },
+        {
+          "name": "DELETE /brands/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/brands/{{brand_id}}", "host": ["{{api}}"], "path": ["brands", "{{brand_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📐 Attributes",
+      "item": [
+        {
+          "name": "GET /attributes",
+          "request": { "method": "GET", "url": { "raw": "{{api}}/attributes", "host": ["{{api}}"], "path": ["attributes"] } }
+        },
+        {
+          "name": "GET /attributes/:id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/attributes/1", "host": ["{{api}}"], "path": ["attributes", "1"] }
+          }
+        },
+        {
+          "name": "POST /attributes (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"جنس\",\n  \"slug\": \"material\",\n  \"inputType\": \"SELECT\",\n  \"isFilterable\": true,\n  \"isVariant\": true,\n  \"isDisplay\": false\n}"
+            },
+            "url": { "raw": "{{api}}/attributes", "host": ["{{api}}"], "path": ["attributes"] }
+          }
+        },
+        {
+          "name": "PUT /attributes/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"جنس پارچه\"\n}" },
+            "url": { "raw": "{{api}}/attributes/1", "host": ["{{api}}"], "path": ["attributes", "1"] }
+          }
+        },
+        {
+          "name": "DELETE /attributes/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/attributes/1", "host": ["{{api}}"], "path": ["attributes", "1"] }
+          }
+        },
+        {
+          "name": "POST /attributes/:id/values (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"value\": \"کتان\",\n  \"colorHex\": \"#F5F5DC\",\n  \"order\": 5\n}" },
+            "url": { "raw": "{{api}}/attributes/1/values", "host": ["{{api}}"], "path": ["attributes", "1", "values"] }
+          }
+        },
+        {
+          "name": "PUT /attributes/values/:valueId (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"value\": \"کتان ممتاز\"\n}" },
+            "url": { "raw": "{{api}}/attributes/values/1", "host": ["{{api}}"], "path": ["attributes", "values", "1"] }
+          }
+        },
+        {
+          "name": "DELETE /attributes/values/:valueId (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/attributes/values/1", "host": ["{{api}}"], "path": ["attributes", "values", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📦 Products",
+      "item": [
+        {
+          "name": "GET /products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/products?page=1&limit=20&sort=newest&inStock=true",
+              "host": ["{{api}}"], "path": ["products"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "sort", "value": "newest" },
+                { "key": "categorySlug", "value": "clothing", "disabled": true },
+                { "key": "brandIds", "value": "1,2", "disabled": true },
+                { "key": "minPrice", "value": "100000", "disabled": true },
+                { "key": "maxPrice", "value": "5000000", "disabled": true },
+                { "key": "inStock", "value": "true" },
+                { "key": "hasDiscount", "value": "true", "disabled": true },
+                { "key": "isFeatured", "value": "true", "disabled": true },
+                { "key": "search", "value": "نایک", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /products?sort=bestselling",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/products?sort=bestselling",
+              "host": ["{{api}}"], "path": ["products"],
+              "query": [{ "key": "sort", "value": "bestselling" }]
+            }
+          }
+        },
+        {
+          "name": "GET /products?sort=most_popular",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/products?sort=most_popular",
+              "host": ["{{api}}"], "path": ["products"],
+              "query": [{ "key": "sort", "value": "most_popular" }]
+            }
+          }
+        },
+        {
+          "name": "GET /products/filters",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/products/filters?categorySlug=clothing",
+              "host": ["{{api}}"], "path": ["products", "filters"],
+              "query": [{ "key": "categorySlug", "value": "clothing" }]
+            }
+          }
+        },
+        {
+          "name": "GET /products/by-id/:id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/products/by-id/{{product_id}}", "host": ["{{api}}"], "path": ["products", "by-id", "{{product_id}}"] }
+          }
+        },
+        {
+          "name": "GET /products/:slug",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/products/nike-dri-fit-tshirt", "host": ["{{api}}"], "path": ["products", "nike-dri-fit-tshirt"] }
+          }
+        },
+        {
+          "name": "GET /products/admin",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/products/admin?page=1&limit=20&status=PUBLISHED",
+              "host": ["{{api}}"], "path": ["products", "admin"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "status", "value": "PUBLISHED" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /products/admin/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/products/admin/{{product_id}}", "host": ["{{api}}"], "path": ["products", "admin", "{{product_id}}"] }
+          }
+        },
+        {
+          "name": "POST /products (ادمین) — Multipart (روش اصلی)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "multipart/form-data"}],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "محصول جدید", "type": "text" },
+                { "key": "brandId", "value": "1", "type": "text" },
+                { "key": "basePrice", "value": "450000", "type": "text" },
+                { "key": "shortDescription", "value": "توضیح کوتاه", "type": "text" },
+                { "key": "description", "value": "<p>توضیح کامل HTML</p>", "type": "text" },
+                { "key": "status", "value": "DRAFT", "type": "text" },
+                { "key": "discountType", "value": "PERCENT", "type": "text" },
+                { "key": "discountValue", "value": "10", "type": "text" },
+                { "key": "isFeatured", "value": "false", "type": "text" },
+                { "key": "categoryIds", "value": "[1, 2]", "type": "text" },
+                { "key": "images", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{api}}/products", "host": ["{{api}}"], "path": ["products"] }
+          }
+        },
+        {
+          "name": "POST /products (ادمین) — JSON (mediaId از قبل آپلود شده)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"محصول با تصاویر از Media\",\n  \"brandId\": 1,\n  \"shortDescription\": \"توضیح کوتاه\",\n  \"description\": \"<p>توضیح کامل HTML</p>\",\n  \"basePrice\": 350000,\n  \"discountType\": \"PERCENT\",\n  \"discountValue\": 10,\n  \"status\": \"DRAFT\",\n  \"isFeatured\": false,\n  \"categoryIds\": [1, 2],\n  \"images\": [\n    { \"mediaId\": 1, \"order\": 0, \"isMain\": true }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"TEST-SKU-001\",\n      \"priceAdjustment\": 0,\n      \"stock\": 10,\n      \"isDefault\": true,\n      \"attributeValueIds\": [1, 3]\n    }\n  ],\n  \"displayAttributes\": [\n    { \"attributeId\": 1, \"value\": \"ایران\" }\n  ]\n}"
+            },
+            "url": { "raw": "{{api}}/products", "host": ["{{api}}"], "path": ["products"] }
+          }
+        },
+        {
+          "name": "PUT /products/:id (ادمین) — Multipart (روش اصلی)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "multipart/form-data"}],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "نام جدید محصول", "type": "text" },
+                { "key": "categoryIds", "value": "[1]", "type": "text" },
+                { "key": "deletedImages", "value": "[3, 5]", "type": "text" },
+                { "key": "images", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{api}}/products/{{product_id}}", "host": ["{{api}}"], "path": ["products", "{{product_id}}"] }
+          }
+        },
+        {
+          "name": "PUT /products/:id (ادمین) — JSON (mediaId از قبل آپلود شده)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"نام جدید محصول\",\n  \"categoryIds\": [1],\n  \"deletedImages\": [3, 5],\n  \"images\": [\n    { \"mediaId\": 1, \"order\": 0, \"isMain\": true }\n  ]\n}"
+            },
+            "url": { "raw": "{{api}}/products/{{product_id}}", "host": ["{{api}}"], "path": ["products", "{{product_id}}"] }
+          }
+        },
+        {
+          "name": "DELETE /products/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/products/{{product_id}}", "host": ["{{api}}"], "path": ["products", "{{product_id}}"] }
+          }
+        },
+        {
+          "name": "POST /products/:id/variants (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"NEW-VARIANT-001\",\n  \"priceAdjustment\": 20000,\n  \"stock\": 5,\n  \"isDefault\": false,\n  \"isActive\": true,\n  \"attributeValueIds\": [1, 2]\n}"
+            },
+            "url": { "raw": "{{api}}/products/{{product_id}}/variants", "host": ["{{api}}"], "path": ["products", "{{product_id}}", "variants"] }
+          }
+        },
+        {
+          "name": "PUT /products/:id/variants/:variantId (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"stock\": 25,\n  \"priceAdjustment\": 10000\n}" },
+            "url": { "raw": "{{api}}/products/{{product_id}}/variants/{{variant_id}}", "host": ["{{api}}"], "path": ["products", "{{product_id}}", "variants", "{{variant_id}}"] }
+          }
+        },
+        {
+          "name": "DELETE /products/:id/variants/:variantId (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/products/{{product_id}}/variants/{{variant_id}}", "host": ["{{api}}"], "path": ["products", "{{product_id}}", "variants", "{{variant_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛒 Cart",
+      "item": [
+        {
+          "name": "GET /cart",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "X-Guest-Token", "value": "{{guest_token}}"}],
+            "url": { "raw": "{{api}}/cart", "host": ["{{api}}"], "path": ["cart"] },
+            "description": "اگر guest_token خالی باشد، سرور یک توکن جدید برمی‌گرداند"
+          }
+        },
+        {
+          "name": "POST /cart/items",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "X-Guest-Token", "value": "{{guest_token}}"}
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"variantId\": 1,\n  \"quantity\": 2\n}" },
+            "url": { "raw": "{{api}}/cart/items", "host": ["{{api}}"], "path": ["cart", "items"] }
+          }
+        },
+        {
+          "name": "PATCH /cart/items/:itemId",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "X-Guest-Token", "value": "{{guest_token}}"}
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"quantity\": 3\n}" },
+            "url": { "raw": "{{api}}/cart/items/1", "host": ["{{api}}"], "path": ["cart", "items", "1"] }
+          }
+        },
+        {
+          "name": "DELETE /cart/items/:itemId",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "X-Guest-Token", "value": "{{guest_token}}"}],
+            "url": { "raw": "{{api}}/cart/items/1", "host": ["{{api}}"], "path": ["cart", "items", "1"] }
+          }
+        },
+        {
+          "name": "DELETE /cart",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "X-Guest-Token", "value": "{{guest_token}}"}],
+            "url": { "raw": "{{api}}/cart", "host": ["{{api}}"], "path": ["cart"] }
+          }
+        },
+        {
+          "name": "POST /cart/merge",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"guestToken\": \"{{guest_token}}\"\n}" },
+            "url": { "raw": "{{api}}/cart/merge", "host": ["{{api}}"], "path": ["cart", "merge"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "❤️ Wishlist",
+      "item": [
+        {
+          "name": "GET /wishlist",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/wishlist?page=1&limit=20",
+              "host": ["{{api}}"], "path": ["wishlist"],
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "20" }]
+            }
+          }
+        },
+        {
+          "name": "POST /wishlist",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"productId\": 1\n}" },
+            "url": { "raw": "{{api}}/wishlist", "host": ["{{api}}"], "path": ["wishlist"] }
+          }
+        },
+        {
+          "name": "DELETE /wishlist/:productId",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/wishlist/{{product_id}}", "host": ["{{api}}"], "path": ["wishlist", "{{product_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚖️ Comparison",
+      "item": [
+        {
+          "name": "GET /comparison",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/comparison?productIds=1,2,3",
+              "host": ["{{api}}"], "path": ["comparison"],
+              "query": [{ "key": "productIds", "value": "1,2,3" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏷️ Discount Codes",
+      "item": [
+        {
+          "name": "POST /discount-codes/apply",
+          "request": {
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "method": "POST",
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"WELCOME20\"\n}" },
+            "url": { "raw": "{{api}}/discount-codes/apply", "host": ["{{api}}"], "path": ["discount-codes", "apply"] }
+          }
+        },
+        {
+          "name": "GET /discount-codes (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/discount-codes?page=1&isActive=true&search=WELCOME",
+              "host": ["{{api}}"], "path": ["discount-codes"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "isActive", "value": "true", "disabled": true },
+                { "key": "search", "value": "WELCOME", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /discount-codes/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/discount-codes/1", "host": ["{{api}}"], "path": ["discount-codes", "1"] }
+          }
+        },
+        {
+          "name": "POST /discount-codes (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"TEST50\",\n  \"type\": \"PERCENT\",\n  \"value\": 50,\n  \"maxDiscountAmount\": 200000,\n  \"minCartAmount\": 500000,\n  \"maxUsage\": 100,\n  \"maxUsagePerUser\": 1,\n  \"startsAt\": \"2026-07-01T00:00:00Z\",\n  \"expiresAt\": \"2026-08-01T23:59:59Z\",\n  \"isActive\": true\n}"
+            },
+            "url": { "raw": "{{api}}/discount-codes", "host": ["{{api}}"], "path": ["discount-codes"] }
+          }
+        },
+        {
+          "name": "PUT /discount-codes/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"isActive\": false\n}" },
+            "url": { "raw": "{{api}}/discount-codes/1", "host": ["{{api}}"], "path": ["discount-codes", "1"] }
+          }
+        },
+        {
+          "name": "DELETE /discount-codes/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/discount-codes/1", "host": ["{{api}}"], "path": ["discount-codes", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏠 Addresses",
+      "item": [
+        {
+          "name": "GET /addresses",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/addresses", "host": ["{{api}}"], "path": ["addresses"] }
+          }
+        },
+        {
+          "name": "GET /addresses/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/addresses/1", "host": ["{{api}}"], "path": ["addresses", "1"] }
+          }
+        },
+        {
+          "name": "POST /addresses",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"محل کار\",\n  \"receiverName\": \"علی رضایی\",\n  \"receiverPhone\": \"09123456789\",\n  \"province\": \"تهران\",\n  \"city\": \"تهران\",\n  \"postalCode\": \"1234567890\",\n  \"fullAddress\": \"تهران، خیابان انقلاب، پلاک ۱۰\",\n  \"lat\": 35.6892,\n  \"lng\": 51.3890,\n  \"isDefault\": false\n}"
+            },
+            "url": { "raw": "{{api}}/addresses", "host": ["{{api}}"], "path": ["addresses"] }
+          }
+        },
+        {
+          "name": "PUT /addresses/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"آدرس جدید\",\n  \"isDefault\": true\n}" },
+            "url": { "raw": "{{api}}/addresses/1", "host": ["{{api}}"], "path": ["addresses", "1"] }
+          }
+        },
+        {
+          "name": "DELETE /addresses/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/addresses/1", "host": ["{{api}}"], "path": ["addresses", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚚 Shipping Companies",
+      "item": [
+        {
+          "name": "GET /shipping-companies",
+          "request": { "method": "GET", "url": { "raw": "{{api}}/shipping-companies", "host": ["{{api}}"], "path": ["shipping-companies"] } }
+        },
+        {
+          "name": "GET /shipping-companies/:id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/shipping-companies/1", "host": ["{{api}}"], "path": ["shipping-companies", "1"] }
+          }
+        },
+        {
+          "name": "POST /shipping-companies (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"شرکت جدید\",\n  \"description\": \"توضیحات\",\n  \"baseCost\": 45000,\n  \"estimatedDaysMin\": 2,\n  \"estimatedDaysMax\": 5,\n  \"isActive\": true\n}" },
+            "url": { "raw": "{{api}}/shipping-companies", "host": ["{{api}}"], "path": ["shipping-companies"] }
+          }
+        },
+        {
+          "name": "PUT /shipping-companies/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"baseCost\": 55000\n}" },
+            "url": { "raw": "{{api}}/shipping-companies/1", "host": ["{{api}}"], "path": ["shipping-companies", "1"] }
+          }
+        },
+        {
+          "name": "DELETE /shipping-companies/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/shipping-companies/1", "host": ["{{api}}"], "path": ["shipping-companies", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 Payment Gateways",
+      "item": [
+        {
+          "name": "GET /payment-gateways",
+          "request": { "method": "GET", "url": { "raw": "{{api}}/payment-gateways", "host": ["{{api}}"], "path": ["payment-gateways"] } }
+        },
+        {
+          "name": "POST /payment-gateways (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"ملت\",\n  \"slug\": \"mellat\",\n  \"isActive\": true\n}" },
+            "url": { "raw": "{{api}}/payment-gateways", "host": ["{{api}}"], "path": ["payment-gateways"] }
+          }
+        },
+        {
+          "name": "PUT /payment-gateways/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"isActive\": false\n}" },
+            "url": { "raw": "{{api}}/payment-gateways/1", "host": ["{{api}}"], "path": ["payment-gateways", "1"] }
+          }
+        },
+        {
+          "name": "DELETE /payment-gateways/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/payment-gateways/1", "host": ["{{api}}"], "path": ["payment-gateways", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👛 Wallet",
+      "item": [
+        {
+          "name": "GET /wallet",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/wallet?page=1&limit=20",
+              "host": ["{{api}}"], "path": ["wallet"],
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "20" }]
+            }
+          }
+        },
+        {
+          "name": "POST /wallet/charge/initiate",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 200000,\n  \"gatewaySlug\": \"zarinpal\"\n}" },
+            "url": { "raw": "{{api}}/wallet/charge/initiate", "host": ["{{api}}"], "path": ["wallet", "charge", "initiate"] }
+          }
+        },
+        {
+          "name": "POST /wallet/charge/:transactionId/verify",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"providerParams\": { \"Authority\": \"...\", \"Status\": \"OK\" }\n}" },
+            "url": { "raw": "{{api}}/wallet/charge/1/verify", "host": ["{{api}}"], "path": ["wallet", "charge", "1", "verify"] }
+          }
+        },
+        {
+          "name": "POST /wallet/withdrawals",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 50000,\n  \"description\": \"برداشت به حساب بانکی\"\n}" },
+            "url": { "raw": "{{api}}/wallet/withdrawals", "host": ["{{api}}"], "path": ["wallet", "withdrawals"] }
+          }
+        },
+        {
+          "name": "GET /wallet/withdrawals",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/wallet/withdrawals", "host": ["{{api}}"], "path": ["wallet", "withdrawals"] }
+          }
+        },
+        {
+          "name": "GET /wallet/admin/withdrawals (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/wallet/admin/withdrawals", "host": ["{{api}}"], "path": ["wallet", "admin", "withdrawals"] }
+          }
+        },
+        {
+          "name": "PUT /wallet/admin/withdrawals/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"APPROVED\",\n  \"adminNote\": \"تایید شد\"\n}" },
+            "url": { "raw": "{{api}}/wallet/admin/withdrawals/1", "host": ["{{api}}"], "path": ["wallet", "admin", "withdrawals", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📦 Orders",
+      "item": [
+        {
+          "name": "GET /orders",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/orders", "host": ["{{api}}"], "path": ["orders"] }
+          }
+        },
+        {
+          "name": "GET /orders/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/orders/{{order_id}}", "host": ["{{api}}"], "path": ["orders", "{{order_id}}"] }
+          }
+        },
+        {
+          "name": "POST /orders (ثبت سفارش)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addressId\": 1,\n  \"shippingCompanyId\": 1,\n  \"paymentMethod\": \"WALLET\",\n  \"gatewaySlug\": \"zarinpal\",\n  \"discountCode\": \"WELCOME20\"\n}"
+            },
+            "url": { "raw": "{{api}}/orders", "host": ["{{api}}"], "path": ["orders"] }
+          }
+        },
+        {
+          "name": "POST /orders/:id/cancel",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "url": { "raw": "{{api}}/orders/{{order_id}}/cancel", "host": ["{{api}}"], "path": ["orders", "{{order_id}}", "cancel"] }
+          }
+        },
+        {
+          "name": "POST /orders/:id/return",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"orderItemId\": 1,\n  \"reason\": \"سایز اشتباه\",\n  \"imageMediaIds\": [1]\n}" },
+            "url": { "raw": "{{api}}/orders/{{order_id}}/return", "host": ["{{api}}"], "path": ["orders", "{{order_id}}", "return"] }
+          }
+        },
+        {
+          "name": "POST /orders/:id/payment/initiate",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "body": { "mode": "raw", "raw": "{\n  \"gatewaySlug\": \"zarinpal\"\n}" },
+            "url": { "raw": "{{api}}/orders/{{order_id}}/payment/initiate", "host": ["{{api}}"], "path": ["orders", "{{order_id}}", "payment", "initiate"] }
+          }
+        },
+        {
+          "name": "POST /orders/:id/payment/verify",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "body": { "mode": "raw", "raw": "{\n  \"providerParams\": {}\n}" },
+            "url": { "raw": "{{api}}/orders/{{order_id}}/payment/verify", "host": ["{{api}}"], "path": ["orders", "{{order_id}}", "payment", "verify"] }
+          }
+        },
+        {
+          "name": "GET /orders/admin",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/orders/admin", "host": ["{{api}}"], "path": ["orders", "admin"] }
+          }
+        },
+        {
+          "name": "GET /orders/admin/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/orders/admin/{{order_id}}", "host": ["{{api}}"], "path": ["orders", "admin", "{{order_id}}"] }
+          }
+        },
+        {
+          "name": "PUT /orders/admin/:id/status",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"SHIPPED\",\n  \"note\": \"مرسوله تحویل پست شد\",\n  \"trackingCode\": \"1234567890\",\n  \"packageNumber\": \"PKG-001\"\n}"
+            },
+            "url": { "raw": "{{api}}/orders/admin/{{order_id}}/status", "host": ["{{api}}"], "path": ["orders", "admin", "{{order_id}}", "status"] }
+          }
+        },
+        {
+          "name": "GET /orders/admin/returns",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/orders/admin/returns", "host": ["{{api}}"], "path": ["orders", "admin", "returns"] }
+          }
+        },
+        {
+          "name": "GET /orders/admin/returns/:returnId",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/orders/admin/returns/1", "host": ["{{api}}"], "path": ["orders", "admin", "returns", "1"] }
+          }
+        },
+        {
+          "name": "PUT /orders/admin/returns/:returnId",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"APPROVED\",\n  \"adminNote\": \"مرجوعی تایید شد\"\n}" },
+            "url": { "raw": "{{api}}/orders/admin/returns/1", "host": ["{{api}}"], "path": ["orders", "admin", "returns", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🖼️ Media",
+      "item": [
+        {
+          "name": "GET /media",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/media?page=1&limit=20&type=IMAGE",
+              "host": ["{{api}}"], "path": ["media"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "type", "value": "IMAGE", "disabled": true },
+                { "key": "entityType", "value": "products", "disabled": true },
+                { "key": "search", "value": "nike", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /media/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/media/{{media_id}}", "host": ["{{api}}"], "path": ["media", "{{media_id}}"] }
+          }
+        },
+        {
+          "name": "GET /media/:id/usage",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/media/{{media_id}}/usage", "host": ["{{api}}"], "path": ["media", "{{media_id}}", "usage"] }
+          }
+        },
+        {
+          "name": "GET /media/:id/download",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/media/{{media_id}}/download", "host": ["{{api}}"], "path": ["media", "{{media_id}}", "download"] }
+          }
+        },
+        {
+          "name": "POST /media (آپلود تک فایل)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "multipart/form-data"}],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "file", "type": "file", "src": [] }]
+            },
+            "url": { "raw": "{{api}}/media", "host": ["{{api}}"], "path": ["media"] }
+          }
+        },
+        {
+          "name": "POST /media/bulk (آپلود چند فایل)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "multipart/form-data"}],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "files", "type": "file", "src": [] }]
+            },
+            "url": { "raw": "{{api}}/media/bulk", "host": ["{{api}}"], "path": ["media", "bulk"] }
+          }
+        },
+        {
+          "name": "DELETE /media/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/media/{{media_id}}", "host": ["{{api}}"], "path": ["media", "{{media_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔔 Notifications",
+      "item": [
+        {
+          "name": "GET /notifications",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/notifications", "host": ["{{api}}"], "path": ["notifications"] }
+          }
+        },
+        {
+          "name": "GET /notifications/unread-count",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/notifications/unread-count", "host": ["{{api}}"], "path": ["notifications", "unread-count"] }
+          }
+        },
+        {
+          "name": "PATCH /notifications/read-all",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "PATCH",
+            "url": { "raw": "{{api}}/notifications/read-all", "host": ["{{api}}"], "path": ["notifications", "read-all"] }
+          }
+        },
+        {
+          "name": "PATCH /notifications/:id/read",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "PATCH",
+            "url": { "raw": "{{api}}/notifications/1/read", "host": ["{{api}}"], "path": ["notifications", "1", "read"] }
+          }
+        },
+        {
+          "name": "DELETE /notifications/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/notifications/1", "host": ["{{api}}"], "path": ["notifications", "1"] }
+          }
+        },
+        {
+          "name": "POST /notifications/admin/broadcast",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PROMOTION\",\n  \"title\": \"حراج تابستانه\",\n  \"message\": \"تا ۵۰٪ تخفیف!\",\n  \"link\": \"/products?hasDiscount=true\"\n}"
+            },
+            "url": { "raw": "{{api}}/notifications/admin/broadcast", "host": ["{{api}}"], "path": ["notifications", "admin", "broadcast"] }
+          }
+        },
+        {
+          "name": "GET /admin/notifications",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/admin/notifications", "host": ["{{api}}"], "path": ["admin", "notifications"] }
+          }
+        },
+        {
+          "name": "GET /admin/notifications/unread-count",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/admin/notifications/unread-count", "host": ["{{api}}"], "path": ["admin", "notifications", "unread-count"] }
+          }
+        },
+        {
+          "name": "PUT /admin/notifications/:id/read",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "url": { "raw": "{{api}}/admin/notifications/1/read", "host": ["{{api}}"], "path": ["admin", "notifications", "1", "read"] }
+          }
+        },
+        {
+          "name": "PUT /admin/notifications/read-all",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "url": { "raw": "{{api}}/admin/notifications/read-all", "host": ["{{api}}"], "path": ["admin", "notifications", "read-all"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎫 Tickets",
+      "item": [
+        {
+          "name": "GET /tickets/departments",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/tickets/departments", "host": ["{{api}}"], "path": ["tickets", "departments"] }
+          }
+        },
+        {
+          "name": "POST /tickets/departments (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"بخش جدید\"\n}" },
+            "url": { "raw": "{{api}}/tickets/departments", "host": ["{{api}}"], "path": ["tickets", "departments"] }
+          }
+        },
+        {
+          "name": "GET /tickets",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/tickets", "host": ["{{api}}"], "path": ["tickets"] }
+          }
+        },
+        {
+          "name": "POST /tickets (ایجاد تیکت)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"مشکل در پرداخت\",\n  \"departmentId\": 1,\n  \"priority\": \"NORMAL\",\n  \"orderId\": 1,\n  \"message\": \"سلام، درگاه پرداخت خطا میده\",\n  \"attachmentMediaIds\": []\n}"
+            },
+            "url": { "raw": "{{api}}/tickets", "host": ["{{api}}"], "path": ["tickets"] }
+          }
+        },
+        {
+          "name": "GET /tickets/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/tickets/{{ticket_id}}", "host": ["{{api}}"], "path": ["tickets", "{{ticket_id}}"] }
+          }
+        },
+        {
+          "name": "POST /tickets/:id/messages",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"ممنون از پاسخگویی\",\n  \"attachmentMediaIds\": []\n}"
+            },
+            "url": { "raw": "{{api}}/tickets/{{ticket_id}}/messages", "host": ["{{api}}"], "path": ["tickets", "{{ticket_id}}", "messages"] }
+          }
+        },
+        {
+          "name": "GET /tickets/admin",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/tickets/admin", "host": ["{{api}}"], "path": ["tickets", "admin"] }
+          }
+        },
+        {
+          "name": "GET /tickets/admin/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/tickets/admin/{{ticket_id}}", "host": ["{{api}}"], "path": ["tickets", "admin", "{{ticket_id}}"] }
+          }
+        },
+        {
+          "name": "PUT /tickets/admin/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"CLOSED\",\n  \"priority\": \"LOW\"\n}" },
+            "url": { "raw": "{{api}}/tickets/admin/{{ticket_id}}", "host": ["{{api}}"], "path": ["tickets", "admin", "{{ticket_id}}"] }
+          }
+        },
+        {
+          "name": "POST /tickets/admin/:id/messages",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"message\": \"سلام، مشکل شما بررسی شد و به زودی حل می‌شود.\",\n  \"attachmentMediaIds\": []\n}" },
+            "url": { "raw": "{{api}}/tickets/admin/{{ticket_id}}/messages", "host": ["{{api}}"], "path": ["tickets", "admin", "{{ticket_id}}", "messages"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💬 Comments",
+      "item": [
+        {
+          "name": "GET /comments/product/:productId",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/comments/product/{{product_id}}?page=1&limit=20",
+              "host": ["{{api}}"], "path": ["comments", "product", "{{product_id}}"],
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "20" }]
+            }
+          }
+        },
+        {
+          "name": "POST /comments/product/:productId",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"محصول عالی بود!\",\n  \"rating\": 5\n}"
+            },
+            "url": { "raw": "{{api}}/comments/product/{{product_id}}", "host": ["{{api}}"], "path": ["comments", "product", "{{product_id}}"] }
+          }
+        },
+        {
+          "name": "POST /comments/product/:productId (پاسخ)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"موافقم!\",\n  \"parentId\": 1\n}"
+            },
+            "url": { "raw": "{{api}}/comments/product/{{product_id}}", "host": ["{{api}}"], "path": ["comments", "product", "{{product_id}}"] }
+          }
+        },
+        {
+          "name": "GET /comments/blog/:postId",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/comments/blog/1?page=1&limit=20",
+              "host": ["{{api}}"], "path": ["comments", "blog", "1"],
+              "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "20" }]
+            }
+          }
+        },
+        {
+          "name": "POST /comments/blog/:postId",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"content\": \"مقاله مفیدی بود!\"\n}" },
+            "url": { "raw": "{{api}}/comments/blog/1", "host": ["{{api}}"], "path": ["comments", "blog", "1"] }
+          }
+        },
+        {
+          "name": "PUT /comments/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"content\": \"متن ویرایش‌شده\"\n}" },
+            "url": { "raw": "{{api}}/comments/{{comment_id}}", "host": ["{{api}}"], "path": ["comments", "{{comment_id}}"] }
+          }
+        },
+        {
+          "name": "DELETE /comments/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/comments/{{comment_id}}", "host": ["{{api}}"], "path": ["comments", "{{comment_id}}"] }
+          }
+        },
+        {
+          "name": "POST /comments/:id/like",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "url": { "raw": "{{api}}/comments/{{comment_id}}/like", "host": ["{{api}}"], "path": ["comments", "{{comment_id}}", "like"] }
+          }
+        },
+        {
+          "name": "GET /comments/admin",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/comments/admin?status=PENDING&isReviewed=false&productSearch=نایک",
+              "host": ["{{api}}"], "path": ["comments", "admin"],
+              "query": [
+                { "key": "status", "value": "PENDING", "disabled": true },
+                { "key": "isReviewed", "value": "false", "disabled": true },
+                { "key": "productSearch", "value": "نایک", "disabled": true },
+                { "key": "search", "value": "کیفیت", "disabled": true },
+                { "key": "commentableType", "value": "PRODUCT", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT /comments/admin/:id (مدیریت)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"APPROVED\"\n}" },
+            "url": { "raw": "{{api}}/comments/admin/{{comment_id}}", "host": ["{{api}}"], "path": ["comments", "admin", "{{comment_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🖼️ Banners",
+      "item": [
+        {
+          "name": "GET /banners",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/banners?position=HOME_MAIN",
+              "host": ["{{api}}"], "path": ["banners"],
+              "query": [{ "key": "position", "value": "HOME_MAIN", "disabled": true }]
+            }
+          }
+        },
+        {
+          "name": "GET /banners/admin",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/banners/admin", "host": ["{{api}}"], "path": ["banners", "admin"] }
+          }
+        },
+        {
+          "name": "POST /banners (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"بنر جدید\",\n  \"position\": \"HOME_MAIN\",\n  \"order\": 1,\n  \"isActive\": true,\n  \"link\": \"/products\"\n}" },
+            "url": { "raw": "{{api}}/banners", "host": ["{{api}}"], "path": ["banners"] }
+          }
+        },
+        {
+          "name": "PUT /banners/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"بنر ویرایش‌شده\"\n}" },
+            "url": { "raw": "{{api}}/banners/1", "host": ["{{api}}"], "path": ["banners", "1"] }
+          }
+        },
+        {
+          "name": "DELETE /banners/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/banners/1", "host": ["{{api}}"], "path": ["banners", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💡 Popups",
+      "item": [
+        {
+          "name": "GET /popups",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/popups", "host": ["{{api}}"], "path": ["popups"] }
+          }
+        },
+        {
+          "name": "GET /popups/admin",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/popups/admin", "host": ["{{api}}"], "path": ["popups", "admin"] }
+          }
+        },
+        {
+          "name": "POST /popups (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"تخفیف ویژه!\",\n  \"content\": \"۵۰٪ تخفیف روی محصولات منتخب\",\n  \"link\": \"/products\",\n  \"isActive\": true,\n  \"showOncePerSession\": true\n}"
+            },
+            "url": { "raw": "{{api}}/popups", "host": ["{{api}}"], "path": ["popups"] }
+          }
+        },
+        {
+          "name": "PUT /popups/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"isActive\": false\n}" },
+            "url": { "raw": "{{api}}/popups/1", "host": ["{{api}}"], "path": ["popups", "1"] }
+          }
+        },
+        {
+          "name": "DELETE /popups/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/popups/1", "host": ["{{api}}"], "path": ["popups", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📸 Stories",
+      "item": [
+        {
+          "name": "GET /stories",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/stories", "host": ["{{api}}"], "path": ["stories"] }
+          }
+        },
+        {
+          "name": "GET /stories/admin",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/stories/admin", "host": ["{{api}}"], "path": ["stories", "admin"] }
+          }
+        },
+        {
+          "name": "POST /stories (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"استوری جدید\",\n  \"expiresAt\": \"2026-08-01T00:00:00Z\",\n  \"order\": 1,\n  \"productIds\": [1]\n}"
+            },
+            "url": { "raw": "{{api}}/stories", "host": ["{{api}}"], "path": ["stories"] }
+          }
+        },
+        {
+          "name": "PUT /stories/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"استوری ویرایش‌شده\",\n  \"productIds\": [1, 2]\n}" },
+            "url": { "raw": "{{api}}/stories/1", "host": ["{{api}}"], "path": ["stories", "1"] }
+          }
+        },
+        {
+          "name": "DELETE /stories/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/stories/1", "host": ["{{api}}"], "path": ["stories", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📧 Newsletter",
+      "item": [
+        {
+          "name": "POST /newsletter/subscribe",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}" },
+            "url": { "raw": "{{api}}/newsletter/subscribe", "host": ["{{api}}"], "path": ["newsletter", "subscribe"] }
+          }
+        },
+        {
+          "name": "POST /newsletter/unsubscribe",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}" },
+            "url": { "raw": "{{api}}/newsletter/unsubscribe", "host": ["{{api}}"], "path": ["newsletter", "unsubscribe"] }
+          }
+        },
+        {
+          "name": "GET /newsletter/admin/subscribers",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/newsletter/admin/subscribers", "host": ["{{api}}"], "path": ["newsletter", "admin", "subscribers"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔍 Search",
+      "item": [
+        {
+          "name": "GET /search (سراسری)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/search?q=نایک",
+              "host": ["{{api}}"], "path": ["search"],
+              "query": [{ "key": "q", "value": "نایک" }]
+            }
+          }
+        },
+        {
+          "name": "GET /search/quick (autocomplete)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/search/quick?q=تیشرت",
+              "host": ["{{api}}"], "path": ["search", "quick"],
+              "query": [{ "key": "q", "value": "تیشرت" }]
+            }
+          }
+        },
+        {
+          "name": "GET /search/main (جستجوی اصلی)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/search/main?q=نایک&sort=bestselling&minPrice=100000",
+              "host": ["{{api}}"], "path": ["search", "main"],
+              "query": [
+                { "key": "q", "value": "نایک" },
+                { "key": "sort", "value": "bestselling" },
+                { "key": "minPrice", "value": "100000", "disabled": true },
+                { "key": "maxPrice", "value": "5000000", "disabled": true },
+                { "key": "brandIds", "value": "1", "disabled": true },
+                { "key": "categoryIds", "value": "1,2", "disabled": true },
+                { "key": "inStock", "value": "true", "disabled": true },
+                { "key": "hasDiscount", "value": "true", "disabled": true }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏠 Landing Page",
+      "item": [
+        {
+          "name": "GET /landing",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/landing", "host": ["{{api}}"], "path": ["landing"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📝 Blog",
+      "item": [
+        {
+          "name": "GET /blog",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/blog", "host": ["{{api}}"], "path": ["blog"] }
+          }
+        },
+        {
+          "name": "GET /blog/:slug",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/blog/tshirt-buying-guide", "host": ["{{api}}"], "path": ["blog", "tshirt-buying-guide"] }
+          }
+        },
+        {
+          "name": "GET /blog/categories",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/blog/categories", "host": ["{{api}}"], "path": ["blog", "categories"] }
+          }
+        },
+        {
+          "name": "GET /blog/admin",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/blog/admin", "host": ["{{api}}"], "path": ["blog", "admin"] }
+          }
+        },
+        {
+          "name": "POST /blog (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"پست جدید وبلاگ\",\n  \"slug\": \"new-blog-post\",\n  \"content\": \"<p>محتوای مطلب</p>\",\n  \"excerpt\": \"خلاصه مطلب\",\n  \"categoryId\": 1,\n  \"productIds\": [1],\n  \"status\": \"PUBLISHED\"\n}"
+            },
+            "url": { "raw": "{{api}}/blog", "host": ["{{api}}"], "path": ["blog"] }
+          }
+        },
+        {
+          "name": "PUT /blog/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"عنوان جدید\"\n}" },
+            "url": { "raw": "{{api}}/blog/1", "host": ["{{api}}"], "path": ["blog", "1"] }
+          }
+        },
+        {
+          "name": "DELETE /blog/:id (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/blog/1", "host": ["{{api}}"], "path": ["blog", "1"] }
+          }
+        },
+        {
+          "name": "POST /blog/categories (ادمین)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"دسته جدید وبلاگ\",\n  \"slug\": \"new-blog-category\"\n}" },
+            "url": { "raw": "{{api}}/blog/categories", "host": ["{{api}}"], "path": ["blog", "categories"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 Users / Profile",
+      "item": [
+        {
+          "name": "GET /users/me",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/users/me", "host": ["{{api}}"], "path": ["users", "me"] }
+          }
+        },
+        {
+          "name": "PUT /users/me",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"نام جدید\"\n}" },
+            "url": { "raw": "{{api}}/users/me", "host": ["{{api}}"], "path": ["users", "me"] }
+          }
+        },
+        {
+          "name": "PUT /users/me/password",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"currentPassword\": \"Customer@1234\",\n  \"newPassword\": \"NewPass@1234\"\n}" },
+            "url": { "raw": "{{api}}/users/me/password", "host": ["{{api}}"], "path": ["users", "me", "password"] }
+          }
+        },
+        {
+          "name": "POST /users/me/change-identifier/request",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"newIdentifier\": \"newemail@example.com\"\n}" },
+            "url": { "raw": "{{api}}/users/me/change-identifier/request", "host": ["{{api}}"], "path": ["users", "me", "change-identifier", "request"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛡️ Admin: Users & Security",
+      "item": [
+        {
+          "name": "GET /users/admin",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/users/admin?page=1&limit=20&role=CUSTOMER",
+              "host": ["{{api}}"], "path": ["users", "admin"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "role", "value": "CUSTOMER", "disabled": true },
+                { "key": "isBlocked", "value": "true", "disabled": true },
+                { "key": "search", "value": "علی", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /users/admin/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/users/admin/1", "host": ["{{api}}"], "path": ["users", "admin", "1"] }
+          }
+        },
+        {
+          "name": "PUT /users/admin/:id/block",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"تخلف از قوانین\"\n}" },
+            "url": { "raw": "{{api}}/users/admin/1/block", "host": ["{{api}}"], "path": ["users", "admin", "1", "block"] }
+          }
+        },
+        {
+          "name": "PUT /users/admin/:id/unblock",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "url": { "raw": "{{api}}/users/admin/1/unblock", "host": ["{{api}}"], "path": ["users", "admin", "1", "unblock"] }
+          }
+        },
+        {
+          "name": "PUT /users/admin/:id/role",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"EDITOR\"\n}" },
+            "url": { "raw": "{{api}}/users/admin/1/role", "host": ["{{api}}"], "path": ["users", "admin", "1", "role"] }
+          }
+        },
+        {
+          "name": "POST /users/admin/:id/wallet/adjust",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 100000,\n  \"description\": \"هدیه ویژه\"\n}" },
+            "url": { "raw": "{{api}}/users/admin/1/wallet/adjust", "host": ["{{api}}"], "path": ["users", "admin", "1", "wallet", "adjust"] }
+          }
+        },
+        {
+          "name": "GET /users/admin/:id/sessions",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/users/admin/1/sessions", "host": ["{{api}}"], "path": ["users", "admin", "1", "sessions"] }
+          }
+        },
+        {
+          "name": "GET /security/blocked-ips",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/security/blocked-ips", "host": ["{{api}}"], "path": ["security", "blocked-ips"] }
+          }
+        },
+        {
+          "name": "POST /security/blocked-ips",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"ip\": \"10.0.0.1\",\n  \"reason\": \"تست امنیتی\"\n}" },
+            "url": { "raw": "{{api}}/security/blocked-ips", "host": ["{{api}}"], "path": ["security", "blocked-ips"] }
+          }
+        },
+        {
+          "name": "DELETE /security/blocked-ips/:id",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/security/blocked-ips/1", "host": ["{{api}}"], "path": ["security", "blocked-ips", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Analytics",
+      "item": [
+        {
+          "name": "GET /analytics/overview",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/analytics/overview", "host": ["{{api}}"], "path": ["analytics", "overview"] }
+          }
+        },
+        {
+          "name": "GET /analytics/sales-over-time",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/analytics/sales-over-time?from=2026-01-01&to=2026-12-31&period=month",
+              "host": ["{{api}}"], "path": ["analytics", "sales-over-time"],
+              "query": [
+                { "key": "from", "value": "2026-01-01", "disabled": true },
+                { "key": "to", "value": "2026-12-31", "disabled": true },
+                { "key": "period", "value": "month" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /analytics/order-status-breakdown",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/analytics/order-status-breakdown", "host": ["{{api}}"], "path": ["analytics", "order-status-breakdown"] }
+          }
+        },
+        {
+          "name": "GET /analytics/top-products",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/analytics/top-products?limit=10&from=2026-01-01&to=2026-12-31",
+              "host": ["{{api}}"], "path": ["analytics", "top-products"],
+              "query": [
+                { "key": "limit", "value": "10" },
+                { "key": "from", "value": "2026-01-01", "disabled": true },
+                { "key": "to", "value": "2026-12-31", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /analytics/new-users-over-time",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/analytics/new-users-over-time?period=week",
+              "host": ["{{api}}"], "path": ["analytics", "new-users-over-time"],
+              "query": [{ "key": "period", "value": "week" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚙️ Settings",
+      "item": [
+        {
+          "name": "GET /settings",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/settings", "host": ["{{api}}"], "path": ["settings"] }
+          }
+        },
+        {
+          "name": "GET /settings/admin",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{api}}/settings/admin", "host": ["{{api}}"], "path": ["settings", "admin"] }
+          }
+        },
+        {
+          "name": "PUT /settings/admin/:key",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"value\": \"فروشگاه جدید\",\n  \"type\": \"string\"\n}" },
+            "url": { "raw": "{{api}}/settings/admin/site_name", "host": ["{{api}}"], "path": ["settings", "admin", "site_name"] }
+          }
+        },
+        {
+          "name": "DELETE /settings/admin/:key",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{api}}/settings/admin/site_name", "host": ["{{api}}"], "path": ["settings", "admin", "site_name"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔍 SEO & Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] }
+          }
+        },
+        {
+          "name": "GET /sitemap.xml",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/sitemap.xml", "host": ["{{base_url}}"], "path": ["sitemap.xml"] }
+          }
+        },
+        {
+          "name": "GET /robots.txt",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/robots.txt", "host": ["{{base_url}}"], "path": ["robots.txt"] }
+          }
+        }
+      ]
     }
   ]
 }

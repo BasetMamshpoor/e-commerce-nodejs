@@ -5,6 +5,7 @@ import {
   PrismaClient,
   Role,
   ProductStatus,
+  PostStatus,
   DiscountType,
   AttributeInputType,
   MediaType,
@@ -35,6 +36,59 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log("🌱 شروع seed دیتابیس...");
+
+  // پاکسازی دیتابیس (به ترتیب وابستگی معکوس)
+  console.log("🧹 پاکسازی داده‌های قبلی...");
+  await prisma.storyProduct.deleteMany();
+  await prisma.story.deleteMany();
+  await prisma.popup.deleteMany();
+  await prisma.newsletter.deleteMany();
+  await prisma.blogPostProduct.deleteMany();
+  await prisma.blogPost.deleteMany();
+  await prisma.blogCategory.deleteMany();
+  await prisma.auditLog.deleteMany();
+  await prisma.notification.deleteMany();
+  await prisma.commentAttachment.deleteMany();
+  await prisma.ticketAttachment.deleteMany();
+  await prisma.ticketMessage.deleteMany();
+  await prisma.ticket.deleteMany();
+  await prisma.ticketDepartment.deleteMany();
+  await prisma.commentLike.deleteMany();
+  await prisma.comment.deleteMany();
+  await prisma.cartItem.deleteMany();
+  await prisma.cart.deleteMany();
+  await prisma.wishlist.deleteMany();
+  await prisma.transaction.deleteMany();
+  await prisma.orderStatusHistory.deleteMany();
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.discountCodeProduct.deleteMany();
+  await prisma.discountCodeCategory.deleteMany();
+  await prisma.discountCodeUser.deleteMany();
+  await prisma.discountCode.deleteMany();
+  await prisma.paymentGateway.deleteMany();
+  await prisma.shippingCompany.deleteMany();
+  await prisma.address.deleteMany();
+  await prisma.walletTransaction.deleteMany();
+  await prisma.wallet.deleteMany();
+  await prisma.productDisplayAttributeValue.deleteMany();
+  await prisma.productVariantAttributeValue.deleteMany();
+  await prisma.productVariant.deleteMany();
+  await prisma.productImage.deleteMany();
+  await prisma.productRelated.deleteMany();
+  await prisma.productAlsoBought.deleteMany();
+  await prisma.productCategory.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.categoryAttribute.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.attributeValue.deleteMany();
+  await prisma.attribute.deleteMany();
+  await prisma.brand.deleteMany();
+  await prisma.userSession.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.media.deleteMany();
+  await prisma.setting.deleteMany();
+  console.log("✅ پاکسازی انجام شد");
 
   // ============================================================
   // 1. Media (تصاویر placeholder)
@@ -1064,6 +1118,22 @@ async function main() {
     },
   });
 
+  // بعد از ثبت سفارش‌ها، مقادیر denormalize شده را به‌روزرسانی می‌کنیم
+  // چون تابع increment در سرویس order در seed مستقیم صدا زده نمی‌شود
+  // (آپدیت وضعیت توسط ادمین انجام نمی‌شود، مستقیماً DELIVERED زده شده)
+  await prisma.product.update({
+    where: { id: product1.id },
+    data: { totalSold: 5, viewCount: 320 },
+  });
+  await prisma.product.update({
+    where: { id: product3.id },
+    data: { totalSold: 12, viewCount: 580 },
+  });
+  await prisma.product.update({
+    where: { id: product2.id },
+    data: { viewCount: 210 },
+  });
+
   // ============================================================
   // 13. Comments (دیدگاه‌ها)
   // ============================================================
@@ -1121,6 +1191,116 @@ async function main() {
   });
   await prisma.commentLike.create({
     data: { commentId: comment1.id, userId: customer3.id },
+  });
+
+  // بازمحاسبه avgRating و reviewCount برای محصولات دارای کامنت
+  await prisma.product.update({
+    where: { id: product1.id },
+    data: { avgRating: 4.5, reviewCount: 2 },
+  });
+  await prisma.product.update({
+    where: { id: product3.id },
+    data: { avgRating: 5.0, reviewCount: 1 },
+  });
+
+  // ============================================================
+  // 13.5. Blog Posts (برای صفحه اصلی و سئو)
+  // ============================================================
+  console.log("📝 ایجاد پست‌های وبلاگ...");
+
+  const blogCat1 = await prisma.blogCategory.create({
+    data: {
+      name: "راهنمای خرید",
+      slug: "buying-guide",
+      description: "مقالات راهنمای خرید",
+    },
+  });
+  const blogCat2 = await prisma.blogCategory.create({
+    data: { name: "مد و فشن", slug: "fashion", description: "اخبار دنیای مد" },
+  });
+
+  await prisma.blogPost.create({
+    data: {
+      title: "راهنمای خرید تیشرت: از سایز تا جنس پارچه",
+      slug: "tshirt-buying-guide",
+      content:
+        "<p>در این مقاله به شما کمک می‌کنیم بهترین تیشرت را بر اساس سایز، جنس و مدل انتخاب کنید...</p>",
+      excerpt: "هر آنچه باید قبل از خرید تیشرت بدانید",
+      status: PostStatus.PUBLISHED,
+      categoryId: blogCat1.id,
+      authorId: editor.id,
+      publishedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      products: {
+        create: [{ productId: product1.id }, { productId: product4.id }],
+      },
+    },
+  });
+
+  await prisma.blogPost.create({
+    data: {
+      title: "ترندهای بهاره ۱۴۰۵: رنگ‌های محبوب امسال",
+      slug: "spring-1405-trends",
+      content:
+        "<p>امسال چه رنگ‌هایی در دنیای مد محبوب هستند؟ نگاهی به جدیدترین ترندهای بهاره...</p>",
+      excerpt: "محبوب‌ترین رنگ‌های فصل",
+      status: PostStatus.PUBLISHED,
+      categoryId: blogCat2.id,
+      authorId: editor.id,
+      publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  // ============================================================
+  // 13.6. Stories (برای صفحه اصلی)
+  // ============================================================
+  console.log("📸 ایجاد استوری‌ها...");
+
+  await prisma.story.create({
+    data: {
+      title: "جدیدترین کفش‌های نایک",
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      order: 1,
+      products: { create: [{ productId: product3.id }] },
+    },
+  });
+
+  await prisma.story.create({
+    data: {
+      title: "مجموعه بهاره آدیداس",
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      order: 2,
+      products: { create: [{ productId: product2.id }] },
+    },
+  });
+
+  // ============================================================
+  // 13.7. Popups
+  // ============================================================
+  console.log("💡 ایجاد پاپ‌آپ...");
+
+  await prisma.popup.create({
+    data: {
+      title: "تخفیف ویژه!",
+      content: "با کد WELCOME20 از ۲۰٪ تخفیف اولین خرید خود بهره‌مند شوید!",
+      link: "/products",
+      isActive: true,
+      showOncePerSession: true,
+      endsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  // ============================================================
+  // 13.8. Newsletter Subscribers
+  // ============================================================
+  console.log("📧 ایجاد مشترکین خبرنامه...");
+
+  await prisma.newsletter.createMany({
+    data: [
+      { email: "ali@example.com", isActive: true },
+      { email: "fateme@example.com", isActive: true },
+      { email: "sara@test.com", isActive: true },
+      { email: "bounced@test.com", isActive: false },
+    ],
   });
 
   // ============================================================
@@ -1367,8 +1547,13 @@ async function main() {
   );
   console.log(`🛒 سفارش‌ها: ORD-1001 (تحویل‌شده)، ORD-1002 (در پردازش)`);
   console.log(`🏷️ کدهای تخفیف: WELCOME20، SUMMER50K`);
+  console.log(`📝 پست وبلاگ: ۲ پست منتشرشده`);
+  console.log(`📸 استوری: ۲ استوری فعال`);
+  console.log(`📧 خبرنامه: ۴ مشترک`);
   console.log(`\n🔑 رمز ادمین: Admin@1234`);
   console.log(`🔑 رمز مشتریان: Customer@1234`);
+  console.log(`💡 totalSold: تیشرت نایک=۵، کفش نایک=۱۲`);
+  console.log(`⭐ avgRating: تیشرت نایک=۴.۵، کفش نایک=۵.۰`);
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 }
 

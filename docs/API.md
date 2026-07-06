@@ -365,7 +365,28 @@ Base path: `/api/v1/products`
 > `popular` و `most_viewed` بر اساس `viewCount` (تعداد بازدید) مرتب‌سازی می‌کنند.
 
 ### `POST /` (ایجاد محصول)
-**Body:**
+
+دو روش برای ارسال تصاویر وجود دارد:
+
+**روش ۱ (توصیه‌شده) — multipart/form-data با آپلود مستقیم فایل:**
+```json
+// فیلدهای متنی:
+name: "تیشرت مردانه"
+brandId: "1"
+shortDescription: "توضیح کوتاه"
+description: "<p>HTML از تکست ادیتور</p>"
+basePrice: "250000"
+discountType: "PERCENT"
+discountValue: "10"
+status: "DRAFT"
+isFeatured: "false"
+categoryIds: "[1, 2]"
+
+// فیلدهای فایل:
+images: [فایل‌های تصویر]  // (آرایه، حداکثر ۲۰ فایل)
+```
+
+**روش ۲ — JSON (فقط با mediaId از قبل آپلود شده):**
 ```json
 {
   "name": "تیشرت مردانه",
@@ -395,11 +416,12 @@ Base path: `/api/v1/products`
   ]
 }
 ```
+
 - `basePrice`: حداقل قیمت محصول (تومان).
 - `discountType`/`discountValue`: تخفیف کل محصول (`PERCENT` یا `FIXED`) — روی تمام Variantها اعمال می‌شود.
 - `variants[].priceAdjustment`: مقدار افزایش قیمت نسبت به Base Price (می‌تواند ۰ باشد).
 - `variants[].attributeValueIds`: فقط Attributeهای نوع تنوع (Variant Attributes).
-- `images[].mediaId`: شناسه‌ی Media (از قبل آپلود شده).
+- `images`: در روش JSON آرایه‌ای از `{ mediaId, order, isMain }` (mediaId از قبل آپلود شده). در روش multipart فایل‌ها مستقیم آپلود می‌شوند و mediaId به‌طور خودکار ایجاد می‌گردد.
 - `displayAttributes`: Attributeهای نمایشی (فقط در صفحه جزئیات نمایش داده می‌شوند).
 
 **خطاها:** `400` دسته/برند نامعتبر یا ترکیب ویژگی تکراری بین تنوع‌ها، `409` SKU تکراری یا slug تکراری.
@@ -1040,11 +1062,13 @@ Base path: `/api/v1/comments`
 ```
 
 ### `POST /product/:productId`
+می‌توانید فایل‌های ضمیمه را به‌صورت multipart/form-data با field name `attachments`
+ارسال کنید. فیلدهای متنی (`content`, `parentId`, `rating`) همزمان ارسال می‌شوند.
 ```json
-{ "content": "...", "parentId": 1, "rating": 5, "attachmentMediaIds": [1, 2] }
+// اگر فایلی نیست — درخواست JSON معمولی:
+{ "content": "...", "parentId": 1, "rating": 5 }
 ```
 `parentId` اختیاری (اگر باشد یعنی پاسخ است). `rating` فقط برای دیدگاه اصلی.
-`attachmentMediaIds` آرایه‌ای از شناسه‌های Media است.
 
 ---
 

@@ -499,12 +499,7 @@ model Product {
   images                 ProductImage[]
   wishlists              Wishlist[]
   discountCodes          DiscountCodeProduct[]
-  productViews           ProductView[]
   displayAttributeValues ProductDisplayAttributeValue[]
-  relatedProducts        ProductRelated[]               @relation("ProductRelatedFrom")
-  relatedFrom            ProductRelated[]               @relation("ProductRelatedTo")
-  alsoBought             ProductAlsoBought[]            @relation("ProductAlsoBoughtFrom")
-  alsoBoughtFrom         ProductAlsoBought[]            @relation("ProductAlsoBoughtTo")
   stories                StoryProduct[]
   blogPosts              BlogPostProduct[]
 
@@ -579,38 +574,6 @@ model ProductDisplayAttributeValue {
   value       String
 
   @@unique([productId, attributeId])
-}
-
-model ProductView {
-  id        Int      @id @default(autoincrement())
-  productId Int
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  userId    Int?
-  ip        String?
-  createdAt DateTime @default(now())
-
-  @@index([productId])
-  @@index([createdAt])
-}
-
-model ProductRelated {
-  id        Int     @id @default(autoincrement())
-  productId Int
-  product   Product @relation("ProductRelatedFrom", fields: [productId], references: [id], onDelete: Cascade)
-  relatedId Int
-  related   Product @relation("ProductRelatedTo", fields: [relatedId], references: [id], onDelete: Cascade)
-
-  @@unique([productId, relatedId])
-}
-
-model ProductAlsoBought {
-  id           Int     @id @default(autoincrement())
-  productId    Int
-  product      Product @relation("ProductAlsoBoughtFrom", fields: [productId], references: [id], onDelete: Cascade)
-  alsoBoughtId Int
-  alsoBought   Product @relation("ProductAlsoBoughtTo", fields: [alsoBoughtId], references: [id], onDelete: Cascade)
-
-  @@unique([productId, alsoBoughtId])
 }
 
 // ============================================================================

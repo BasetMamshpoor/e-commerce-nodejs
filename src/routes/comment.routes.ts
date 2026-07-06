@@ -9,6 +9,7 @@ import {
   adminListCommentsQuerySchema,
   moderateCommentSchema,
 } from "../validations/comment.validation";
+import { uploadCommentAttachmentsMiddleware } from "../services/media/upload-helper";
 
 const router = Router();
 const manageOnly = [authenticate, authorize("ADMIN", "EDITOR")] as const;
@@ -23,6 +24,7 @@ router.get(
 router.post(
   "/product/:productId",
   authenticate,
+  uploadCommentAttachmentsMiddleware(),
   validate(createCommentSchema),
   commentController.createForProduct
 );
@@ -37,6 +39,7 @@ router.get(
 router.post(
   "/blog/:postId",
   authenticate,
+  uploadCommentAttachmentsMiddleware(),
   validate(createCommentSchema),
   commentController.createForBlogPost
 );

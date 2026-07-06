@@ -7,6 +7,23 @@ import * as variantService from "../services/catalog/product-variant.service";
 import * as queryService from "../services/catalog/product-query.service";
 
 export async function create(req: Request, res: Response) {
+  // ادغام تصاویر آپلودشده با تصاویر ارسالی در body
+  const uploadedImages: Array<{ mediaId: number; url: string }> =
+    (req as unknown as Record<string, unknown>).uploadedImages as Array<{ mediaId: number; url: string }> | undefined ?? [];
+
+  if (uploadedImages.length > 0) {
+    const existingImages: Array<{ mediaId: number; order: number; isMain: boolean }> = req.body.images ?? [];
+    const hasMain = existingImages.some((img) => img.isMain);
+    req.body.images = [
+      ...existingImages,
+      ...uploadedImages.map((img, i) => ({
+        mediaId: img.mediaId,
+        order: existingImages.length + i,
+        isMain: !hasMain && i === 0,
+      })),
+    ];
+  }
+
   const product = await productService.createProduct(req.body, req.user?.id);
   return ApiResponse.created(res, product, "محصول ایجاد شد");
 }
@@ -22,22 +39,27 @@ export async function update(req: Request, res: Response) {
     await productService.deleteProductImages(id, deletedImages);
   }
 
-  // پردازش تصاویر جدید آپلودشده
+  // پردازش تصاویر جدید آپلودشده (از multipart)
   const uploadedImages: Array<{ mediaId: number; url: string }> =
     (req as unknown as Record<string, unknown>).uploadedImages as Array<{ mediaId: number; url: string }> | undefined ?? [];
 
+  // تصاویر ارسالی در body JSON (با mediaId از قبل آپلود شده)
+  const bodyImages: Array<{ mediaId: number; order: number; isMain: boolean }> =
+    Array.isArray(req.body.images) ? req.body.images : [];
+
   // حذف فیلدهای کمکی از body قبل از ارسال به سرویس
-  const { deletedImages: _, ...cleanBody } = req.body;
+  const { deletedImages: _, images: __, ...cleanBody } = req.body;
 
   const product = await productService.updateProduct(id, cleanBody);
 
-  // افزودن تصاویر جدید بعد از به‌روزرسانی محصول
-  if (uploadedImages.length > 0) {
-    const updatedProduct = await productService.addProductImages(id, uploadedImages.map((img) => ({
-      mediaId: img.mediaId,
-      order: 0,
-      isMain: false,
-    })));
+  // افزودن تصاویر جدید (از هر دو منبع)
+  const allNewImages = [
+    ...bodyImages,
+    ...uploadedImages.map((img) => ({ mediaId: img.mediaId, order: 0, isMain: false })),
+  ];
+
+  if (allNewImages.length > 0) {
+    const updatedProduct = await productService.addProductImages(id, allNewImages);
     return ApiResponse.ok(res, updatedProduct, "محصول به‌روزرسانی شد");
   }
 

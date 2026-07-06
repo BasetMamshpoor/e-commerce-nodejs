@@ -223,7 +223,7 @@ export async function getProductBySlugPublic(slug: string, userId?: number) {
 
   const serialized = serializeProduct(product) as Record<string, unknown>;
 
-  await trackProductView(product.id as number, { userId, ip: undefined });
+  await trackProductView(product.id as number);
 
   if (userId) {
     const wishlistItem = await prisma.wishlist.findUnique({
@@ -269,7 +269,7 @@ export async function getProductByIdPublic(id: number, userId?: number) {
 
   const serialized = serializeProduct(product) as Record<string, unknown>;
 
-  await trackProductView(id, { userId, ip: undefined });
+  await trackProductView(id);
 
   if (userId) {
     const wishlistItem = await prisma.wishlist.findUnique({
@@ -303,33 +303,74 @@ export async function recomputeProductRating(productId: number): Promise<void> {
   });
 }
 
-export async function trackProductView(productId: number, meta: { userId?: number; ip?: string }): Promise<void> {
-  await prisma.$transaction(async (tx) => {
-    await tx.productView.create({ data: { productId, userId: meta.userId, ip: meta.ip } });
-    await tx.product.update({ where: { id: productId }, data: { viewCount: { increment: 1 } } });
-  });
+export async function trackProductView(productId: number): Promise<void> {
+  await prisma.product.update({ where: { id: productId }, data: { viewCount: { increment: 1 } } });
 }
 
 export async function getRelatedProducts(productId: number) {
-  const links = await prisma.productRelated.findMany({
+  const cats = await prisma.productCategory.findMany({
     where: { productId },
-    include: {
-      related: { include: { brand: true, images: { where: { isMain: true }, take: 1, include: { media: true } } } },
+    select: { categoryId: true },
+  });
+  if (cats.length === 0) return [];
+
+  const related = await prisma.productCategory.groupBy({
+    by: ["productId"],
+    where: {
+      categoryId: { in: cats.map((c) => c.categoryId) },
+      productId: { not: productId },
+      product: { status: "PUBLISHED" },
     },
+    _count: { categoryId: true },
+    orderBy: { _count: { categoryId: "desc" } },
     take: 10,
   });
-  return links.map((l) => l.related);
+  if (related.length === 0) return [];
+
+  const ids = related.map((r) => r.productId);
+  const products = await prisma.product.findMany({
+    where: { id: { in: ids } },
+    include: { brand: true, images: { where: { isMain: true }, take: 1, include: { media: true } } },
+  });
+  return related.map((r) => products.find((p) => p.id === r.productId)).filter(Boolean);
 }
 
 export async function getAlsoBoughtProducts(productId: number) {
-  const links = await prisma.productAlsoBought.findMany({
+  const variantIds = await prisma.productVariant.findMany({
     where: { productId },
-    include: {
-      alsoBought: { include: { brand: true, images: { where: { isMain: true }, take: 1, include: { media: true } } } },
-    },
-    take: 10,
+    select: { id: true },
   });
-  return links.map((l) => l.alsoBought);
+  if (variantIds.length === 0) return [];
+
+  const orderIds = await prisma.orderItem.findMany({
+    where: { variantId: { in: variantIds.map((v) => v.id) } },
+    select: { orderId: true },
+    distinct: ["orderId"],
+  });
+  if (orderIds.length === 0) return [];
+
+  const coItems = await prisma.orderItem.findMany({
+    where: {
+      orderId: { in: orderIds.map((o) => o.orderId) },
+      variant: { productId: { not: productId } },
+    },
+    select: { variant: { select: { productId: true } } },
+  });
+
+  const freq = new Map<number, number>();
+  for (const item of coItems) {
+    const pid = item.variant.productId;
+    freq.set(pid, (freq.get(pid) ?? 0) + 1);
+  }
+
+  const topIds = [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([pid]) => pid);
+  if (topIds.length === 0) return [];
+
+  const products = await prisma.product.findMany({
+    where: { id: { in: topIds }, status: "PUBLISHED" },
+    include: { brand: true, images: { where: { isMain: true }, take: 1, include: { media: true } } },
+  });
+  return topIds.map((id) => products.find((p) => p.id === id)).filter(Boolean);
 }
 
 export async function getRelatedBlogPosts(productId: number) {
@@ -391,22 +432,4 @@ export async function addProductImages(
   });
 }
 
-export async function setRelatedProducts(productId: number, relatedIds: number[]) {
-  await prisma.productRelated.deleteMany({ where: { productId } });
-  if (relatedIds.length > 0) {
-    await prisma.productRelated.createMany({
-      data: relatedIds.map((relatedId) => ({ productId, relatedId })),
-      skipDuplicates: true,
-    });
-  }
-}
 
-export async function setAlsoBoughtProducts(productId: number, alsoBoughtIds: number[]) {
-  await prisma.productAlsoBought.deleteMany({ where: { productId } });
-  if (alsoBoughtIds.length > 0) {
-    await prisma.productAlsoBought.createMany({
-      data: alsoBoughtIds.map((alsoBoughtId) => ({ productId, alsoBoughtId })),
-      skipDuplicates: true,
-    });
-  }
-}

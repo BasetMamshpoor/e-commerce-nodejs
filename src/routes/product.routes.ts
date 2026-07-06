@@ -11,8 +11,6 @@ import {
   adminListProductsQuerySchema,
 } from "../validations/product.validation";
 import { uploadProductImagesMiddleware } from "../services/media/upload-helper";
-import { uploadProductImages } from "../middlewares/upload.middleware";
-import { saveFileToMedia } from "../services/media/media.service";
 
 const router = Router();
 const manageOnly = [authenticate, authorize("ADMIN", "EDITOR")] as const;
@@ -30,27 +28,8 @@ router.get("/", validate(listProductsQuerySchema, "query"), productController.li
 router.get("/by-id/:id", optionalAuthenticate, productController.getByIdPublic);
 router.get("/:slug", optionalAuthenticate, productController.getBySlugPublic);
 
-router.post("/", ...manageOnly, validate(createProductSchema), productController.create);
-router.put("/:id", ...manageOnly, (req, res, next) => {
-  // پردازش فایل‌های تصویر جدید در حین ویرایش محصول
-  // فیلد images می‌تواند حاوی فایل‌های جدید باشد (multipart)
-  // فیلد deletedImages (آرایه‌ای از شناسه ProductImage) برای حذف تصاویر موجود
-  uploadProductImages.array("images", 20)(req, res, async (err) => {
-    if (err) return next(err);
-    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-      try {
-        const results = await Promise.all(
-          req.files.map((f) => saveFileToMedia(f, "products", req.user?.id))
-        );
-        (req as unknown as Record<string, unknown>).uploadedImages = results.map((r) => ({
-          mediaId: r.id,
-          url: r.url,
-        }));
-      } catch (e) { return next(e); }
-    }
-    next();
-  });
-}, validate(updateProductSchema), productController.update);
+router.post("/", ...manageOnly, uploadProductImagesMiddleware(), validate(createProductSchema), productController.create);
+router.put("/:id", ...manageOnly, uploadProductImagesMiddleware(), validate(updateProductSchema), productController.update);
 
 router.delete("/:id", ...manageOnly, productController.remove);
 
@@ -59,7 +38,5 @@ router.put("/:id/variants/:variantId", ...manageOnly, validate(updateVariantSche
 router.delete("/:id/variants/:variantId", ...manageOnly, productController.removeVariant);
 
 // تصاویر محصول از طریق PUT /:id مدیریت می‌شوند — endpoint های جداگانه حذف شده‌اند
-// POST  /:id/images  → حذف شد (به جای آن از PUT /:id با uploadedImages استفاده کنید)
-// DELETE /:id/images/:imageId → حذف شد (به جای آن از PUT /:id با deletedImages استفاده کنید)
 
 export default router;

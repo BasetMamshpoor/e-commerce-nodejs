@@ -11,27 +11,80 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../../utils/ApiError";
 import { saveFileToMedia, SavedMedia } from "./media.service";
-import { uploadBannerImage, uploadProductImages, uploadCategoryImage, uploadBrandLogo, uploadPopupMedia, uploadStoryMedia, uploadBlogCover, uploadShippingLogo, uploadTicketAttachments } from "../../middlewares/upload.middleware";
+import {
+  uploadBannerImage,
+  uploadProductImages,
+  uploadCategoryImage,
+  uploadBrandLogo,
+  uploadPopupMedia,
+  uploadStoryMedia,
+  uploadBlogCover,
+  uploadShippingLogo,
+  uploadTicketAttachments,
+  uploadCommentAttachments,
+} from "../../middlewares/upload.middleware";
 
 type UploadFieldConfig = {
-  fieldName: string;      // نام فیلد فرم که فایل در آن ارسال می‌شود
-  entityType: string;     // نوع موجودیت برای ذخیره‌سازی
-  mimeSetter: ReturnType<typeof import("../../middlewares/upload.middleware").createUpload>; // multer middleware
+  fieldName: string; // نام فیلد فرم که فایل در آن ارسال می‌شود
+  entityType: string; // نوع موجودیت برای ذخیره‌سازی
+  mimeSetter: ReturnType<
+    typeof import("../../middlewares/upload.middleware").createUpload
+  >; // multer middleware
 };
 
 // پیکربندی upload برای هر موجودیت — هر زمان موجودیت جدید اضافه شد،
 // یک ورودی به این map اضافه کنید
 const UPLOAD_CONFIGS: Record<string, UploadFieldConfig> = {
-  banner:            { fieldName: "image",      entityType: "banners",   mimeSetter: uploadBannerImage },
-  category:          { fieldName: "image",      entityType: "categories", mimeSetter: uploadCategoryImage },
-  brand:             { fieldName: "logo",       entityType: "brands",    mimeSetter: uploadBrandLogo },
-  popup:             { fieldName: "media",      entityType: "popups",    mimeSetter: uploadPopupMedia },
-  product:           { fieldName: "images",     entityType: "products",  mimeSetter: uploadProductImages },
-  storyCover:        { fieldName: "coverImage", entityType: "stories",   mimeSetter: uploadStoryMedia },
-  storyVideo:        { fieldName: "video",      entityType: "stories",   mimeSetter: uploadStoryMedia },
-  blogCover:         { fieldName: "coverImage", entityType: "blog",      mimeSetter: uploadBlogCover },
-  shippingLogo:      { fieldName: "logo",       entityType: "shipping",  mimeSetter: uploadShippingLogo },
-  ticket:            { fieldName: "attachments", entityType: "tickets",   mimeSetter: uploadTicketAttachments },
+  banner: {
+    fieldName: "image",
+    entityType: "banners",
+    mimeSetter: uploadBannerImage,
+  },
+  category: {
+    fieldName: "image",
+    entityType: "categories",
+    mimeSetter: uploadCategoryImage,
+  },
+  brand: {
+    fieldName: "logo",
+    entityType: "brands",
+    mimeSetter: uploadBrandLogo,
+  },
+  popup: {
+    fieldName: "media",
+    entityType: "popups",
+    mimeSetter: uploadPopupMedia,
+  },
+  product: {
+    fieldName: "images",
+    entityType: "products",
+    mimeSetter: uploadProductImages,
+  },
+  storyCover: {
+    fieldName: "coverImage",
+    entityType: "stories",
+    mimeSetter: uploadStoryMedia,
+  },
+  storyVideo: {
+    fieldName: "video",
+    entityType: "stories",
+    mimeSetter: uploadStoryMedia,
+  },
+  blogCover: {
+    fieldName: "coverImage",
+    entityType: "blog",
+    mimeSetter: uploadBlogCover,
+  },
+  shippingLogo: {
+    fieldName: "logo",
+    entityType: "shipping",
+    mimeSetter: uploadShippingLogo,
+  },
+  ticket: {
+    fieldName: "attachments",
+    entityType: "tickets",
+    mimeSetter: uploadTicketAttachments,
+  },
 };
 
 /**
@@ -68,7 +121,7 @@ export function entityUpload(uploadKey: string) {
         const saved: SavedMedia = await saveFileToMedia(
           req.file,
           config.entityType,
-          req.user?.id
+          req.user?.id,
         );
 
         // تعیین نام فیلد URL بر اساس entityType
@@ -93,14 +146,14 @@ export function entityUpload(uploadKey: string) {
 /** نگاشت entityType به نام فیلد URL در دیتابیس */
 function mapEntityTypeToUrlField(entityType: string): string {
   const map: Record<string, string> = {
-    banners:    "imageUrl",
+    banners: "imageUrl",
     categories: "imageUrl",
-    brands:     "logoUrl",
-    popups:     "mediaUrl",
-    products:   "", // محصولات چند تصویر دارند — با منطق جداگانه مدیریت می‌شوند
-    blog:       "coverImageUrl",
-    stories:    "coverImageUrl",
-    shipping:   "logoUrl",
+    brands: "logoUrl",
+    popups: "mediaUrl",
+    products: "", // محصولات چند تصویر دارند — با منطق جداگانه مدیریت می‌شوند
+    blog: "coverImageUrl",
+    stories: "coverImageUrl",
+    shipping: "logoUrl",
   };
   return map[entityType] ?? "imageUrl";
 }
@@ -108,13 +161,13 @@ function mapEntityTypeToUrlField(entityType: string): string {
 /** نگاشت entityType به نام فیلد mediaId در دیتابیس */
 function mapEntityTypeToMediaIdField(entityType: string): string {
   const map: Record<string, string> = {
-    banners:    "mediaId",
+    banners: "mediaId",
     categories: "imageMediaId",
-    brands:     "logoMediaId",
-    popups:     "mediaId",
-    blog:       "coverImageMediaId",
-    stories:    "coverImageMediaId",
-    shipping:   "logoMediaId",
+    brands: "logoMediaId",
+    popups: "mediaId",
+    blog: "coverImageMediaId",
+    stories: "coverImageMediaId",
+    shipping: "logoMediaId",
   };
   return map[entityType] ?? "mediaId";
 }
@@ -139,13 +192,36 @@ export function uploadTicketAttachmentsMiddleware() {
 
       try {
         const results = await Promise.all(
-          req.files.map((f) => saveFileToMedia(f, "tickets", req.user?.id))
+          req.files.map((f) => saveFileToMedia(f, "tickets", req.user?.id)),
         );
         const newIds = results.map((r) => r.id);
         const existingIds: number[] = Array.isArray(req.body.attachmentMediaIds)
           ? req.body.attachmentMediaIds.map((x: string | number) => Number(x))
           : [];
         req.body.attachmentMediaIds = [...existingIds, ...newIds];
+        next();
+      } catch (error) {
+        next(error);
+      }
+    });
+  };
+}
+
+export function uploadCommentAttachmentsMiddleware() {
+  const uploader = uploadCommentAttachments.array("attachments", 5);
+
+  return async (req: Request, _res: Response, next: NextFunction) => {
+    uploader(req, _res, async (err: unknown) => {
+      if (err) return next(err);
+      if (!req.files || !Array.isArray(req.files) || req.files.length === 0)
+        return next();
+
+      try {
+        const results = await Promise.all(
+          req.files.map((f) => saveFileToMedia(f, "comments", req.user?.id)),
+        );
+        (req as unknown as Record<string, unknown>).uploadedMediaIds =
+          results.map((r) => r.id);
         next();
       } catch (error) {
         next(error);
@@ -166,12 +242,13 @@ export function uploadProductImagesMiddleware() {
 
       try {
         const results = await Promise.all(
-          req.files.map((f) => saveFileToMedia(f, "products", req.user?.id))
+          req.files.map((f) => saveFileToMedia(f, "products", req.user?.id)),
         );
-        req.body.uploadedImages = results.map((r) => ({
-          mediaId: r.id,
-          url: r.url,
-        }));
+        (req as unknown as Record<string, unknown>).uploadedImages =
+          results.map((r) => ({
+            mediaId: r.id,
+            url: r.url,
+          }));
         next();
       } catch (error) {
         next(error);
