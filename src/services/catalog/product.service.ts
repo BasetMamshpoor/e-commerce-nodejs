@@ -171,7 +171,7 @@ export async function updateProduct(id: number, input: UpdateProductInput) {
     }
   }
 
-  const { categoryIds, ...rest } = input;
+  const { categoryIds, displayAttributes, ...rest } = input;
 
   return prisma.product.update({
     where: { id },
@@ -180,6 +180,17 @@ export async function updateProduct(id: number, input: UpdateProductInput) {
       slug,
       ...(categoryIds
         ? { categories: { deleteMany: {}, create: categoryIds.map((categoryId) => ({ categoryId })) } }
+        : {}),
+      ...(typeof displayAttributes !== "undefined"
+        ? {
+            displayAttributeValues: {
+              deleteMany: {},
+              create: displayAttributes.map((displayAttribute) => ({
+                attributeId: displayAttribute.attributeId,
+                value: displayAttribute.value,
+              })),
+            },
+          }
         : {}),
     },
   });

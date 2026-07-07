@@ -56,6 +56,7 @@ export const updateProductSchema = z.object({
   metaDescription: z.string().max(300).optional(),
   canonicalUrl: z.string().url().optional(),
   categoryIds: z.array(z.coerce.number()).min(1).optional(),
+  displayAttributes: z.array(displayAttributeSchema).optional(),
 });
 
 export const addVariantSchema = variantInputSchema;
