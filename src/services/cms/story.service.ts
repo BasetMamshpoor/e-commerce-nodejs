@@ -2,11 +2,13 @@ import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import { parsePagination, buildPaginationMeta } from "../../utils/pagination";
 
-export async function createStory(input: { title: string; coverImageMediaId: number; videoMediaId?: number; expiresAt: Date; order?: number; productIds?: number[] }) {
+export async function createStory(input: { title: string; coverImageMediaId: number; coverImageUrl: string; videoUrl?: string; videoMediaId?: number; expiresAt: Date; order?: number; productIds?: number[] }) {
   return prisma.story.create({
     data: {
       title: input.title,
       coverImageMediaId: input.coverImageMediaId,
+      coverImageUrl:input.coverImageUrl,
+      videoUrl: input.videoUrl,
       videoMediaId: input.videoMediaId,
       expiresAt: input.expiresAt,
       order: input.order ?? 0,
@@ -16,7 +18,7 @@ export async function createStory(input: { title: string; coverImageMediaId: num
   });
 }
 
-export async function updateStory(id: number, input: Partial<{ title: string; coverImageMediaId: number; videoMediaId?: number; expiresAt: Date; order: number; isActive: boolean; productIds: number[] }>) {
+export async function updateStory(id: number, input: Partial<{  productIds: number[] }>) {
   const story = await prisma.story.findUnique({ where: { id } });
   if (!story) throw ApiError.notFound("استوری پیدا نشد");
 

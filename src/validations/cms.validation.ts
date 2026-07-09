@@ -4,9 +4,7 @@ const isoDate = z.coerce.date();
 
 export const createBannerSchema = z.object({
   title: z.string().trim().max(150).optional(),
-  // imageUrl توسط middleware آپلود تنظیم می‌شود — در بدنه درخواست اختیاری است
   imageUrl: z.string().optional(),
-  // mediaId هم می‌تواند مستقیم ارسال شود هم توسط middleware تنظیم گردد
   mediaId: z.coerce.number().int().positive().optional(),
   link: z.string().optional(),
   position: z.enum(["HOME_MAIN", "HOME_MIDDLE", "CATEGORY_TOP", "SIDEBAR"]),
@@ -21,6 +19,7 @@ export const createPopupSchema = z.object({
   title: z.string().trim().min(1).max(150),
   content: z.string().max(2000).optional(),
   mediaId: z.coerce.number().int().positive().optional(),
+  mediaUrl: z.string().optional(),
   link: z.string().optional(),
   isActive: z.coerce.boolean().optional().default(true),
   startsAt: isoDate.optional(),

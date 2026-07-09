@@ -62754,6 +62754,7 @@ export namespace Prisma {
     metaTitle: number
     metaDescription: number
     canonicalUrl: number
+    tags: number
     publishedAt: number
     createdAt: number
     updatedAt: number
@@ -62832,6 +62833,7 @@ export namespace Prisma {
     metaTitle?: true
     metaDescription?: true
     canonicalUrl?: true
+    tags?: true
     publishedAt?: true
     createdAt?: true
     updatedAt?: true
@@ -62939,6 +62941,7 @@ export namespace Prisma {
     metaTitle: string | null
     metaDescription: string | null
     canonicalUrl: string | null
+    tags: string[]
     publishedAt: Date | null
     createdAt: Date
     updatedAt: Date
@@ -62978,6 +62981,7 @@ export namespace Prisma {
     metaTitle?: boolean
     metaDescription?: boolean
     canonicalUrl?: boolean
+    tags?: boolean
     publishedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -63003,6 +63007,7 @@ export namespace Prisma {
     metaTitle?: boolean
     metaDescription?: boolean
     canonicalUrl?: boolean
+    tags?: boolean
     publishedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -63026,6 +63031,7 @@ export namespace Prisma {
     metaTitle?: boolean
     metaDescription?: boolean
     canonicalUrl?: boolean
+    tags?: boolean
     publishedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -63049,12 +63055,13 @@ export namespace Prisma {
     metaTitle?: boolean
     metaDescription?: boolean
     canonicalUrl?: boolean
+    tags?: boolean
     publishedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type BlogPostOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "slug" | "excerpt" | "content" | "status" | "viewCount" | "coverImageUrl" | "coverImageMediaId" | "authorId" | "categoryId" | "metaTitle" | "metaDescription" | "canonicalUrl" | "publishedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["blogPost"]>
+  export type BlogPostOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "slug" | "excerpt" | "content" | "status" | "viewCount" | "coverImageUrl" | "coverImageMediaId" | "authorId" | "categoryId" | "metaTitle" | "metaDescription" | "canonicalUrl" | "tags" | "publishedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["blogPost"]>
   export type BlogPostInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     coverImage?: boolean | BlogPost$coverImageArgs<ExtArgs>
     author?: boolean | BlogPost$authorArgs<ExtArgs>
@@ -63096,6 +63103,7 @@ export namespace Prisma {
       metaTitle: string | null
       metaDescription: string | null
       canonicalUrl: string | null
+      tags: string[]
       publishedAt: Date | null
       createdAt: Date
       updatedAt: Date
@@ -63540,6 +63548,7 @@ export namespace Prisma {
     readonly metaTitle: FieldRef<"BlogPost", 'String'>
     readonly metaDescription: FieldRef<"BlogPost", 'String'>
     readonly canonicalUrl: FieldRef<"BlogPost", 'String'>
+    readonly tags: FieldRef<"BlogPost", 'String[]'>
     readonly publishedAt: FieldRef<"BlogPost", 'DateTime'>
     readonly createdAt: FieldRef<"BlogPost", 'DateTime'>
     readonly updatedAt: FieldRef<"BlogPost", 'DateTime'>
@@ -75905,6 +75914,7 @@ export namespace Prisma {
     metaTitle: 'metaTitle',
     metaDescription: 'metaDescription',
     canonicalUrl: 'canonicalUrl',
+    tags: 'tags',
     publishedAt: 'publishedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -80044,6 +80054,7 @@ export namespace Prisma {
     metaTitle?: StringNullableFilter<"BlogPost"> | string | null
     metaDescription?: StringNullableFilter<"BlogPost"> | string | null
     canonicalUrl?: StringNullableFilter<"BlogPost"> | string | null
+    tags?: StringNullableListFilter<"BlogPost">
     publishedAt?: DateTimeNullableFilter<"BlogPost"> | Date | string | null
     createdAt?: DateTimeFilter<"BlogPost"> | Date | string
     updatedAt?: DateTimeFilter<"BlogPost"> | Date | string
@@ -80068,6 +80079,7 @@ export namespace Prisma {
     metaTitle?: SortOrderInput | SortOrder
     metaDescription?: SortOrderInput | SortOrder
     canonicalUrl?: SortOrderInput | SortOrder
+    tags?: SortOrder
     publishedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -80095,6 +80107,7 @@ export namespace Prisma {
     metaTitle?: StringNullableFilter<"BlogPost"> | string | null
     metaDescription?: StringNullableFilter<"BlogPost"> | string | null
     canonicalUrl?: StringNullableFilter<"BlogPost"> | string | null
+    tags?: StringNullableListFilter<"BlogPost">
     publishedAt?: DateTimeNullableFilter<"BlogPost"> | Date | string | null
     createdAt?: DateTimeFilter<"BlogPost"> | Date | string
     updatedAt?: DateTimeFilter<"BlogPost"> | Date | string
@@ -80119,6 +80132,7 @@ export namespace Prisma {
     metaTitle?: SortOrderInput | SortOrder
     metaDescription?: SortOrderInput | SortOrder
     canonicalUrl?: SortOrderInput | SortOrder
+    tags?: SortOrder
     publishedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -80147,6 +80161,7 @@ export namespace Prisma {
     metaTitle?: StringNullableWithAggregatesFilter<"BlogPost"> | string | null
     metaDescription?: StringNullableWithAggregatesFilter<"BlogPost"> | string | null
     canonicalUrl?: StringNullableWithAggregatesFilter<"BlogPost"> | string | null
+    tags?: StringNullableListFilter<"BlogPost">
     publishedAt?: DateTimeNullableWithAggregatesFilter<"BlogPost"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"BlogPost"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"BlogPost"> | Date | string
@@ -84359,6 +84374,7 @@ export namespace Prisma {
     metaTitle?: string | null
     metaDescription?: string | null
     canonicalUrl?: string | null
+    tags?: BlogPostCreatetagsInput | string[]
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -84383,6 +84399,7 @@ export namespace Prisma {
     metaTitle?: string | null
     metaDescription?: string | null
     canonicalUrl?: string | null
+    tags?: BlogPostCreatetagsInput | string[]
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -84400,6 +84417,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -84424,6 +84442,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -84445,6 +84464,7 @@ export namespace Prisma {
     metaTitle?: string | null
     metaDescription?: string | null
     canonicalUrl?: string | null
+    tags?: BlogPostCreatetagsInput | string[]
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -84461,6 +84481,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -84481,6 +84502,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -88490,6 +88512,14 @@ export namespace Prisma {
     not?: NestedEnumPostStatusFilter<$PrismaModel> | $Enums.PostStatus
   }
 
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
   export type BlogCategoryNullableScalarRelationFilter = {
     is?: BlogCategoryWhereInput | null
     isNot?: BlogCategoryWhereInput | null
@@ -88510,6 +88540,7 @@ export namespace Prisma {
     metaTitle?: SortOrder
     metaDescription?: SortOrder
     canonicalUrl?: SortOrder
+    tags?: SortOrder
     publishedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -93493,6 +93524,10 @@ export namespace Prisma {
     deleteMany?: BlogPostScalarWhereInput | BlogPostScalarWhereInput[]
   }
 
+  export type BlogPostCreatetagsInput = {
+    set: string[]
+  }
+
   export type MediaCreateNestedOneWithoutBlogCoverImagesInput = {
     create?: XOR<MediaCreateWithoutBlogCoverImagesInput, MediaUncheckedCreateWithoutBlogCoverImagesInput>
     connectOrCreate?: MediaCreateOrConnectWithoutBlogCoverImagesInput
@@ -93527,6 +93562,11 @@ export namespace Prisma {
 
   export type EnumPostStatusFieldUpdateOperationsInput = {
     set?: $Enums.PostStatus
+  }
+
+  export type BlogPostUpdatetagsInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type MediaUpdateOneWithoutBlogCoverImagesNestedInput = {
@@ -95098,6 +95138,7 @@ export namespace Prisma {
     metaTitle?: string | null
     metaDescription?: string | null
     canonicalUrl?: string | null
+    tags?: BlogPostCreatetagsInput | string[]
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -95120,6 +95161,7 @@ export namespace Prisma {
     metaTitle?: string | null
     metaDescription?: string | null
     canonicalUrl?: string | null
+    tags?: BlogPostCreatetagsInput | string[]
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -95792,6 +95834,7 @@ export namespace Prisma {
     metaTitle?: StringNullableFilter<"BlogPost"> | string | null
     metaDescription?: StringNullableFilter<"BlogPost"> | string | null
     canonicalUrl?: StringNullableFilter<"BlogPost"> | string | null
+    tags?: StringNullableListFilter<"BlogPost">
     publishedAt?: DateTimeNullableFilter<"BlogPost"> | Date | string | null
     createdAt?: DateTimeFilter<"BlogPost"> | Date | string
     updatedAt?: DateTimeFilter<"BlogPost"> | Date | string
@@ -97126,6 +97169,7 @@ export namespace Prisma {
     metaTitle?: string | null
     metaDescription?: string | null
     canonicalUrl?: string | null
+    tags?: BlogPostCreatetagsInput | string[]
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -97148,6 +97192,7 @@ export namespace Prisma {
     metaTitle?: string | null
     metaDescription?: string | null
     canonicalUrl?: string | null
+    tags?: BlogPostCreatetagsInput | string[]
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -106861,6 +106906,7 @@ export namespace Prisma {
     metaTitle?: string | null
     metaDescription?: string | null
     canonicalUrl?: string | null
+    tags?: BlogPostCreatetagsInput | string[]
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -106883,6 +106929,7 @@ export namespace Prisma {
     metaTitle?: string | null
     metaDescription?: string | null
     canonicalUrl?: string | null
+    tags?: BlogPostCreatetagsInput | string[]
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -107303,6 +107350,7 @@ export namespace Prisma {
     metaTitle?: string | null
     metaDescription?: string | null
     canonicalUrl?: string | null
+    tags?: BlogPostCreatetagsInput | string[]
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -107326,6 +107374,7 @@ export namespace Prisma {
     metaTitle?: string | null
     metaDescription?: string | null
     canonicalUrl?: string | null
+    tags?: BlogPostCreatetagsInput | string[]
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -107434,6 +107483,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -107457,6 +107507,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -108845,6 +108896,7 @@ export namespace Prisma {
     metaTitle?: string | null
     metaDescription?: string | null
     canonicalUrl?: string | null
+    tags?: BlogPostCreatetagsInput | string[]
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -109509,6 +109561,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -109531,6 +109584,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -109551,6 +109605,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -109813,6 +109868,7 @@ export namespace Prisma {
     metaTitle?: string | null
     metaDescription?: string | null
     canonicalUrl?: string | null
+    tags?: BlogPostCreatetagsInput | string[]
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -110114,6 +110170,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -110136,6 +110193,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -110156,6 +110214,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -111782,6 +111841,7 @@ export namespace Prisma {
     metaTitle?: string | null
     metaDescription?: string | null
     canonicalUrl?: string | null
+    tags?: BlogPostCreatetagsInput | string[]
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -111798,6 +111858,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -111820,6 +111881,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -111840,6 +111902,7 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: BlogPostUpdatetagsInput | string[]
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

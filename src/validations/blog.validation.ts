@@ -17,6 +17,7 @@ export const createBlogPostSchema = z.object({
   coverImageMediaId: z.coerce.number().int().positive().optional(),
   categoryId: z.coerce.number().int().optional(),
   productIds: z.array(z.coerce.number().int()).optional(),
+  tags: z.array(z.string().trim().min(1)).optional(),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional().default("DRAFT"),
   metaTitle: z.string().max(160).optional(),
   metaDescription: z.string().max(300).optional(),

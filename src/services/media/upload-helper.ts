@@ -10,7 +10,7 @@
 // ----------------------------------------------------------------------------
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../../utils/ApiError";
-import { saveFileToMedia, SavedMedia } from "./media.service";
+import { saveFileToMedia, SavedMedia, getMediaById } from "./media.service";
 import {
   upload,
   uploadBannerImage,
@@ -121,7 +121,30 @@ export function entityUpload(uploadKey: string) {
 
       const file = req.file ?? (req.body as Record<string, unknown>).file as Express.Multer.File | undefined;
       if (!file) {
-        // اگر فایلی ارسال نشده، ادامه بده (مقادیر قبلی حفظ می‌شوند)
+        // اگر فایلی ارسال نشده، اما ادمین شناسه‌ی مدیا فرستاده، آن را واکشی کن
+        const mediaIdFieldName = config.mediaIdField ??  mapEntityTypeToMediaIdField(config.entityType);
+        const possibleVal = (req.body as Record<string, unknown>)[mediaIdFieldName];
+        const mediaId = possibleVal !== undefined && possibleVal !== null ? Number(possibleVal) : NaN;
+
+        if (!Number.isNaN(mediaId)) {
+          try {
+            const mediaRecord = await getMediaById(mediaId);
+            const urlField = config.urlField ?? mapEntityTypeToUrlField(config.entityType);
+            const mediaIdField = config.mediaIdField ??  mapEntityTypeToMediaIdField(config.entityType);
+
+            req.body = {
+              ...req.body,
+              [urlField]: mediaRecord.url,
+              [mediaIdField]: mediaRecord.id,
+            };
+
+            return next();
+          } catch (err) {
+            return next(err);
+          }
+        }
+
+        // اگر نه فایل و نه media id، ادامه بده (مقادیر قبلی حفظ می‌شوند)
         return next();
       }
 

@@ -49,6 +49,7 @@ export async function createBlogPost(authorId: number | undefined, input: Create
       metaTitle: input.metaTitle,
       metaDescription: input.metaDescription,
       canonicalUrl: input.canonicalUrl,
+      tags: input.tags || [],
       authorId,
       publishedAt: input.status === "PUBLISHED" ? new Date() : null,
       products: input.productIds?.length
@@ -81,7 +82,7 @@ export async function updateBlogPost(id: number, input: UpdateBlogPostInput) {
 
   const updated = (await prisma.blogPost.update({
     where: { id },
-    data: { ...postData, slug, ...(becomingPublished ? { publishedAt: new Date() } : {}) },
+    data: { ...postData, slug, tags: input.tags !== undefined ? input.tags : undefined, ...(becomingPublished ? { publishedAt: new Date() } : {}) },
     include: DETAIL_INCLUDE,
   })) as PostWithRelations;
 

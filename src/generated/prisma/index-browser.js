@@ -622,6 +622,7 @@ exports.Prisma.BlogPostScalarFieldEnum = {
   metaTitle: 'metaTitle',
   metaDescription: 'metaDescription',
   canonicalUrl: 'canonicalUrl',
+  tags: 'tags',
   publishedAt: 'publishedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

@@ -1031,6 +1031,7 @@ model BlogPost {
   metaTitle       String?
   metaDescription String?
   canonicalUrl    String?
+  tags            String[] @default([])
 
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
