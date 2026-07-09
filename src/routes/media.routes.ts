@@ -1,12 +1,12 @@
 import { Router } from "express";
 import * as mediaController from "../controllers/media.controller";
 import { authenticate, authorize } from "../middlewares/auth.middleware";
-import { upload } from "../middlewares/upload.middleware";
+import { uploadMediaSingle, uploadMediaBulk } from "../services/media/upload-helper";
 
 const router = Router();
 
-router.post("/", authenticate, upload.single("file"), mediaController.upload);
-router.post("/bulk", authenticate, upload.array("files", 20), mediaController.uploadBulk);
+router.post("/", authenticate, uploadMediaSingle(), mediaController.upload);
+router.post("/bulk", authenticate, uploadMediaBulk(), mediaController.uploadBulk);
 
 router.get("/", authenticate, authorize("ADMIN", "EDITOR"), mediaController.list);
 router.get("/:id", authenticate, authorize("ADMIN", "EDITOR"), mediaController.getById);

@@ -1242,6 +1242,30 @@ Base path: `/api/v1/search`
 در نتایج جستجو وجود دارند نمایش داده می‌شوند.
 
 ---
+## وبلاگ (Blog)
+
+Base path: `/api/v1/blog`
+
+وبلاگ شامل پست‌ها و دسته‌بندی‌ها است. برخی مسیرها فقط برای نقش‌های
+`ADMIN`/`EDITOR` قابل دسترسی‌اند.
+
+| Method | Path | Auth | توضیح |
+|---|---|---|---|
+| GET | `/` | ندارد | لیست مقالات منتشرشده (فیلتر/صفحه‌بندی) |
+| GET | `/:slug` | ندارد | جزئیات یک پست با slug |
+| GET | `/categories` | ندارد | لیست دسته‌بندی‌های وبلاگ |
+| POST | `/` | ADMIN/EDITOR | ایجاد پست — می‌تواند multipart برای coverImage باشد |
+| PUT | `/:id` | ADMIN/EDITOR | ویرایش پست |
+| DELETE | `/:id` | ADMIN/EDITOR | حذف پست |
+| GET | `/admin` | ADMIN/EDITOR | لیست ادمین (فیلتر/صفحه‌بندی، همه وضعیت‌ها) |
+| GET | `/admin/:id` | ADMIN/EDITOR | جزئیات پست برای ادمین |
+| POST | `/categories` | ADMIN/EDITOR | ایجاد دسته‌بندی |
+| PUT | `/categories/:id` | ADMIN/EDITOR | ویرایش دسته‌بندی |
+| DELETE | `/categories/:id` | ADMIN/EDITOR | حذف دسته‌بندی |
+
+نمونه: برای ارسال تصویر کاور همراه با فیلدهای متنی از `multipart/form-data` استفاده کنید و نام فیلد تصویر را `coverImage` بگذارید — سرور `coverImageUrl` و `coverImageMediaId` را تولید می‌کند.
+
+---
 
 ## ۲۵. صفحه اصلی (Landing Page)
 Base path: `/api/v1/landing`

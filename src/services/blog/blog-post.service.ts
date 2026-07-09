@@ -15,7 +15,7 @@ type PostWithRelations = BlogPost & {
   products: (BlogPostProduct & { product: Product })[];
 };
 
-const DETAIL_INCLUDE = { category: true, coverImage: true, products: { include: { product: true } } };
+const DETAIL_INCLUDE = { category: true, products: { include: { product: true } } };
 
 async function isSlugTaken(slug: string, excludeId?: number): Promise<boolean> {
   const existing = await prisma.blogPost.findUnique({ where: { slug } });
@@ -43,6 +43,7 @@ export async function createBlogPost(authorId: number | undefined, input: Create
       excerpt: input.excerpt,
       content: input.content,
       coverImageMediaId: input.coverImageMediaId,
+      coverImageUrl:input.coverImageUrl,
       categoryId: input.categoryId,
       status: input.status,
       metaTitle: input.metaTitle,

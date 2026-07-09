@@ -45,7 +45,7 @@ export async function listActiveStories() {
   const stories = await prisma.story.findMany({
     where: { isActive: true, expiresAt: { gt: now } },
     orderBy: { order: "asc" },
-    include: { coverImage: true, video: true, products: { include: { product: { include: { images: { where: { isMain: true }, take: 1 } } } } } },
+    include: { products: { include: { product: { include: { images: { where: { isMain: true }, take: 1 } } } } } },
   });
 
   return stories.map((story, index) => ({

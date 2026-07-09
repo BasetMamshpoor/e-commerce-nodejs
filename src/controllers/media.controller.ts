@@ -9,18 +9,20 @@ import { getStorageProvider } from "../services/media/local-storage.provider";
 import * as mediaService from "../services/media/media.service";
 
 export async function upload(req: Request, res: Response) {
-  if (!req.file) throw ApiError.badRequest("فایلی ارسال نشده است");
+  const file = req.file ?? (req.body as Record<string, unknown>).file as Express.Multer.File | undefined;
+  if (!file) throw ApiError.badRequest("فایلی ارسال نشده است");
   const entityType = (req.query.entityType as string) || "misc";
-  const media = await mediaService.saveFileToMedia(req.file, entityType, req.user?.id);
+  const media = await mediaService.saveFileToMedia(file, entityType, req.user?.id);
   return ApiResponse.created(res, media, "فایل آپلود شد");
 }
 
 export async function uploadBulk(req: Request, res: Response) {
-  if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+  const files = req.files ?? (req.body as Record<string, unknown>).files as Express.Multer.File[] | undefined;
+  if (!files || !Array.isArray(files) || files.length === 0) {
     throw ApiError.badRequest("فایلی ارسال نشده است");
   }
   const entityType = (req.query.entityType as string) || "misc";
-  const items = await mediaService.saveFilesToMedia(req.files, entityType, req.user?.id);
+  const items = await mediaService.saveFilesToMedia(files, entityType, req.user?.id);
   return ApiResponse.created(res, { items }, `${items.length} فایل آپلود شد`);
 }
 

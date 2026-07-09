@@ -12,6 +12,7 @@ import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../../utils/ApiError";
 import { saveFileToMedia, SavedMedia } from "./media.service";
 import {
+  upload,
   uploadBannerImage,
   uploadProductImages,
   uploadCategoryImage,
@@ -30,6 +31,8 @@ type UploadFieldConfig = {
   mimeSetter: ReturnType<
     typeof import("../../middlewares/upload.middleware").createUpload
   >; // multer middleware
+  urlField?: string;
+  mediaIdField?: string;
 };
 
 // پیکربندی upload برای هر موجودیت — هر زمان موجودیت جدید اضافه شد،
@@ -64,11 +67,15 @@ const UPLOAD_CONFIGS: Record<string, UploadFieldConfig> = {
     fieldName: "coverImage",
     entityType: "stories",
     mimeSetter: uploadStoryMedia,
+    urlField: "coverImageUrl",
+    mediaIdField: "coverImageMediaId",
   },
   storyVideo: {
     fieldName: "video",
     entityType: "stories",
     mimeSetter: uploadStoryMedia,
+    urlField: "videoUrl",
+    mediaIdField: "videoMediaId",
   },
   blogCover: {
     fieldName: "coverImage",
@@ -112,21 +119,22 @@ export function entityUpload(uploadKey: string) {
         return next(err);
       }
 
-      if (!req.file) {
+      const file = req.file ?? (req.body as Record<string, unknown>).file as Express.Multer.File | undefined;
+      if (!file) {
         // اگر فایلی ارسال نشده، ادامه بده (مقادیر قبلی حفظ می‌شوند)
         return next();
       }
 
       try {
         const saved: SavedMedia = await saveFileToMedia(
-          req.file,
+          file,
           config.entityType,
           req.user?.id,
         );
 
-        // تعیین نام فیلد URL بر اساس entityType
-        const urlField = mapEntityTypeToUrlField(config.entityType);
-        const mediaIdField = mapEntityTypeToMediaIdField(config.entityType);
+        // تعیین نام فیلد URL بر اساس entityType یا تنظیمات سفارشی
+        const urlField = config.urlField ?? mapEntityTypeToUrlField(config.entityType);
+        const mediaIdField = config.mediaIdField ?? mapEntityTypeToMediaIdField(config.entityType);
 
         // تنظیم مقادیر در req.body برای استفاده در کنترلر
         req.body = {
@@ -253,6 +261,34 @@ export function uploadProductImagesMiddleware() {
       } catch (error) {
         next(error);
       }
+    });
+  };
+}
+
+export function uploadMediaSingle() {
+  const uploader = upload.single("file");
+
+  return (req: Request, res: Response, next: NextFunction) => {
+    uploader(req, res, (err: unknown) => {
+      if (err) return next(err);
+      if (req.file) {
+        (req.body as Record<string, unknown>).file = req.file;
+      }
+      next();
+    });
+  };
+}
+
+export function uploadMediaBulk() {
+  const uploader = upload.array("files", 20);
+
+  return (req: Request, res: Response, next: NextFunction) => {
+    uploader(req, res, (err: unknown) => {
+      if (err) return next(err);
+      if (req.files) {
+        (req.body as Record<string, unknown>).files = req.files;
+      }
+      next();
     });
   };
 }
