@@ -9,7 +9,6 @@
 //   2. req.body به‌طور خودکار imageUrl و mediaId را دارد
 // ----------------------------------------------------------------------------
 import { Request, Response, NextFunction } from "express";
-import { ApiError } from "../../utils/ApiError";
 import { saveFileToMedia, SavedMedia, getMediaById } from "./media.service";
 import {
   upload,

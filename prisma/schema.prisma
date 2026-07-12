@@ -1134,9 +1134,7 @@ model AdminNotification {
 model Banner {
   id       Int            @id @default(autoincrement())
   title    String?
-  // آدرس مستقیم فایل — فرانت‌اند برای نمایش از این فیلد استفاده می‌کند
   imageUrl String?
-  // ارجاع به رکورد Media در کتابخانه متمرکز (برای مدیریت ادمین)
   mediaId  Int?
   media    Media?         @relation(fields: [mediaId], references: [id])
   link     String?

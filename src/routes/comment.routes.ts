@@ -29,7 +29,6 @@ router.post(
   commentController.createForProduct
 );
 
-// عمومی — لیست دیدگاه‌های تاییدشده‌ی یک پست وبلاگ (همان مدل Comment، پلی‌مورفیک)
 router.get(
   "/blog/:postId",
   optionalAuthenticate,
