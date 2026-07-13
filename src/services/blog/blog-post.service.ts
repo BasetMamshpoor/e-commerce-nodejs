@@ -158,7 +158,15 @@ export async function listBlogPostsPublic(query: ListBlogPostsQuery) {
       orderBy: { publishedAt: "desc" },
       skip: pagination.skip,
       take: pagination.take,
-      include: DETAIL_INCLUDE,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        excerpt: true,
+        coverImageUrl: true,
+        publishedAt: true,
+        viewCount:true,
+      },
     }),
     prisma.blogPost.count({ where }),
   ]);

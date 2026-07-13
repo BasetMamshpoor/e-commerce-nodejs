@@ -16,6 +16,13 @@ export const updateUserRoleSchema = z.object({
   role: z.enum(["ADMIN", "EDITOR", "SUPPORT", "CUSTOMER"]),
 });
 
+export const adjustUserWalletSchema = z.object({
+  amount: z.coerce.number().int().refine((value) => value !== 0, {
+    message: "مبلغ باید غیر صفر باشد",
+  })
+});
+
 export type AdminListUsersQuery = z.infer<typeof adminListUsersQuerySchema>;
 export type BlockUserInput = z.infer<typeof blockUserSchema>;
 export type UpdateUserRoleInput = z.infer<typeof updateUserRoleSchema>;
+export type AdjustUserWalletInput = z.infer<typeof adjustUserWalletSchema>;

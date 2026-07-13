@@ -3,11 +3,11 @@ import * as userAdminController from "../controllers/user-admin.controller";
 import * as profileController from "../controllers/profile.controller";
 import { validate } from "../middlewares/validate";
 import { authenticate, authorize } from "../middlewares/auth.middleware";
-import { z } from "zod";
 import {
   adminListUsersQuerySchema,
   blockUserSchema,
   updateUserRoleSchema,
+  adjustUserWalletSchema,
 } from "../validations/user-admin.validation";
 import {
   updateMyProfileSchema,
@@ -56,6 +56,13 @@ router.put(
   ...adminOnly,
   validate(updateUserRoleSchema),
   userAdminController.updateRole
+);
+
+router.put(
+  "/admin/:id/wallet/adjust",
+  ...adminOnly,
+  validate(adjustUserWalletSchema),
+  userAdminController.adjustWallet
 );
 
 router.get("/admin/:id/sessions", ...adminOnly, userAdminController.listSessions);
