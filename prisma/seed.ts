@@ -906,9 +906,11 @@ async function main() {
   // const postCompany = await prisma.shippingCompany.create({
   //   data: {
   //     name: "پست جمهوری اسلامی",
-  //     logoMediaId: shipMedia1.id,
-  //     description: "ارسال از طریق پست پیشتاز",
+  //     description: "ارسال از طریق پست پیشتاز (نرخ ثابت)",
+  //     pricingType: "FIXED",
   //     baseCost: 35000,
+  //     acceptsPrepay: true,
+  //     acceptsFreightCollect: true,
   //     estimatedDaysMin: 3,
   //     estimatedDaysMax: 7,
   //     isActive: true,
@@ -918,8 +920,12 @@ async function main() {
   // const tipaxCompany = await prisma.shippingCompany.create({
   //   data: {
   //     name: "تیپاکس",
-  //     description: "ارسال سریع درون‌شهری",
-  //     baseCost: 60000,
+  //     description: "ارسال سریع بر اساس وزن و مسافت",
+  //     pricingType: "WEIGHT_DISTANCE",
+  //     pricePerKg: 15000,
+  //     pricePerKm: 2000,
+  //     acceptsPrepay: true,
+  //     acceptsFreightCollect: false,
   //     estimatedDaysMin: 1,
   //     estimatedDaysMax: 2,
   //     isActive: true,

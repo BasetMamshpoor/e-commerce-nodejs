@@ -39,7 +39,11 @@ export async function chargeVerify(req: Request, res: Response) {
 }
 
 export async function requestWithdrawal(req: Request, res: Response) {
-  const withdrawal = await withdrawalService.requestWithdrawal(userId(req), req.body.amount, req.body.description);
+  const withdrawal = await withdrawalService.requestWithdrawal(userId(req), req.body.amount, req.body.description, {
+    bankSheba: req.body.bankSheba,
+    bankCardNumber: req.body.bankCardNumber,
+    bankAccountOwnerName: req.body.bankAccountOwnerName,
+  });
   return ApiResponse.created(res, withdrawal, "درخواست برداشت ثبت شد و در انتظار بررسی است");
 }
 
@@ -61,6 +65,11 @@ export async function listWithdrawalsAdmin(req: Request, res: Response) {
 }
 
 export async function reviewWithdrawalAdmin(req: Request, res: Response) {
-  const result = await withdrawalService.reviewWithdrawalAdmin(paramInt(req.params.id), req.body.status, req.body.adminNote);
+  const result = await withdrawalService.reviewWithdrawalAdmin(
+    paramInt(req.params.id),
+    req.body.status,
+    req.body.adminNote,
+    req.body.trackingCode
+  );
   return ApiResponse.ok(res, result, "درخواست برداشت بررسی شد");
 }

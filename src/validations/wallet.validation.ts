@@ -12,11 +12,15 @@ export const verifyPaymentSchema = z.object({
 export const withdrawalRequestSchema = z.object({
   amount: z.coerce.number().int().positive(),
   description: z.string().max(500).optional(),
+  bankSheba: z.string().trim().max(34).optional(),
+  bankCardNumber: z.string().trim().max(19).optional(),
+  bankAccountOwnerName: z.string().trim().max(100).optional(),
 });
 
 export const adminReviewWithdrawalSchema = z.object({
   status: z.enum(["APPROVED", "REJECTED"]),
   adminNote: z.string().max(500).optional(),
+  trackingCode: z.string().trim().max(100).optional(),
 });
 
 export type ChargeWalletInput = z.infer<typeof chargeWalletSchema>;

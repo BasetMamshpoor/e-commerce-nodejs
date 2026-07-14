@@ -85,6 +85,7 @@ enum PaymentMethod {
   GATEWAY
   WALLET
   MIXED
+  FREIGHT_COLLECT
 }
 
 enum PaymentStatus {
@@ -182,6 +183,11 @@ enum WalletWithdrawalStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum ShippingPricingType {
+  FIXED
+  WEIGHT_DISTANCE
 }
 
 // ============================================================================
@@ -705,18 +711,21 @@ model DiscountCodeUsage {
 // ============================================================================
 
 model ShippingCompany {
-  id               Int     @id @default(autoincrement())
-  name             String
-  // آدرس مستقیم لوگو — فرانت‌اند برای نمایش از این فیلد استفاده می‌کند
-  logoUrl          String?
-  // ارجاع به رکورد Media در کتابخانه متمرکز (برای مدیریت ادمین)
-  logoMediaId      Int?
-  logo             Media?  @relation("ShippingLogos", fields: [logoMediaId], references: [id])
-  description      String?
-  baseCost         Int     @default(0)
-  estimatedDaysMin Int?
-  estimatedDaysMax Int?
-  isActive         Boolean @default(true)
+  id                    Int                 @id @default(autoincrement())
+  name                  String
+  logoUrl               String?
+  logoMediaId           Int?
+  logo                  Media?              @relation("ShippingLogos", fields: [logoMediaId], references: [id])
+  description           String?
+  pricingType           ShippingPricingType @default(FIXED)
+  baseCost              Int                 @default(0)
+  pricePerKg            Int?
+  pricePerKm            Int?
+  acceptsPrepay         Boolean             @default(true)
+  acceptsFreightCollect Boolean             @default(false)
+  estimatedDaysMin      Int?
+  estimatedDaysMax      Int?
+  isActive              Boolean             @default(true)
 
   orders Order[]
 }
@@ -774,6 +783,8 @@ model Order {
   shippingCompanyId Int?
   shippingCompany   ShippingCompany? @relation(fields: [shippingCompanyId], references: [id])
   shippingCost      Int              @default(0)
+  shippingWeight    Int? // وزن کل (گرم) — برای محاسبه هزینه ارسال وزنی
+  shippingDistance  Int? // فاصله (کیلومتر) — برای محاسبه هزینه ارسال مسافتی
   trackingCode      String?
   packageNumber     String?
 
@@ -1134,9 +1145,7 @@ model AdminNotification {
 model Banner {
   id       Int            @id @default(autoincrement())
   title    String?
-  // آدرس مستقیم فایل — فرانت‌اند برای نمایش از این فیلد استفاده می‌کند
   imageUrl String?
-  // ارجاع به رکورد Media در کتابخانه متمرکز (برای مدیریت ادمین)
   mediaId  Int?
   media    Media?         @relation(fields: [mediaId], references: [id])
   link     String?

@@ -386,7 +386,8 @@ export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
 export const PaymentMethod: {
   GATEWAY: 'GATEWAY',
   WALLET: 'WALLET',
-  MIXED: 'MIXED'
+  MIXED: 'MIXED',
+  FREIGHT_COLLECT: 'FREIGHT_COLLECT'
 };
 
 export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
@@ -527,6 +528,14 @@ export const WalletWithdrawalStatus: {
 
 export type WalletWithdrawalStatus = (typeof WalletWithdrawalStatus)[keyof typeof WalletWithdrawalStatus]
 
+
+export const ShippingPricingType: {
+  FIXED: 'FIXED',
+  WEIGHT_DISTANCE: 'WEIGHT_DISTANCE'
+};
+
+export type ShippingPricingType = (typeof ShippingPricingType)[keyof typeof ShippingPricingType]
+
 }
 
 export type Role = $Enums.Role
@@ -620,6 +629,10 @@ export const BannerPosition: typeof $Enums.BannerPosition
 export type WalletWithdrawalStatus = $Enums.WalletWithdrawalStatus
 
 export const WalletWithdrawalStatus: typeof $Enums.WalletWithdrawalStatus
+
+export type ShippingPricingType = $Enums.ShippingPricingType
+
+export const ShippingPricingType: typeof $Enums.ShippingPricingType
 
 /**
  * ##  Prisma Client ʲˢ
@@ -40346,6 +40359,8 @@ export namespace Prisma {
     id: number | null
     logoMediaId: number | null
     baseCost: number | null
+    pricePerKg: number | null
+    pricePerKm: number | null
     estimatedDaysMin: number | null
     estimatedDaysMax: number | null
   }
@@ -40354,6 +40369,8 @@ export namespace Prisma {
     id: number | null
     logoMediaId: number | null
     baseCost: number | null
+    pricePerKg: number | null
+    pricePerKm: number | null
     estimatedDaysMin: number | null
     estimatedDaysMax: number | null
   }
@@ -40364,7 +40381,12 @@ export namespace Prisma {
     logoUrl: string | null
     logoMediaId: number | null
     description: string | null
+    pricingType: $Enums.ShippingPricingType | null
     baseCost: number | null
+    pricePerKg: number | null
+    pricePerKm: number | null
+    acceptsPrepay: boolean | null
+    acceptsFreightCollect: boolean | null
     estimatedDaysMin: number | null
     estimatedDaysMax: number | null
     isActive: boolean | null
@@ -40376,7 +40398,12 @@ export namespace Prisma {
     logoUrl: string | null
     logoMediaId: number | null
     description: string | null
+    pricingType: $Enums.ShippingPricingType | null
     baseCost: number | null
+    pricePerKg: number | null
+    pricePerKm: number | null
+    acceptsPrepay: boolean | null
+    acceptsFreightCollect: boolean | null
     estimatedDaysMin: number | null
     estimatedDaysMax: number | null
     isActive: boolean | null
@@ -40388,7 +40415,12 @@ export namespace Prisma {
     logoUrl: number
     logoMediaId: number
     description: number
+    pricingType: number
     baseCost: number
+    pricePerKg: number
+    pricePerKm: number
+    acceptsPrepay: number
+    acceptsFreightCollect: number
     estimatedDaysMin: number
     estimatedDaysMax: number
     isActive: number
@@ -40400,6 +40432,8 @@ export namespace Prisma {
     id?: true
     logoMediaId?: true
     baseCost?: true
+    pricePerKg?: true
+    pricePerKm?: true
     estimatedDaysMin?: true
     estimatedDaysMax?: true
   }
@@ -40408,6 +40442,8 @@ export namespace Prisma {
     id?: true
     logoMediaId?: true
     baseCost?: true
+    pricePerKg?: true
+    pricePerKm?: true
     estimatedDaysMin?: true
     estimatedDaysMax?: true
   }
@@ -40418,7 +40454,12 @@ export namespace Prisma {
     logoUrl?: true
     logoMediaId?: true
     description?: true
+    pricingType?: true
     baseCost?: true
+    pricePerKg?: true
+    pricePerKm?: true
+    acceptsPrepay?: true
+    acceptsFreightCollect?: true
     estimatedDaysMin?: true
     estimatedDaysMax?: true
     isActive?: true
@@ -40430,7 +40471,12 @@ export namespace Prisma {
     logoUrl?: true
     logoMediaId?: true
     description?: true
+    pricingType?: true
     baseCost?: true
+    pricePerKg?: true
+    pricePerKm?: true
+    acceptsPrepay?: true
+    acceptsFreightCollect?: true
     estimatedDaysMin?: true
     estimatedDaysMax?: true
     isActive?: true
@@ -40442,7 +40488,12 @@ export namespace Prisma {
     logoUrl?: true
     logoMediaId?: true
     description?: true
+    pricingType?: true
     baseCost?: true
+    pricePerKg?: true
+    pricePerKm?: true
+    acceptsPrepay?: true
+    acceptsFreightCollect?: true
     estimatedDaysMin?: true
     estimatedDaysMax?: true
     isActive?: true
@@ -40541,7 +40592,12 @@ export namespace Prisma {
     logoUrl: string | null
     logoMediaId: number | null
     description: string | null
+    pricingType: $Enums.ShippingPricingType
     baseCost: number
+    pricePerKg: number | null
+    pricePerKm: number | null
+    acceptsPrepay: boolean
+    acceptsFreightCollect: boolean
     estimatedDaysMin: number | null
     estimatedDaysMax: number | null
     isActive: boolean
@@ -40572,7 +40628,12 @@ export namespace Prisma {
     logoUrl?: boolean
     logoMediaId?: boolean
     description?: boolean
+    pricingType?: boolean
     baseCost?: boolean
+    pricePerKg?: boolean
+    pricePerKm?: boolean
+    acceptsPrepay?: boolean
+    acceptsFreightCollect?: boolean
     estimatedDaysMin?: boolean
     estimatedDaysMax?: boolean
     isActive?: boolean
@@ -40587,7 +40648,12 @@ export namespace Prisma {
     logoUrl?: boolean
     logoMediaId?: boolean
     description?: boolean
+    pricingType?: boolean
     baseCost?: boolean
+    pricePerKg?: boolean
+    pricePerKm?: boolean
+    acceptsPrepay?: boolean
+    acceptsFreightCollect?: boolean
     estimatedDaysMin?: boolean
     estimatedDaysMax?: boolean
     isActive?: boolean
@@ -40600,7 +40666,12 @@ export namespace Prisma {
     logoUrl?: boolean
     logoMediaId?: boolean
     description?: boolean
+    pricingType?: boolean
     baseCost?: boolean
+    pricePerKg?: boolean
+    pricePerKm?: boolean
+    acceptsPrepay?: boolean
+    acceptsFreightCollect?: boolean
     estimatedDaysMin?: boolean
     estimatedDaysMax?: boolean
     isActive?: boolean
@@ -40613,13 +40684,18 @@ export namespace Prisma {
     logoUrl?: boolean
     logoMediaId?: boolean
     description?: boolean
+    pricingType?: boolean
     baseCost?: boolean
+    pricePerKg?: boolean
+    pricePerKm?: boolean
+    acceptsPrepay?: boolean
+    acceptsFreightCollect?: boolean
     estimatedDaysMin?: boolean
     estimatedDaysMax?: boolean
     isActive?: boolean
   }
 
-  export type ShippingCompanyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "logoUrl" | "logoMediaId" | "description" | "baseCost" | "estimatedDaysMin" | "estimatedDaysMax" | "isActive", ExtArgs["result"]["shippingCompany"]>
+  export type ShippingCompanyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "logoUrl" | "logoMediaId" | "description" | "pricingType" | "baseCost" | "pricePerKg" | "pricePerKm" | "acceptsPrepay" | "acceptsFreightCollect" | "estimatedDaysMin" | "estimatedDaysMax" | "isActive", ExtArgs["result"]["shippingCompany"]>
   export type ShippingCompanyInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     logo?: boolean | ShippingCompany$logoArgs<ExtArgs>
     orders?: boolean | ShippingCompany$ordersArgs<ExtArgs>
@@ -40644,7 +40720,12 @@ export namespace Prisma {
       logoUrl: string | null
       logoMediaId: number | null
       description: string | null
+      pricingType: $Enums.ShippingPricingType
       baseCost: number
+      pricePerKg: number | null
+      pricePerKm: number | null
+      acceptsPrepay: boolean
+      acceptsFreightCollect: boolean
       estimatedDaysMin: number | null
       estimatedDaysMax: number | null
       isActive: boolean
@@ -41078,7 +41159,12 @@ export namespace Prisma {
     readonly logoUrl: FieldRef<"ShippingCompany", 'String'>
     readonly logoMediaId: FieldRef<"ShippingCompany", 'Int'>
     readonly description: FieldRef<"ShippingCompany", 'String'>
+    readonly pricingType: FieldRef<"ShippingCompany", 'ShippingPricingType'>
     readonly baseCost: FieldRef<"ShippingCompany", 'Int'>
+    readonly pricePerKg: FieldRef<"ShippingCompany", 'Int'>
+    readonly pricePerKm: FieldRef<"ShippingCompany", 'Int'>
+    readonly acceptsPrepay: FieldRef<"ShippingCompany", 'Boolean'>
+    readonly acceptsFreightCollect: FieldRef<"ShippingCompany", 'Boolean'>
     readonly estimatedDaysMin: FieldRef<"ShippingCompany", 'Int'>
     readonly estimatedDaysMax: FieldRef<"ShippingCompany", 'Int'>
     readonly isActive: FieldRef<"ShippingCompany", 'Boolean'>
@@ -43899,6 +43985,8 @@ export namespace Prisma {
     addressId: number | null
     shippingCompanyId: number | null
     shippingCost: number | null
+    shippingWeight: number | null
+    shippingDistance: number | null
     subtotal: number | null
     discountAmount: number | null
     taxAmount: number | null
@@ -43912,6 +44000,8 @@ export namespace Prisma {
     addressId: number | null
     shippingCompanyId: number | null
     shippingCost: number | null
+    shippingWeight: number | null
+    shippingDistance: number | null
     subtotal: number | null
     discountAmount: number | null
     taxAmount: number | null
@@ -43926,6 +44016,8 @@ export namespace Prisma {
     addressId: number | null
     shippingCompanyId: number | null
     shippingCost: number | null
+    shippingWeight: number | null
+    shippingDistance: number | null
     trackingCode: string | null
     packageNumber: string | null
     subtotal: number | null
@@ -43947,6 +44039,8 @@ export namespace Prisma {
     addressId: number | null
     shippingCompanyId: number | null
     shippingCost: number | null
+    shippingWeight: number | null
+    shippingDistance: number | null
     trackingCode: string | null
     packageNumber: string | null
     subtotal: number | null
@@ -43969,6 +44063,8 @@ export namespace Prisma {
     shippingAddress: number
     shippingCompanyId: number
     shippingCost: number
+    shippingWeight: number
+    shippingDistance: number
     trackingCode: number
     packageNumber: number
     subtotal: number
@@ -43991,6 +44087,8 @@ export namespace Prisma {
     addressId?: true
     shippingCompanyId?: true
     shippingCost?: true
+    shippingWeight?: true
+    shippingDistance?: true
     subtotal?: true
     discountAmount?: true
     taxAmount?: true
@@ -44004,6 +44102,8 @@ export namespace Prisma {
     addressId?: true
     shippingCompanyId?: true
     shippingCost?: true
+    shippingWeight?: true
+    shippingDistance?: true
     subtotal?: true
     discountAmount?: true
     taxAmount?: true
@@ -44018,6 +44118,8 @@ export namespace Prisma {
     addressId?: true
     shippingCompanyId?: true
     shippingCost?: true
+    shippingWeight?: true
+    shippingDistance?: true
     trackingCode?: true
     packageNumber?: true
     subtotal?: true
@@ -44039,6 +44141,8 @@ export namespace Prisma {
     addressId?: true
     shippingCompanyId?: true
     shippingCost?: true
+    shippingWeight?: true
+    shippingDistance?: true
     trackingCode?: true
     packageNumber?: true
     subtotal?: true
@@ -44061,6 +44165,8 @@ export namespace Prisma {
     shippingAddress?: true
     shippingCompanyId?: true
     shippingCost?: true
+    shippingWeight?: true
+    shippingDistance?: true
     trackingCode?: true
     packageNumber?: true
     subtotal?: true
@@ -44170,6 +44276,8 @@ export namespace Prisma {
     shippingAddress: JsonValue | null
     shippingCompanyId: number | null
     shippingCost: number
+    shippingWeight: number | null
+    shippingDistance: number | null
     trackingCode: string | null
     packageNumber: string | null
     subtotal: number
@@ -44211,6 +44319,8 @@ export namespace Prisma {
     shippingAddress?: boolean
     shippingCompanyId?: boolean
     shippingCost?: boolean
+    shippingWeight?: boolean
+    shippingDistance?: boolean
     trackingCode?: boolean
     packageNumber?: boolean
     subtotal?: boolean
@@ -44246,6 +44356,8 @@ export namespace Prisma {
     shippingAddress?: boolean
     shippingCompanyId?: boolean
     shippingCost?: boolean
+    shippingWeight?: boolean
+    shippingDistance?: boolean
     trackingCode?: boolean
     packageNumber?: boolean
     subtotal?: boolean
@@ -44272,6 +44384,8 @@ export namespace Prisma {
     shippingAddress?: boolean
     shippingCompanyId?: boolean
     shippingCost?: boolean
+    shippingWeight?: boolean
+    shippingDistance?: boolean
     trackingCode?: boolean
     packageNumber?: boolean
     subtotal?: boolean
@@ -44298,6 +44412,8 @@ export namespace Prisma {
     shippingAddress?: boolean
     shippingCompanyId?: boolean
     shippingCost?: boolean
+    shippingWeight?: boolean
+    shippingDistance?: boolean
     trackingCode?: boolean
     packageNumber?: boolean
     subtotal?: boolean
@@ -44312,7 +44428,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderNumber" | "userId" | "addressId" | "shippingAddress" | "shippingCompanyId" | "shippingCost" | "trackingCode" | "packageNumber" | "subtotal" | "discountAmount" | "taxAmount" | "totalAmount" | "discountCodeId" | "paymentMethod" | "status" | "paidAt" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderNumber" | "userId" | "addressId" | "shippingAddress" | "shippingCompanyId" | "shippingCost" | "shippingWeight" | "shippingDistance" | "trackingCode" | "packageNumber" | "subtotal" | "discountAmount" | "taxAmount" | "totalAmount" | "discountCodeId" | "paymentMethod" | "status" | "paidAt" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
   export type OrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     address?: boolean | Order$addressArgs<ExtArgs>
@@ -44365,6 +44481,8 @@ export namespace Prisma {
       shippingAddress: Prisma.JsonValue | null
       shippingCompanyId: number | null
       shippingCost: number
+      shippingWeight: number | null
+      shippingDistance: number | null
       trackingCode: string | null
       packageNumber: string | null
       subtotal: number
@@ -44819,6 +44937,8 @@ export namespace Prisma {
     readonly shippingAddress: FieldRef<"Order", 'Json'>
     readonly shippingCompanyId: FieldRef<"Order", 'Int'>
     readonly shippingCost: FieldRef<"Order", 'Int'>
+    readonly shippingWeight: FieldRef<"Order", 'Int'>
+    readonly shippingDistance: FieldRef<"Order", 'Int'>
     readonly trackingCode: FieldRef<"Order", 'String'>
     readonly packageNumber: FieldRef<"Order", 'String'>
     readonly subtotal: FieldRef<"Order", 'Int'>
@@ -75661,7 +75781,12 @@ export namespace Prisma {
     logoUrl: 'logoUrl',
     logoMediaId: 'logoMediaId',
     description: 'description',
+    pricingType: 'pricingType',
     baseCost: 'baseCost',
+    pricePerKg: 'pricePerKg',
+    pricePerKm: 'pricePerKm',
+    acceptsPrepay: 'acceptsPrepay',
+    acceptsFreightCollect: 'acceptsFreightCollect',
     estimatedDaysMin: 'estimatedDaysMin',
     estimatedDaysMax: 'estimatedDaysMax',
     isActive: 'isActive'
@@ -75705,6 +75830,8 @@ export namespace Prisma {
     shippingAddress: 'shippingAddress',
     shippingCompanyId: 'shippingCompanyId',
     shippingCost: 'shippingCost',
+    shippingWeight: 'shippingWeight',
+    shippingDistance: 'shippingDistance',
     trackingCode: 'trackingCode',
     packageNumber: 'packageNumber',
     subtotal: 'subtotal',
@@ -76283,6 +76410,20 @@ export namespace Prisma {
    * Reference to a field of type 'DiscountType[]'
    */
   export type ListEnumDiscountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DiscountType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ShippingPricingType'
+   */
+  export type EnumShippingPricingTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ShippingPricingType'>
+    
+
+
+  /**
+   * Reference to a field of type 'ShippingPricingType[]'
+   */
+  export type ListEnumShippingPricingTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ShippingPricingType[]'>
     
 
 
@@ -78687,7 +78828,12 @@ export namespace Prisma {
     logoUrl?: StringNullableFilter<"ShippingCompany"> | string | null
     logoMediaId?: IntNullableFilter<"ShippingCompany"> | number | null
     description?: StringNullableFilter<"ShippingCompany"> | string | null
+    pricingType?: EnumShippingPricingTypeFilter<"ShippingCompany"> | $Enums.ShippingPricingType
     baseCost?: IntFilter<"ShippingCompany"> | number
+    pricePerKg?: IntNullableFilter<"ShippingCompany"> | number | null
+    pricePerKm?: IntNullableFilter<"ShippingCompany"> | number | null
+    acceptsPrepay?: BoolFilter<"ShippingCompany"> | boolean
+    acceptsFreightCollect?: BoolFilter<"ShippingCompany"> | boolean
     estimatedDaysMin?: IntNullableFilter<"ShippingCompany"> | number | null
     estimatedDaysMax?: IntNullableFilter<"ShippingCompany"> | number | null
     isActive?: BoolFilter<"ShippingCompany"> | boolean
@@ -78701,7 +78847,12 @@ export namespace Prisma {
     logoUrl?: SortOrderInput | SortOrder
     logoMediaId?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
+    pricingType?: SortOrder
     baseCost?: SortOrder
+    pricePerKg?: SortOrderInput | SortOrder
+    pricePerKm?: SortOrderInput | SortOrder
+    acceptsPrepay?: SortOrder
+    acceptsFreightCollect?: SortOrder
     estimatedDaysMin?: SortOrderInput | SortOrder
     estimatedDaysMax?: SortOrderInput | SortOrder
     isActive?: SortOrder
@@ -78718,7 +78869,12 @@ export namespace Prisma {
     logoUrl?: StringNullableFilter<"ShippingCompany"> | string | null
     logoMediaId?: IntNullableFilter<"ShippingCompany"> | number | null
     description?: StringNullableFilter<"ShippingCompany"> | string | null
+    pricingType?: EnumShippingPricingTypeFilter<"ShippingCompany"> | $Enums.ShippingPricingType
     baseCost?: IntFilter<"ShippingCompany"> | number
+    pricePerKg?: IntNullableFilter<"ShippingCompany"> | number | null
+    pricePerKm?: IntNullableFilter<"ShippingCompany"> | number | null
+    acceptsPrepay?: BoolFilter<"ShippingCompany"> | boolean
+    acceptsFreightCollect?: BoolFilter<"ShippingCompany"> | boolean
     estimatedDaysMin?: IntNullableFilter<"ShippingCompany"> | number | null
     estimatedDaysMax?: IntNullableFilter<"ShippingCompany"> | number | null
     isActive?: BoolFilter<"ShippingCompany"> | boolean
@@ -78732,7 +78888,12 @@ export namespace Prisma {
     logoUrl?: SortOrderInput | SortOrder
     logoMediaId?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
+    pricingType?: SortOrder
     baseCost?: SortOrder
+    pricePerKg?: SortOrderInput | SortOrder
+    pricePerKm?: SortOrderInput | SortOrder
+    acceptsPrepay?: SortOrder
+    acceptsFreightCollect?: SortOrder
     estimatedDaysMin?: SortOrderInput | SortOrder
     estimatedDaysMax?: SortOrderInput | SortOrder
     isActive?: SortOrder
@@ -78752,7 +78913,12 @@ export namespace Prisma {
     logoUrl?: StringNullableWithAggregatesFilter<"ShippingCompany"> | string | null
     logoMediaId?: IntNullableWithAggregatesFilter<"ShippingCompany"> | number | null
     description?: StringNullableWithAggregatesFilter<"ShippingCompany"> | string | null
+    pricingType?: EnumShippingPricingTypeWithAggregatesFilter<"ShippingCompany"> | $Enums.ShippingPricingType
     baseCost?: IntWithAggregatesFilter<"ShippingCompany"> | number
+    pricePerKg?: IntNullableWithAggregatesFilter<"ShippingCompany"> | number | null
+    pricePerKm?: IntNullableWithAggregatesFilter<"ShippingCompany"> | number | null
+    acceptsPrepay?: BoolWithAggregatesFilter<"ShippingCompany"> | boolean
+    acceptsFreightCollect?: BoolWithAggregatesFilter<"ShippingCompany"> | boolean
     estimatedDaysMin?: IntNullableWithAggregatesFilter<"ShippingCompany"> | number | null
     estimatedDaysMax?: IntNullableWithAggregatesFilter<"ShippingCompany"> | number | null
     isActive?: BoolWithAggregatesFilter<"ShippingCompany"> | boolean
@@ -78914,6 +79080,8 @@ export namespace Prisma {
     shippingAddress?: JsonNullableFilter<"Order">
     shippingCompanyId?: IntNullableFilter<"Order"> | number | null
     shippingCost?: IntFilter<"Order"> | number
+    shippingWeight?: IntNullableFilter<"Order"> | number | null
+    shippingDistance?: IntNullableFilter<"Order"> | number | null
     trackingCode?: StringNullableFilter<"Order"> | string | null
     packageNumber?: StringNullableFilter<"Order"> | string | null
     subtotal?: IntFilter<"Order"> | number
@@ -78948,6 +79116,8 @@ export namespace Prisma {
     shippingAddress?: SortOrderInput | SortOrder
     shippingCompanyId?: SortOrderInput | SortOrder
     shippingCost?: SortOrder
+    shippingWeight?: SortOrderInput | SortOrder
+    shippingDistance?: SortOrderInput | SortOrder
     trackingCode?: SortOrderInput | SortOrder
     packageNumber?: SortOrderInput | SortOrder
     subtotal?: SortOrder
@@ -78985,6 +79155,8 @@ export namespace Prisma {
     shippingAddress?: JsonNullableFilter<"Order">
     shippingCompanyId?: IntNullableFilter<"Order"> | number | null
     shippingCost?: IntFilter<"Order"> | number
+    shippingWeight?: IntNullableFilter<"Order"> | number | null
+    shippingDistance?: IntNullableFilter<"Order"> | number | null
     trackingCode?: StringNullableFilter<"Order"> | string | null
     packageNumber?: StringNullableFilter<"Order"> | string | null
     subtotal?: IntFilter<"Order"> | number
@@ -79019,6 +79191,8 @@ export namespace Prisma {
     shippingAddress?: SortOrderInput | SortOrder
     shippingCompanyId?: SortOrderInput | SortOrder
     shippingCost?: SortOrder
+    shippingWeight?: SortOrderInput | SortOrder
+    shippingDistance?: SortOrderInput | SortOrder
     trackingCode?: SortOrderInput | SortOrder
     packageNumber?: SortOrderInput | SortOrder
     subtotal?: SortOrder
@@ -79049,6 +79223,8 @@ export namespace Prisma {
     shippingAddress?: JsonNullableWithAggregatesFilter<"Order">
     shippingCompanyId?: IntNullableWithAggregatesFilter<"Order"> | number | null
     shippingCost?: IntWithAggregatesFilter<"Order"> | number
+    shippingWeight?: IntNullableWithAggregatesFilter<"Order"> | number | null
+    shippingDistance?: IntNullableWithAggregatesFilter<"Order"> | number | null
     trackingCode?: StringNullableWithAggregatesFilter<"Order"> | string | null
     packageNumber?: StringNullableWithAggregatesFilter<"Order"> | string | null
     subtotal?: IntWithAggregatesFilter<"Order"> | number
@@ -83064,7 +83240,12 @@ export namespace Prisma {
     name: string
     logoUrl?: string | null
     description?: string | null
+    pricingType?: $Enums.ShippingPricingType
     baseCost?: number
+    pricePerKg?: number | null
+    pricePerKm?: number | null
+    acceptsPrepay?: boolean
+    acceptsFreightCollect?: boolean
     estimatedDaysMin?: number | null
     estimatedDaysMax?: number | null
     isActive?: boolean
@@ -83078,7 +83259,12 @@ export namespace Prisma {
     logoUrl?: string | null
     logoMediaId?: number | null
     description?: string | null
+    pricingType?: $Enums.ShippingPricingType
     baseCost?: number
+    pricePerKg?: number | null
+    pricePerKm?: number | null
+    acceptsPrepay?: boolean
+    acceptsFreightCollect?: boolean
     estimatedDaysMin?: number | null
     estimatedDaysMax?: number | null
     isActive?: boolean
@@ -83089,7 +83275,12 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    pricingType?: EnumShippingPricingTypeFieldUpdateOperationsInput | $Enums.ShippingPricingType
     baseCost?: IntFieldUpdateOperationsInput | number
+    pricePerKg?: NullableIntFieldUpdateOperationsInput | number | null
+    pricePerKm?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptsPrepay?: BoolFieldUpdateOperationsInput | boolean
+    acceptsFreightCollect?: BoolFieldUpdateOperationsInput | boolean
     estimatedDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
     estimatedDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -83103,7 +83294,12 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     logoMediaId?: NullableIntFieldUpdateOperationsInput | number | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    pricingType?: EnumShippingPricingTypeFieldUpdateOperationsInput | $Enums.ShippingPricingType
     baseCost?: IntFieldUpdateOperationsInput | number
+    pricePerKg?: NullableIntFieldUpdateOperationsInput | number | null
+    pricePerKm?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptsPrepay?: BoolFieldUpdateOperationsInput | boolean
+    acceptsFreightCollect?: BoolFieldUpdateOperationsInput | boolean
     estimatedDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
     estimatedDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -83116,7 +83312,12 @@ export namespace Prisma {
     logoUrl?: string | null
     logoMediaId?: number | null
     description?: string | null
+    pricingType?: $Enums.ShippingPricingType
     baseCost?: number
+    pricePerKg?: number | null
+    pricePerKm?: number | null
+    acceptsPrepay?: boolean
+    acceptsFreightCollect?: boolean
     estimatedDaysMin?: number | null
     estimatedDaysMax?: number | null
     isActive?: boolean
@@ -83126,7 +83327,12 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    pricingType?: EnumShippingPricingTypeFieldUpdateOperationsInput | $Enums.ShippingPricingType
     baseCost?: IntFieldUpdateOperationsInput | number
+    pricePerKg?: NullableIntFieldUpdateOperationsInput | number | null
+    pricePerKm?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptsPrepay?: BoolFieldUpdateOperationsInput | boolean
+    acceptsFreightCollect?: BoolFieldUpdateOperationsInput | boolean
     estimatedDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
     estimatedDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -83138,7 +83344,12 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     logoMediaId?: NullableIntFieldUpdateOperationsInput | number | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    pricingType?: EnumShippingPricingTypeFieldUpdateOperationsInput | $Enums.ShippingPricingType
     baseCost?: IntFieldUpdateOperationsInput | number
+    pricePerKg?: NullableIntFieldUpdateOperationsInput | number | null
+    pricePerKm?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptsPrepay?: BoolFieldUpdateOperationsInput | boolean
+    acceptsFreightCollect?: BoolFieldUpdateOperationsInput | boolean
     estimatedDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
     estimatedDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -83290,6 +83501,8 @@ export namespace Prisma {
     orderNumber: string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -83323,6 +83536,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -83349,6 +83564,8 @@ export namespace Prisma {
     orderNumber?: StringFieldUpdateOperationsInput | string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -83382,6 +83599,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -83412,6 +83631,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -83430,6 +83651,8 @@ export namespace Prisma {
     orderNumber?: StringFieldUpdateOperationsInput | string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -83451,6 +83674,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -87384,13 +87609,25 @@ export namespace Prisma {
     discountAmount?: SortOrder
   }
 
+  export type EnumShippingPricingTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ShippingPricingType | EnumShippingPricingTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ShippingPricingType[] | ListEnumShippingPricingTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ShippingPricingType[] | ListEnumShippingPricingTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumShippingPricingTypeFilter<$PrismaModel> | $Enums.ShippingPricingType
+  }
+
   export type ShippingCompanyCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
     logoUrl?: SortOrder
     logoMediaId?: SortOrder
     description?: SortOrder
+    pricingType?: SortOrder
     baseCost?: SortOrder
+    pricePerKg?: SortOrder
+    pricePerKm?: SortOrder
+    acceptsPrepay?: SortOrder
+    acceptsFreightCollect?: SortOrder
     estimatedDaysMin?: SortOrder
     estimatedDaysMax?: SortOrder
     isActive?: SortOrder
@@ -87400,6 +87637,8 @@ export namespace Prisma {
     id?: SortOrder
     logoMediaId?: SortOrder
     baseCost?: SortOrder
+    pricePerKg?: SortOrder
+    pricePerKm?: SortOrder
     estimatedDaysMin?: SortOrder
     estimatedDaysMax?: SortOrder
   }
@@ -87410,7 +87649,12 @@ export namespace Prisma {
     logoUrl?: SortOrder
     logoMediaId?: SortOrder
     description?: SortOrder
+    pricingType?: SortOrder
     baseCost?: SortOrder
+    pricePerKg?: SortOrder
+    pricePerKm?: SortOrder
+    acceptsPrepay?: SortOrder
+    acceptsFreightCollect?: SortOrder
     estimatedDaysMin?: SortOrder
     estimatedDaysMax?: SortOrder
     isActive?: SortOrder
@@ -87422,7 +87666,12 @@ export namespace Prisma {
     logoUrl?: SortOrder
     logoMediaId?: SortOrder
     description?: SortOrder
+    pricingType?: SortOrder
     baseCost?: SortOrder
+    pricePerKg?: SortOrder
+    pricePerKm?: SortOrder
+    acceptsPrepay?: SortOrder
+    acceptsFreightCollect?: SortOrder
     estimatedDaysMin?: SortOrder
     estimatedDaysMax?: SortOrder
     isActive?: SortOrder
@@ -87432,8 +87681,20 @@ export namespace Prisma {
     id?: SortOrder
     logoMediaId?: SortOrder
     baseCost?: SortOrder
+    pricePerKg?: SortOrder
+    pricePerKm?: SortOrder
     estimatedDaysMin?: SortOrder
     estimatedDaysMax?: SortOrder
+  }
+
+  export type EnumShippingPricingTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ShippingPricingType | EnumShippingPricingTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ShippingPricingType[] | ListEnumShippingPricingTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ShippingPricingType[] | ListEnumShippingPricingTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumShippingPricingTypeWithAggregatesFilter<$PrismaModel> | $Enums.ShippingPricingType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumShippingPricingTypeFilter<$PrismaModel>
+    _max?: NestedEnumShippingPricingTypeFilter<$PrismaModel>
   }
 
   export type PaymentGatewayCountOrderByAggregateInput = {
@@ -87642,6 +87903,8 @@ export namespace Prisma {
     shippingAddress?: SortOrder
     shippingCompanyId?: SortOrder
     shippingCost?: SortOrder
+    shippingWeight?: SortOrder
+    shippingDistance?: SortOrder
     trackingCode?: SortOrder
     packageNumber?: SortOrder
     subtotal?: SortOrder
@@ -87662,6 +87925,8 @@ export namespace Prisma {
     addressId?: SortOrder
     shippingCompanyId?: SortOrder
     shippingCost?: SortOrder
+    shippingWeight?: SortOrder
+    shippingDistance?: SortOrder
     subtotal?: SortOrder
     discountAmount?: SortOrder
     taxAmount?: SortOrder
@@ -87676,6 +87941,8 @@ export namespace Prisma {
     addressId?: SortOrder
     shippingCompanyId?: SortOrder
     shippingCost?: SortOrder
+    shippingWeight?: SortOrder
+    shippingDistance?: SortOrder
     trackingCode?: SortOrder
     packageNumber?: SortOrder
     subtotal?: SortOrder
@@ -87697,6 +87964,8 @@ export namespace Prisma {
     addressId?: SortOrder
     shippingCompanyId?: SortOrder
     shippingCost?: SortOrder
+    shippingWeight?: SortOrder
+    shippingDistance?: SortOrder
     trackingCode?: SortOrder
     packageNumber?: SortOrder
     subtotal?: SortOrder
@@ -87717,6 +87986,8 @@ export namespace Prisma {
     addressId?: SortOrder
     shippingCompanyId?: SortOrder
     shippingCost?: SortOrder
+    shippingWeight?: SortOrder
+    shippingDistance?: SortOrder
     subtotal?: SortOrder
     discountAmount?: SortOrder
     taxAmount?: SortOrder
@@ -92206,6 +92477,10 @@ export namespace Prisma {
     connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
   }
 
+  export type EnumShippingPricingTypeFieldUpdateOperationsInput = {
+    set?: $Enums.ShippingPricingType
+  }
+
   export type MediaUpdateOneWithoutShippingLogosNestedInput = {
     create?: XOR<MediaCreateWithoutShippingLogosInput, MediaUncheckedCreateWithoutShippingLogosInput>
     connectOrCreate?: MediaCreateOrConnectWithoutShippingLogosInput
@@ -94236,6 +94511,23 @@ export namespace Prisma {
     _max?: NestedEnumDiscountTypeFilter<$PrismaModel>
   }
 
+  export type NestedEnumShippingPricingTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ShippingPricingType | EnumShippingPricingTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ShippingPricingType[] | ListEnumShippingPricingTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ShippingPricingType[] | ListEnumShippingPricingTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumShippingPricingTypeFilter<$PrismaModel> | $Enums.ShippingPricingType
+  }
+
+  export type NestedEnumShippingPricingTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ShippingPricingType | EnumShippingPricingTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ShippingPricingType[] | ListEnumShippingPricingTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ShippingPricingType[] | ListEnumShippingPricingTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumShippingPricingTypeWithAggregatesFilter<$PrismaModel> | $Enums.ShippingPricingType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumShippingPricingTypeFilter<$PrismaModel>
+    _max?: NestedEnumShippingPricingTypeFilter<$PrismaModel>
+  }
+
   export type NestedEnumTransactionTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.TransactionType | EnumTransactionTypeFieldRefInput<$PrismaModel>
     in?: $Enums.TransactionType[] | ListEnumTransactionTypeFieldRefInput<$PrismaModel>
@@ -94692,6 +94984,8 @@ export namespace Prisma {
     orderNumber: string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -94723,6 +95017,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -95470,6 +95766,8 @@ export namespace Prisma {
     shippingAddress?: JsonNullableFilter<"Order">
     shippingCompanyId?: IntNullableFilter<"Order"> | number | null
     shippingCost?: IntFilter<"Order"> | number
+    shippingWeight?: IntNullableFilter<"Order"> | number | null
+    shippingDistance?: IntNullableFilter<"Order"> | number | null
     trackingCode?: StringNullableFilter<"Order"> | string | null
     packageNumber?: StringNullableFilter<"Order"> | string | null
     subtotal?: IntFilter<"Order"> | number
@@ -96150,6 +96448,8 @@ export namespace Prisma {
     orderNumber: string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -96181,6 +96481,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -97006,7 +97308,12 @@ export namespace Prisma {
     name: string
     logoUrl?: string | null
     description?: string | null
+    pricingType?: $Enums.ShippingPricingType
     baseCost?: number
+    pricePerKg?: number | null
+    pricePerKm?: number | null
+    acceptsPrepay?: boolean
+    acceptsFreightCollect?: boolean
     estimatedDaysMin?: number | null
     estimatedDaysMax?: number | null
     isActive?: boolean
@@ -97018,7 +97325,12 @@ export namespace Prisma {
     name: string
     logoUrl?: string | null
     description?: string | null
+    pricingType?: $Enums.ShippingPricingType
     baseCost?: number
+    pricePerKg?: number | null
+    pricePerKm?: number | null
+    acceptsPrepay?: boolean
+    acceptsFreightCollect?: boolean
     estimatedDaysMin?: number | null
     estimatedDaysMax?: number | null
     isActive?: boolean
@@ -97486,7 +97798,12 @@ export namespace Prisma {
     logoUrl?: StringNullableFilter<"ShippingCompany"> | string | null
     logoMediaId?: IntNullableFilter<"ShippingCompany"> | number | null
     description?: StringNullableFilter<"ShippingCompany"> | string | null
+    pricingType?: EnumShippingPricingTypeFilter<"ShippingCompany"> | $Enums.ShippingPricingType
     baseCost?: IntFilter<"ShippingCompany"> | number
+    pricePerKg?: IntNullableFilter<"ShippingCompany"> | number | null
+    pricePerKm?: IntNullableFilter<"ShippingCompany"> | number | null
+    acceptsPrepay?: BoolFilter<"ShippingCompany"> | boolean
+    acceptsFreightCollect?: BoolFilter<"ShippingCompany"> | boolean
     estimatedDaysMin?: IntNullableFilter<"ShippingCompany"> | number | null
     estimatedDaysMax?: IntNullableFilter<"ShippingCompany"> | number | null
     isActive?: BoolFilter<"ShippingCompany"> | boolean
@@ -101250,6 +101567,8 @@ export namespace Prisma {
     orderNumber: string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -101282,6 +101601,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -102235,6 +102556,8 @@ export namespace Prisma {
     orderNumber: string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -102267,6 +102590,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -102446,6 +102771,8 @@ export namespace Prisma {
     orderNumber?: StringFieldUpdateOperationsInput | string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -102478,6 +102805,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -102563,6 +102892,8 @@ export namespace Prisma {
     orderNumber: string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -102594,6 +102925,8 @@ export namespace Prisma {
     addressId?: number | null
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -102761,6 +103094,8 @@ export namespace Prisma {
     orderNumber: string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -102793,6 +103128,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -102934,6 +103271,8 @@ export namespace Prisma {
     orderNumber?: StringFieldUpdateOperationsInput | string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -102966,6 +103305,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -103221,7 +103562,12 @@ export namespace Prisma {
     name: string
     logoUrl?: string | null
     description?: string | null
+    pricingType?: $Enums.ShippingPricingType
     baseCost?: number
+    pricePerKg?: number | null
+    pricePerKm?: number | null
+    acceptsPrepay?: boolean
+    acceptsFreightCollect?: boolean
     estimatedDaysMin?: number | null
     estimatedDaysMax?: number | null
     isActive?: boolean
@@ -103234,7 +103580,12 @@ export namespace Prisma {
     logoUrl?: string | null
     logoMediaId?: number | null
     description?: string | null
+    pricingType?: $Enums.ShippingPricingType
     baseCost?: number
+    pricePerKg?: number | null
+    pricePerKm?: number | null
+    acceptsPrepay?: boolean
+    acceptsFreightCollect?: boolean
     estimatedDaysMin?: number | null
     estimatedDaysMax?: number | null
     isActive?: boolean
@@ -103658,7 +104009,12 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    pricingType?: EnumShippingPricingTypeFieldUpdateOperationsInput | $Enums.ShippingPricingType
     baseCost?: IntFieldUpdateOperationsInput | number
+    pricePerKg?: NullableIntFieldUpdateOperationsInput | number | null
+    pricePerKm?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptsPrepay?: BoolFieldUpdateOperationsInput | boolean
+    acceptsFreightCollect?: BoolFieldUpdateOperationsInput | boolean
     estimatedDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
     estimatedDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -103671,7 +104027,12 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     logoMediaId?: NullableIntFieldUpdateOperationsInput | number | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    pricingType?: EnumShippingPricingTypeFieldUpdateOperationsInput | $Enums.ShippingPricingType
     baseCost?: IntFieldUpdateOperationsInput | number
+    pricePerKg?: NullableIntFieldUpdateOperationsInput | number | null
+    pricePerKm?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptsPrepay?: BoolFieldUpdateOperationsInput | boolean
+    acceptsFreightCollect?: BoolFieldUpdateOperationsInput | boolean
     estimatedDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
     estimatedDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -103922,6 +104283,8 @@ export namespace Prisma {
     orderNumber: string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -103954,6 +104317,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -104062,6 +104427,8 @@ export namespace Prisma {
     orderNumber?: StringFieldUpdateOperationsInput | string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -104094,6 +104461,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -104175,6 +104544,8 @@ export namespace Prisma {
     orderNumber: string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -104207,6 +104578,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -104248,6 +104621,8 @@ export namespace Prisma {
     orderNumber?: StringFieldUpdateOperationsInput | string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -104280,6 +104655,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -104305,6 +104682,8 @@ export namespace Prisma {
     orderNumber: string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -104337,6 +104716,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -104378,6 +104759,8 @@ export namespace Prisma {
     orderNumber?: StringFieldUpdateOperationsInput | string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -104410,6 +104793,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -104435,6 +104820,8 @@ export namespace Prisma {
     orderNumber: string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -104467,6 +104854,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -104553,6 +104942,8 @@ export namespace Prisma {
     orderNumber?: StringFieldUpdateOperationsInput | string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -104585,6 +104976,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -105075,6 +105468,8 @@ export namespace Prisma {
     orderNumber: string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -105107,6 +105502,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -105174,6 +105571,8 @@ export namespace Prisma {
     orderNumber?: StringFieldUpdateOperationsInput | string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -105206,6 +105605,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -105374,6 +105775,8 @@ export namespace Prisma {
     orderNumber: string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -105406,6 +105809,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -105580,6 +105985,8 @@ export namespace Prisma {
     orderNumber?: StringFieldUpdateOperationsInput | string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -105612,6 +106019,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -108752,6 +109161,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -109088,6 +109499,8 @@ export namespace Prisma {
     orderNumber?: StringFieldUpdateOperationsInput | string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -109119,6 +109532,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -109148,6 +109563,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -109676,6 +110093,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -109694,6 +110113,8 @@ export namespace Prisma {
     orderNumber?: StringFieldUpdateOperationsInput | string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -109725,6 +110146,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -109754,6 +110177,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -109809,7 +110234,12 @@ export namespace Prisma {
     name: string
     logoUrl?: string | null
     description?: string | null
+    pricingType?: $Enums.ShippingPricingType
     baseCost?: number
+    pricePerKg?: number | null
+    pricePerKm?: number | null
+    acceptsPrepay?: boolean
+    acceptsFreightCollect?: boolean
     estimatedDaysMin?: number | null
     estimatedDaysMax?: number | null
     isActive?: boolean
@@ -110017,7 +110447,12 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    pricingType?: EnumShippingPricingTypeFieldUpdateOperationsInput | $Enums.ShippingPricingType
     baseCost?: IntFieldUpdateOperationsInput | number
+    pricePerKg?: NullableIntFieldUpdateOperationsInput | number | null
+    pricePerKm?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptsPrepay?: BoolFieldUpdateOperationsInput | boolean
+    acceptsFreightCollect?: BoolFieldUpdateOperationsInput | boolean
     estimatedDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
     estimatedDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -110029,7 +110464,12 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    pricingType?: EnumShippingPricingTypeFieldUpdateOperationsInput | $Enums.ShippingPricingType
     baseCost?: IntFieldUpdateOperationsInput | number
+    pricePerKg?: NullableIntFieldUpdateOperationsInput | number | null
+    pricePerKm?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptsPrepay?: BoolFieldUpdateOperationsInput | boolean
+    acceptsFreightCollect?: BoolFieldUpdateOperationsInput | boolean
     estimatedDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
     estimatedDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -110041,7 +110481,12 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    pricingType?: EnumShippingPricingTypeFieldUpdateOperationsInput | $Enums.ShippingPricingType
     baseCost?: IntFieldUpdateOperationsInput | number
+    pricePerKg?: NullableIntFieldUpdateOperationsInput | number | null
+    pricePerKm?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptsPrepay?: BoolFieldUpdateOperationsInput | boolean
+    acceptsFreightCollect?: BoolFieldUpdateOperationsInput | boolean
     estimatedDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
     estimatedDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -110994,6 +111439,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: number | null
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -111076,6 +111523,8 @@ export namespace Prisma {
     orderNumber?: StringFieldUpdateOperationsInput | string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -111108,6 +111557,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -111137,6 +111588,8 @@ export namespace Prisma {
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCompanyId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -111157,6 +111610,8 @@ export namespace Prisma {
     addressId?: number | null
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: number
+    shippingWeight?: number | null
+    shippingDistance?: number | null
     trackingCode?: string | null
     packageNumber?: string | null
     subtotal: number
@@ -111175,6 +111630,8 @@ export namespace Prisma {
     orderNumber?: StringFieldUpdateOperationsInput | string
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -111206,6 +111663,8 @@ export namespace Prisma {
     addressId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number
@@ -111235,6 +111694,8 @@ export namespace Prisma {
     addressId?: NullableIntFieldUpdateOperationsInput | number | null
     shippingAddress?: NullableJsonNullValueInput | InputJsonValue
     shippingCost?: IntFieldUpdateOperationsInput | number
+    shippingWeight?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDistance?: NullableIntFieldUpdateOperationsInput | number | null
     trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     packageNumber?: NullableStringFieldUpdateOperationsInput | string | null
     subtotal?: IntFieldUpdateOperationsInput | number

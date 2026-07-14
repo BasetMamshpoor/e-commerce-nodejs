@@ -4,11 +4,13 @@ export const createOrderSchema = z
   .object({
     addressId: z.coerce.number().int().positive("آدرس ارسال الزامی است"),
     shippingCompanyId: z.coerce.number().int().positive("انتخاب شرکت ارسال الزامی است"),
-    paymentMethod: z.enum(["GATEWAY", "WALLET", "MIXED"]),
+    shippingWeight: z.coerce.number().int().nonnegative().optional(),
+    shippingDistance: z.coerce.number().int().nonnegative().optional(),
+    paymentMethod: z.enum(["GATEWAY", "WALLET", "MIXED", "FREIGHT_COLLECT"]),
     gatewaySlug: z.string().optional(),
     discountCode: z.string().trim().optional(),
   })
-  .refine((d) => d.paymentMethod === "WALLET" || Boolean(d.gatewaySlug), {
+  .refine((d) => d.paymentMethod === "WALLET" || d.paymentMethod === "FREIGHT_COLLECT" || Boolean(d.gatewaySlug), {
     message: "برای پرداخت از درگاه، انتخاب درگاه (gatewaySlug) الزامی است",
     path: ["gatewaySlug"],
   });

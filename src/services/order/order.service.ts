@@ -7,6 +7,7 @@ import * as cartService from "../shopping/cart.service";
 import * as discountApplyService from "../discount/discount-apply.service";
 import * as walletService from "../wallet/wallet.service";
 import * as gatewayAdminService from "../payment/payment-gateway-admin.service";
+import { calculateShippingCost } from "../shipping/shipping-company.service";
 import { recomputeProductAggregates } from "../catalog/product.service";
 import { notifyUser } from "../notification/notification.service";
 import { createAdminNotification } from "../notification/admin-notification.service";
@@ -63,8 +64,16 @@ export async function createOrder(userId: number, input: CreateOrderInput): Prom
     throw ApiError.badRequest("شرکت ارسال انتخاب‌شده معتبر نیست");
   }
 
+  // اعتبارسنجی سازگاری روش پرداخت با شرکت ارسال
+  if (input.paymentMethod === "FREIGHT_COLLECT" && !shippingCompany.acceptsFreightCollect) {
+    throw ApiError.badRequest("این شرکت ارسال روش پرداخت در محل (Freight Collect) را پشتیبانی نمی‌کند");
+  }
+  if (input.paymentMethod !== "FREIGHT_COLLECT" && !shippingCompany.acceptsPrepay) {
+    throw ApiError.badRequest("این شرکت ارسال روش پرداخت پیش از ارسال را پشتیبانی نمی‌کند");
+  }
+
   const subtotal = cart.total;
-  const shippingCost = shippingCompany.baseCost;
+  const shippingCost = calculateShippingCost(shippingCompany, input.shippingWeight, input.shippingDistance);
 
   let discountAmount = 0;
   let discountCodeId: number | undefined;
@@ -82,25 +91,31 @@ export async function createOrder(userId: number, input: CreateOrderInput): Prom
   const totalAmount = Math.max(0, subtotal + shippingCost - discountAmount);
 
   let wallet: { id: number; balance: number } | null = null;
-  if (input.paymentMethod !== "GATEWAY") {
-    wallet = await walletService.getOrCreateWallet(userId);
-  }
-
   let walletPortion = 0;
-  if (input.paymentMethod === "WALLET") {
-    if (!wallet || wallet.balance < totalAmount) {
-      throw ApiError.badRequest("موجودی کیف پول کافی نیست");
-    }
-    walletPortion = totalAmount;
-  } else if (input.paymentMethod === "MIXED" && wallet) {
-    walletPortion = Math.min(wallet.balance, totalAmount);
-  }
-  const gatewayPortion = totalAmount - walletPortion;
-
+  let gatewayPortion = 0;
   let gatewayRecord: { id: number; slug: string } | null = null;
-  if (gatewayPortion > 0) {
-    if (!input.gatewaySlug) throw ApiError.badRequest("انتخاب درگاه پرداخت الزامی است");
-    gatewayRecord = await gatewayAdminService.getPaymentGatewayBySlug(input.gatewaySlug);
+
+  if (input.paymentMethod === "FREIGHT_COLLECT") {
+    // پرداخت در محل — هیچ مبلغی آنلاین دریافت نمی‌شود
+  } else {
+    if (input.paymentMethod !== "GATEWAY") {
+      wallet = await walletService.getOrCreateWallet(userId);
+    }
+
+    if (input.paymentMethod === "WALLET") {
+      if (!wallet || wallet.balance < totalAmount) {
+        throw ApiError.badRequest("موجودی کیف پول کافی نیست");
+      }
+      walletPortion = totalAmount;
+    } else if (input.paymentMethod === "MIXED" && wallet) {
+      walletPortion = Math.min(wallet.balance, totalAmount);
+    }
+
+    gatewayPortion = totalAmount - walletPortion;
+    if (gatewayPortion > 0) {
+      if (!input.gatewaySlug) throw ApiError.badRequest("انتخاب درگاه پرداخت الزامی است");
+      gatewayRecord = await gatewayAdminService.getPaymentGatewayBySlug(input.gatewaySlug);
+    }
   }
 
   // تخصیص متناسب تخفیف بین آیتم‌های واجدشرایط — فقط برای ثبت تاریخچه‌ی دقیق هر آیتم،
@@ -113,7 +128,8 @@ export async function createOrder(userId: number, input: CreateOrderInput): Prom
   }
 
   const orderNumber = generateOrderNumber();
-  const isFullyPaidNow = gatewayPortion === 0;
+  const isFreightCollect = input.paymentMethod === "FREIGHT_COLLECT";
+  const isFullyPaidNow = !isFreightCollect && gatewayPortion === 0;
 
   const order = await prisma.$transaction(async (tx) => {
     for (const item of cart.items) {
@@ -144,13 +160,15 @@ export async function createOrder(userId: number, input: CreateOrderInput): Prom
         },
         shippingCompanyId: shippingCompany.id,
         shippingCost,
+        shippingWeight: input.shippingWeight ?? null,
+        shippingDistance: input.shippingDistance ?? null,
         subtotal,
         discountAmount,
         taxAmount: 0,
         totalAmount,
         discountCodeId,
         paymentMethod: input.paymentMethod,
-        status: isFullyPaidNow ? "PROCESSING" : "PENDING_PAYMENT",
+        status: isFreightCollect || isFullyPaidNow ? "PROCESSING" : "PENDING_PAYMENT",
         paidAt: isFullyPaidNow ? new Date() : null,
         items: {
           create: cart.items.map((item) => ({
@@ -163,7 +181,7 @@ export async function createOrder(userId: number, input: CreateOrderInput): Prom
           })),
         },
         statusHistory: {
-          create: { status: isFullyPaidNow ? "PROCESSING" : "PENDING_PAYMENT" },
+          create: { status: isFreightCollect || isFullyPaidNow ? "PROCESSING" : "PENDING_PAYMENT" },
         },
       },
     });

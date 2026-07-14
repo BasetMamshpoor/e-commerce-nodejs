@@ -426,7 +426,12 @@ exports.Prisma.ShippingCompanyScalarFieldEnum = {
   logoUrl: 'logoUrl',
   logoMediaId: 'logoMediaId',
   description: 'description',
+  pricingType: 'pricingType',
   baseCost: 'baseCost',
+  pricePerKg: 'pricePerKg',
+  pricePerKm: 'pricePerKm',
+  acceptsPrepay: 'acceptsPrepay',
+  acceptsFreightCollect: 'acceptsFreightCollect',
   estimatedDaysMin: 'estimatedDaysMin',
   estimatedDaysMax: 'estimatedDaysMax',
   isActive: 'isActive'
@@ -461,6 +466,8 @@ exports.Prisma.OrderScalarFieldEnum = {
   shippingAddress: 'shippingAddress',
   shippingCompanyId: 'shippingCompanyId',
   shippingCost: 'shippingCost',
+  shippingWeight: 'shippingWeight',
+  shippingDistance: 'shippingDistance',
   trackingCode: 'trackingCode',
   packageNumber: 'packageNumber',
   subtotal: 'subtotal',
@@ -801,6 +808,11 @@ exports.DiscountType = exports.$Enums.DiscountType = {
   FIXED: 'FIXED'
 };
 
+exports.ShippingPricingType = exports.$Enums.ShippingPricingType = {
+  FIXED: 'FIXED',
+  WEIGHT_DISTANCE: 'WEIGHT_DISTANCE'
+};
+
 exports.TransactionType = exports.$Enums.TransactionType = {
   ORDER_PAYMENT: 'ORDER_PAYMENT',
   WALLET_CHARGE: 'WALLET_CHARGE',
@@ -817,7 +829,8 @@ exports.PaymentStatus = exports.$Enums.PaymentStatus = {
 exports.PaymentMethod = exports.$Enums.PaymentMethod = {
   GATEWAY: 'GATEWAY',
   WALLET: 'WALLET',
-  MIXED: 'MIXED'
+  MIXED: 'MIXED',
+  FREIGHT_COLLECT: 'FREIGHT_COLLECT'
 };
 
 exports.OrderStatus = exports.$Enums.OrderStatus = {

@@ -31,7 +31,7 @@ export async function deleteShippingCompany(id: number): Promise<void> {
 export async function listShippingCompanies(includeInactive: boolean) {
   return prisma.shippingCompany.findMany({
     where: includeInactive ? {} : { isActive: true },
-    orderBy: { baseCost: "asc" },
+    orderBy: { name: "asc" },
   });
 }
 
@@ -39,4 +39,17 @@ export async function getShippingCompanyById(id: number) {
   const company = await prisma.shippingCompany.findUnique({ where: { id } });
   if (!company) throw ApiError.notFound("شرکت ارسال پیدا نشد");
   return company;
+}
+
+export function calculateShippingCost(
+  company: { pricingType: string; baseCost: number; pricePerKg: number | null; pricePerKm: number | null },
+  weight?: number,
+  distance?: number,
+): number {
+  if (company.pricingType === "WEIGHT_DISTANCE") {
+    const kg = weight ?? 0;
+    const km = distance ?? 0;
+    return (company.pricePerKg ?? 0) * kg + (company.pricePerKm ?? 0) * km;
+  }
+  return company.baseCost;
 }

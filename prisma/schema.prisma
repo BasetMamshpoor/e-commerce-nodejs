@@ -85,6 +85,7 @@ enum PaymentMethod {
   GATEWAY
   WALLET
   MIXED
+  FREIGHT_COLLECT
 }
 
 enum PaymentStatus {
@@ -184,6 +185,11 @@ enum WalletWithdrawalStatus {
   REJECTED
 }
 
+enum ShippingPricingType {
+  FIXED
+  WEIGHT_DISTANCE
+}
+
 // ============================================================================
 // Users & Authentication
 // ============================================================================
@@ -233,15 +239,19 @@ model User {
 }
 
 model WalletWithdrawal {
-  id          Int                    @id @default(autoincrement())
-  userId      Int
-  user        User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  amount      Int
-  status      WalletWithdrawalStatus @default(PENDING)
-  description String?
-  adminNote   String?
-  createdAt   DateTime               @default(now())
-  reviewedAt  DateTime?
+  id                      Int                    @id @default(autoincrement())
+  userId                  Int
+  user                    User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount                  Int
+  status                  WalletWithdrawalStatus @default(PENDING)
+  description             String?
+  bankSheba               String?
+  bankCardNumber          String?
+  bankAccountOwnerName    String?
+  adminNote               String?
+  trackingCode            String?
+  createdAt               DateTime               @default(now())
+  reviewedAt              DateTime?
 
   @@index([userId])
   @@index([status])
@@ -705,18 +715,21 @@ model DiscountCodeUsage {
 // ============================================================================
 
 model ShippingCompany {
-  id               Int     @id @default(autoincrement())
+  id               Int                @id @default(autoincrement())
   name             String
-  // آدرس مستقیم لوگو — فرانت‌اند برای نمایش از این فیلد استفاده می‌کند
   logoUrl          String?
-  // ارجاع به رکورد Media در کتابخانه متمرکز (برای مدیریت ادمین)
   logoMediaId      Int?
-  logo             Media?  @relation("ShippingLogos", fields: [logoMediaId], references: [id])
+  logo             Media?             @relation("ShippingLogos", fields: [logoMediaId], references: [id])
   description      String?
-  baseCost         Int     @default(0)
+  pricingType      ShippingPricingType @default(FIXED)
+  baseCost         Int                @default(0)
+  pricePerKg       Int?
+  pricePerKm       Int?
+  acceptsPrepay        Boolean @default(true)
+  acceptsFreightCollect Boolean @default(false)
   estimatedDaysMin Int?
   estimatedDaysMax Int?
-  isActive         Boolean @default(true)
+  isActive         Boolean            @default(true)
 
   orders Order[]
 }
@@ -774,6 +787,8 @@ model Order {
   shippingCompanyId Int?
   shippingCompany   ShippingCompany? @relation(fields: [shippingCompanyId], references: [id])
   shippingCost      Int              @default(0)
+  shippingWeight    Int?             // وزن کل (گرم) — برای محاسبه هزینه ارسال وزنی
+  shippingDistance  Int?             // فاصله (کیلومتر) — برای محاسبه هزینه ارسال مسافتی
   trackingCode      String?
   packageNumber     String?
 
