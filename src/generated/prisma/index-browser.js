@@ -144,7 +144,11 @@ exports.Prisma.WalletWithdrawalScalarFieldEnum = {
   amount: 'amount',
   status: 'status',
   description: 'description',
+  bankSheba: 'bankSheba',
+  bankCardNumber: 'bankCardNumber',
+  bankAccountOwnerName: 'bankAccountOwnerName',
   adminNote: 'adminNote',
+  trackingCode: 'trackingCode',
   createdAt: 'createdAt',
   reviewedAt: 'reviewedAt'
 };

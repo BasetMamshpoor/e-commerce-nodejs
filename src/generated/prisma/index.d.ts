@@ -9345,7 +9345,11 @@ export namespace Prisma {
     amount: number | null
     status: $Enums.WalletWithdrawalStatus | null
     description: string | null
+    bankSheba: string | null
+    bankCardNumber: string | null
+    bankAccountOwnerName: string | null
     adminNote: string | null
+    trackingCode: string | null
     createdAt: Date | null
     reviewedAt: Date | null
   }
@@ -9356,7 +9360,11 @@ export namespace Prisma {
     amount: number | null
     status: $Enums.WalletWithdrawalStatus | null
     description: string | null
+    bankSheba: string | null
+    bankCardNumber: string | null
+    bankAccountOwnerName: string | null
     adminNote: string | null
+    trackingCode: string | null
     createdAt: Date | null
     reviewedAt: Date | null
   }
@@ -9367,7 +9375,11 @@ export namespace Prisma {
     amount: number
     status: number
     description: number
+    bankSheba: number
+    bankCardNumber: number
+    bankAccountOwnerName: number
     adminNote: number
+    trackingCode: number
     createdAt: number
     reviewedAt: number
     _all: number
@@ -9392,7 +9404,11 @@ export namespace Prisma {
     amount?: true
     status?: true
     description?: true
+    bankSheba?: true
+    bankCardNumber?: true
+    bankAccountOwnerName?: true
     adminNote?: true
+    trackingCode?: true
     createdAt?: true
     reviewedAt?: true
   }
@@ -9403,7 +9419,11 @@ export namespace Prisma {
     amount?: true
     status?: true
     description?: true
+    bankSheba?: true
+    bankCardNumber?: true
+    bankAccountOwnerName?: true
     adminNote?: true
+    trackingCode?: true
     createdAt?: true
     reviewedAt?: true
   }
@@ -9414,7 +9434,11 @@ export namespace Prisma {
     amount?: true
     status?: true
     description?: true
+    bankSheba?: true
+    bankCardNumber?: true
+    bankAccountOwnerName?: true
     adminNote?: true
+    trackingCode?: true
     createdAt?: true
     reviewedAt?: true
     _all?: true
@@ -9512,7 +9536,11 @@ export namespace Prisma {
     amount: number
     status: $Enums.WalletWithdrawalStatus
     description: string | null
+    bankSheba: string | null
+    bankCardNumber: string | null
+    bankAccountOwnerName: string | null
     adminNote: string | null
+    trackingCode: string | null
     createdAt: Date
     reviewedAt: Date | null
     _count: WalletWithdrawalCountAggregateOutputType | null
@@ -9542,7 +9570,11 @@ export namespace Prisma {
     amount?: boolean
     status?: boolean
     description?: boolean
+    bankSheba?: boolean
+    bankCardNumber?: boolean
+    bankAccountOwnerName?: boolean
     adminNote?: boolean
+    trackingCode?: boolean
     createdAt?: boolean
     reviewedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -9554,7 +9586,11 @@ export namespace Prisma {
     amount?: boolean
     status?: boolean
     description?: boolean
+    bankSheba?: boolean
+    bankCardNumber?: boolean
+    bankAccountOwnerName?: boolean
     adminNote?: boolean
+    trackingCode?: boolean
     createdAt?: boolean
     reviewedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -9566,7 +9602,11 @@ export namespace Prisma {
     amount?: boolean
     status?: boolean
     description?: boolean
+    bankSheba?: boolean
+    bankCardNumber?: boolean
+    bankAccountOwnerName?: boolean
     adminNote?: boolean
+    trackingCode?: boolean
     createdAt?: boolean
     reviewedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -9578,12 +9618,16 @@ export namespace Prisma {
     amount?: boolean
     status?: boolean
     description?: boolean
+    bankSheba?: boolean
+    bankCardNumber?: boolean
+    bankAccountOwnerName?: boolean
     adminNote?: boolean
+    trackingCode?: boolean
     createdAt?: boolean
     reviewedAt?: boolean
   }
 
-  export type WalletWithdrawalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "amount" | "status" | "description" | "adminNote" | "createdAt" | "reviewedAt", ExtArgs["result"]["walletWithdrawal"]>
+  export type WalletWithdrawalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "amount" | "status" | "description" | "bankSheba" | "bankCardNumber" | "bankAccountOwnerName" | "adminNote" | "trackingCode" | "createdAt" | "reviewedAt", ExtArgs["result"]["walletWithdrawal"]>
   export type WalletWithdrawalInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -9605,7 +9649,11 @@ export namespace Prisma {
       amount: number
       status: $Enums.WalletWithdrawalStatus
       description: string | null
+      bankSheba: string | null
+      bankCardNumber: string | null
+      bankAccountOwnerName: string | null
       adminNote: string | null
+      trackingCode: string | null
       createdAt: Date
       reviewedAt: Date | null
     }, ExtArgs["result"]["walletWithdrawal"]>
@@ -10037,7 +10085,11 @@ export namespace Prisma {
     readonly amount: FieldRef<"WalletWithdrawal", 'Int'>
     readonly status: FieldRef<"WalletWithdrawal", 'WalletWithdrawalStatus'>
     readonly description: FieldRef<"WalletWithdrawal", 'String'>
+    readonly bankSheba: FieldRef<"WalletWithdrawal", 'String'>
+    readonly bankCardNumber: FieldRef<"WalletWithdrawal", 'String'>
+    readonly bankAccountOwnerName: FieldRef<"WalletWithdrawal", 'String'>
     readonly adminNote: FieldRef<"WalletWithdrawal", 'String'>
+    readonly trackingCode: FieldRef<"WalletWithdrawal", 'String'>
     readonly createdAt: FieldRef<"WalletWithdrawal", 'DateTime'>
     readonly reviewedAt: FieldRef<"WalletWithdrawal", 'DateTime'>
   }
@@ -75421,7 +75473,11 @@ export namespace Prisma {
     amount: 'amount',
     status: 'status',
     description: 'description',
+    bankSheba: 'bankSheba',
+    bankCardNumber: 'bankCardNumber',
+    bankAccountOwnerName: 'bankAccountOwnerName',
     adminNote: 'adminNote',
+    trackingCode: 'trackingCode',
     createdAt: 'createdAt',
     reviewedAt: 'reviewedAt'
   };
@@ -76816,7 +76872,11 @@ export namespace Prisma {
     amount?: IntFilter<"WalletWithdrawal"> | number
     status?: EnumWalletWithdrawalStatusFilter<"WalletWithdrawal"> | $Enums.WalletWithdrawalStatus
     description?: StringNullableFilter<"WalletWithdrawal"> | string | null
+    bankSheba?: StringNullableFilter<"WalletWithdrawal"> | string | null
+    bankCardNumber?: StringNullableFilter<"WalletWithdrawal"> | string | null
+    bankAccountOwnerName?: StringNullableFilter<"WalletWithdrawal"> | string | null
     adminNote?: StringNullableFilter<"WalletWithdrawal"> | string | null
+    trackingCode?: StringNullableFilter<"WalletWithdrawal"> | string | null
     createdAt?: DateTimeFilter<"WalletWithdrawal"> | Date | string
     reviewedAt?: DateTimeNullableFilter<"WalletWithdrawal"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -76828,7 +76888,11 @@ export namespace Prisma {
     amount?: SortOrder
     status?: SortOrder
     description?: SortOrderInput | SortOrder
+    bankSheba?: SortOrderInput | SortOrder
+    bankCardNumber?: SortOrderInput | SortOrder
+    bankAccountOwnerName?: SortOrderInput | SortOrder
     adminNote?: SortOrderInput | SortOrder
+    trackingCode?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     reviewedAt?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
@@ -76843,7 +76907,11 @@ export namespace Prisma {
     amount?: IntFilter<"WalletWithdrawal"> | number
     status?: EnumWalletWithdrawalStatusFilter<"WalletWithdrawal"> | $Enums.WalletWithdrawalStatus
     description?: StringNullableFilter<"WalletWithdrawal"> | string | null
+    bankSheba?: StringNullableFilter<"WalletWithdrawal"> | string | null
+    bankCardNumber?: StringNullableFilter<"WalletWithdrawal"> | string | null
+    bankAccountOwnerName?: StringNullableFilter<"WalletWithdrawal"> | string | null
     adminNote?: StringNullableFilter<"WalletWithdrawal"> | string | null
+    trackingCode?: StringNullableFilter<"WalletWithdrawal"> | string | null
     createdAt?: DateTimeFilter<"WalletWithdrawal"> | Date | string
     reviewedAt?: DateTimeNullableFilter<"WalletWithdrawal"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -76855,7 +76923,11 @@ export namespace Prisma {
     amount?: SortOrder
     status?: SortOrder
     description?: SortOrderInput | SortOrder
+    bankSheba?: SortOrderInput | SortOrder
+    bankCardNumber?: SortOrderInput | SortOrder
+    bankAccountOwnerName?: SortOrderInput | SortOrder
     adminNote?: SortOrderInput | SortOrder
+    trackingCode?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     reviewedAt?: SortOrderInput | SortOrder
     _count?: WalletWithdrawalCountOrderByAggregateInput
@@ -76874,7 +76946,11 @@ export namespace Prisma {
     amount?: IntWithAggregatesFilter<"WalletWithdrawal"> | number
     status?: EnumWalletWithdrawalStatusWithAggregatesFilter<"WalletWithdrawal"> | $Enums.WalletWithdrawalStatus
     description?: StringNullableWithAggregatesFilter<"WalletWithdrawal"> | string | null
+    bankSheba?: StringNullableWithAggregatesFilter<"WalletWithdrawal"> | string | null
+    bankCardNumber?: StringNullableWithAggregatesFilter<"WalletWithdrawal"> | string | null
+    bankAccountOwnerName?: StringNullableWithAggregatesFilter<"WalletWithdrawal"> | string | null
     adminNote?: StringNullableWithAggregatesFilter<"WalletWithdrawal"> | string | null
+    trackingCode?: StringNullableWithAggregatesFilter<"WalletWithdrawal"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"WalletWithdrawal"> | Date | string
     reviewedAt?: DateTimeNullableWithAggregatesFilter<"WalletWithdrawal"> | Date | string | null
   }
@@ -81219,7 +81295,11 @@ export namespace Prisma {
     amount: number
     status?: $Enums.WalletWithdrawalStatus
     description?: string | null
+    bankSheba?: string | null
+    bankCardNumber?: string | null
+    bankAccountOwnerName?: string | null
     adminNote?: string | null
+    trackingCode?: string | null
     createdAt?: Date | string
     reviewedAt?: Date | string | null
     user: UserCreateNestedOneWithoutWalletWithdrawalsInput
@@ -81231,7 +81311,11 @@ export namespace Prisma {
     amount: number
     status?: $Enums.WalletWithdrawalStatus
     description?: string | null
+    bankSheba?: string | null
+    bankCardNumber?: string | null
+    bankAccountOwnerName?: string | null
     adminNote?: string | null
+    trackingCode?: string | null
     createdAt?: Date | string
     reviewedAt?: Date | string | null
   }
@@ -81240,7 +81324,11 @@ export namespace Prisma {
     amount?: IntFieldUpdateOperationsInput | number
     status?: EnumWalletWithdrawalStatusFieldUpdateOperationsInput | $Enums.WalletWithdrawalStatus
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    bankSheba?: NullableStringFieldUpdateOperationsInput | string | null
+    bankCardNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bankAccountOwnerName?: NullableStringFieldUpdateOperationsInput | string | null
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutWalletWithdrawalsNestedInput
@@ -81252,7 +81340,11 @@ export namespace Prisma {
     amount?: IntFieldUpdateOperationsInput | number
     status?: EnumWalletWithdrawalStatusFieldUpdateOperationsInput | $Enums.WalletWithdrawalStatus
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    bankSheba?: NullableStringFieldUpdateOperationsInput | string | null
+    bankCardNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bankAccountOwnerName?: NullableStringFieldUpdateOperationsInput | string | null
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -81263,7 +81355,11 @@ export namespace Prisma {
     amount: number
     status?: $Enums.WalletWithdrawalStatus
     description?: string | null
+    bankSheba?: string | null
+    bankCardNumber?: string | null
+    bankAccountOwnerName?: string | null
     adminNote?: string | null
+    trackingCode?: string | null
     createdAt?: Date | string
     reviewedAt?: Date | string | null
   }
@@ -81272,7 +81368,11 @@ export namespace Prisma {
     amount?: IntFieldUpdateOperationsInput | number
     status?: EnumWalletWithdrawalStatusFieldUpdateOperationsInput | $Enums.WalletWithdrawalStatus
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    bankSheba?: NullableStringFieldUpdateOperationsInput | string | null
+    bankCardNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bankAccountOwnerName?: NullableStringFieldUpdateOperationsInput | string | null
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -81283,7 +81383,11 @@ export namespace Prisma {
     amount?: IntFieldUpdateOperationsInput | number
     status?: EnumWalletWithdrawalStatusFieldUpdateOperationsInput | $Enums.WalletWithdrawalStatus
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    bankSheba?: NullableStringFieldUpdateOperationsInput | string | null
+    bankCardNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bankAccountOwnerName?: NullableStringFieldUpdateOperationsInput | string | null
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -85810,7 +85914,11 @@ export namespace Prisma {
     amount?: SortOrder
     status?: SortOrder
     description?: SortOrder
+    bankSheba?: SortOrder
+    bankCardNumber?: SortOrder
+    bankAccountOwnerName?: SortOrder
     adminNote?: SortOrder
+    trackingCode?: SortOrder
     createdAt?: SortOrder
     reviewedAt?: SortOrder
   }
@@ -85827,7 +85935,11 @@ export namespace Prisma {
     amount?: SortOrder
     status?: SortOrder
     description?: SortOrder
+    bankSheba?: SortOrder
+    bankCardNumber?: SortOrder
+    bankAccountOwnerName?: SortOrder
     adminNote?: SortOrder
+    trackingCode?: SortOrder
     createdAt?: SortOrder
     reviewedAt?: SortOrder
   }
@@ -85838,7 +85950,11 @@ export namespace Prisma {
     amount?: SortOrder
     status?: SortOrder
     description?: SortOrder
+    bankSheba?: SortOrder
+    bankCardNumber?: SortOrder
+    bankAccountOwnerName?: SortOrder
     adminNote?: SortOrder
+    trackingCode?: SortOrder
     createdAt?: SortOrder
     reviewedAt?: SortOrder
   }
@@ -95507,7 +95623,11 @@ export namespace Prisma {
     amount: number
     status?: $Enums.WalletWithdrawalStatus
     description?: string | null
+    bankSheba?: string | null
+    bankCardNumber?: string | null
+    bankAccountOwnerName?: string | null
     adminNote?: string | null
+    trackingCode?: string | null
     createdAt?: Date | string
     reviewedAt?: Date | string | null
   }
@@ -95517,7 +95637,11 @@ export namespace Prisma {
     amount: number
     status?: $Enums.WalletWithdrawalStatus
     description?: string | null
+    bankSheba?: string | null
+    bankCardNumber?: string | null
+    bankAccountOwnerName?: string | null
     adminNote?: string | null
+    trackingCode?: string | null
     createdAt?: Date | string
     reviewedAt?: Date | string | null
   }
@@ -96193,7 +96317,11 @@ export namespace Prisma {
     amount?: IntFilter<"WalletWithdrawal"> | number
     status?: EnumWalletWithdrawalStatusFilter<"WalletWithdrawal"> | $Enums.WalletWithdrawalStatus
     description?: StringNullableFilter<"WalletWithdrawal"> | string | null
+    bankSheba?: StringNullableFilter<"WalletWithdrawal"> | string | null
+    bankCardNumber?: StringNullableFilter<"WalletWithdrawal"> | string | null
+    bankAccountOwnerName?: StringNullableFilter<"WalletWithdrawal"> | string | null
     adminNote?: StringNullableFilter<"WalletWithdrawal"> | string | null
+    trackingCode?: StringNullableFilter<"WalletWithdrawal"> | string | null
     createdAt?: DateTimeFilter<"WalletWithdrawal"> | Date | string
     reviewedAt?: DateTimeNullableFilter<"WalletWithdrawal"> | Date | string | null
   }
@@ -109328,7 +109456,11 @@ export namespace Prisma {
     amount: number
     status?: $Enums.WalletWithdrawalStatus
     description?: string | null
+    bankSheba?: string | null
+    bankCardNumber?: string | null
+    bankAccountOwnerName?: string | null
     adminNote?: string | null
+    trackingCode?: string | null
     createdAt?: Date | string
     reviewedAt?: Date | string | null
   }
@@ -110061,7 +110193,11 @@ export namespace Prisma {
     amount?: IntFieldUpdateOperationsInput | number
     status?: EnumWalletWithdrawalStatusFieldUpdateOperationsInput | $Enums.WalletWithdrawalStatus
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    bankSheba?: NullableStringFieldUpdateOperationsInput | string | null
+    bankCardNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bankAccountOwnerName?: NullableStringFieldUpdateOperationsInput | string | null
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -110071,7 +110207,11 @@ export namespace Prisma {
     amount?: IntFieldUpdateOperationsInput | number
     status?: EnumWalletWithdrawalStatusFieldUpdateOperationsInput | $Enums.WalletWithdrawalStatus
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    bankSheba?: NullableStringFieldUpdateOperationsInput | string | null
+    bankCardNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bankAccountOwnerName?: NullableStringFieldUpdateOperationsInput | string | null
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -110081,7 +110221,11 @@ export namespace Prisma {
     amount?: IntFieldUpdateOperationsInput | number
     status?: EnumWalletWithdrawalStatusFieldUpdateOperationsInput | $Enums.WalletWithdrawalStatus
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    bankSheba?: NullableStringFieldUpdateOperationsInput | string | null
+    bankCardNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bankAccountOwnerName?: NullableStringFieldUpdateOperationsInput | string | null
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }

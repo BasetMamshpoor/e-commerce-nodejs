@@ -239,15 +239,19 @@ model User {
 }
 
 model WalletWithdrawal {
-  id          Int                    @id @default(autoincrement())
-  userId      Int
-  user        User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  amount      Int
-  status      WalletWithdrawalStatus @default(PENDING)
-  description String?
-  adminNote   String?
-  createdAt   DateTime               @default(now())
-  reviewedAt  DateTime?
+  id                   Int                    @id @default(autoincrement())
+  userId               Int
+  user                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount               Int
+  status               WalletWithdrawalStatus @default(PENDING)
+  description          String?
+  bankSheba            String?
+  bankCardNumber       String?
+  bankAccountOwnerName String?
+  adminNote            String?
+  trackingCode         String?
+  createdAt            DateTime               @default(now())
+  reviewedAt           DateTime?
 
   @@index([userId])
   @@index([status])
