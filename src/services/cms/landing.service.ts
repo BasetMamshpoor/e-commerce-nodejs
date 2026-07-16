@@ -25,7 +25,7 @@ export async function getLandingPageData() {
       where: { status: "PUBLISHED" },
       orderBy: { publishedAt: "desc" },
       take: 5,
-      select: { id: true, title: true, slug: true, excerpt: true, coverImageMediaId: true, publishedAt: true },
+      select: { id: true, title: true, slug: true, excerpt: true, coverImageUrl: true, publishedAt: true },
     }),
     prisma.brand.findMany({
       where: { isActive: true },

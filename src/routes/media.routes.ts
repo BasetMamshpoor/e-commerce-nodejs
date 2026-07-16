@@ -5,14 +5,20 @@ import { uploadMediaSingle, uploadMediaBulk } from "../services/media/upload-hel
 
 const router = Router();
 
-router.post("/", authenticate, uploadMediaSingle(), mediaController.upload);
-router.post("/bulk", authenticate, uploadMediaBulk(), mediaController.uploadBulk);
+router.post("/", authenticate, authorize("ADMIN", "EDITOR"), uploadMediaSingle(), mediaController.upload);
+router.post("/bulk", authenticate, authorize("ADMIN", "EDITOR"), uploadMediaBulk(), mediaController.uploadBulk);
+
+router.get("/folders", authenticate, authorize("ADMIN", "EDITOR"), mediaController.listFolders);
+router.get("/folders/:entityType", authenticate, authorize("ADMIN", "EDITOR"), mediaController.listFolders);
+router.delete("/folders/:entityType/:year/:month", authenticate, authorize("ADMIN", "EDITOR"), mediaController.removeFolder);
 
 router.get("/", authenticate, authorize("ADMIN", "EDITOR"), mediaController.list);
 router.get("/:id", authenticate, authorize("ADMIN", "EDITOR"), mediaController.getById);
 router.get("/:id/usage", authenticate, authorize("ADMIN", "EDITOR"), mediaController.getUsage);
+router.patch("/:id", authenticate, authorize("ADMIN", "EDITOR"), mediaController.update);
 // دانلود فایل — فایل را به‌عنوان attachment (یا inline برای تصاویر) سرو می‌کند
 router.get("/:id/download", authenticate, authorize("ADMIN", "EDITOR"), mediaController.download);
+router.delete("/:id/force-delete", authenticate, authorize("ADMIN", "EDITOR"), mediaController.forceRemove);
 router.delete("/:id", authenticate, authorize("ADMIN", "EDITOR"), mediaController.remove);
 
 export default router;

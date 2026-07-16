@@ -27,15 +27,26 @@ export async function uploadBulk(req: Request, res: Response) {
 }
 
 export async function list(req: Request, res: Response) {
-  const { page, limit, type, entityType, search } = req.query as Record<string, string | undefined>;
+  const { page, limit, type, entityType, search, year, month } = req.query as Record<string, string | undefined>;
   const result = await mediaService.listMedia({
     page: page ? Number(page) : undefined,
     limit: limit ? Number(limit) : undefined,
     type,
     entityType,
     search,
+    year,
+    month,
   });
   return ApiResponse.ok(res, result);
+}
+
+export async function listFolders(req: Request, res: Response) {
+  const folders = await mediaService.listMediaFolders({
+    entityType: (req.query.entityType as string | undefined) ?? (req.params.entityType as string | undefined),
+    year: req.query.year as string | undefined,
+    month: req.query.month as string | undefined,
+  });
+  return ApiResponse.ok(res, folders);
 }
 
 export async function getById(req: Request, res: Response) {
@@ -46,6 +57,13 @@ export async function getById(req: Request, res: Response) {
 export async function getUsage(req: Request, res: Response) {
   const usages = await mediaService.checkMediaUsage(paramInt(req.params.id));
   return ApiResponse.ok(res, { usages });
+}
+
+export async function update(req: Request, res: Response) {
+  const mediaId = paramInt(req.params.id);
+  const payload = req.body as Partial<{ originalName: string; entityType: string; metadata: Record<string, unknown> }>;
+  const updatedMedia = await mediaService.updateMedia(mediaId, payload);
+  return ApiResponse.ok(res, mediaService.serializeMedia(updatedMedia), "اطلاعات رسانه بروزرسانی شد");
 }
 
 export async function download(req: Request, res: Response) {
@@ -71,4 +89,17 @@ export async function download(req: Request, res: Response) {
 export async function remove(req: Request, res: Response) {
   await mediaService.deleteMedia(paramInt(req.params.id));
   return ApiResponse.ok(res, null, "فایل حذف شد");
+}
+
+export async function forceRemove(req: Request, res: Response) {
+  await mediaService.forceDeleteMedia(paramInt(req.params.id));
+  return ApiResponse.ok(res, null, "فایل با همه‌ی استفاده‌ها حذف شد");
+}
+
+export async function removeFolder(req: Request, res: Response) {
+  const entityType = Array.isArray(req.params.entityType) ? req.params.entityType[0] : req.params.entityType;
+  const year = Array.isArray(req.params.year) ? req.params.year[0] : req.params.year;
+  const month = Array.isArray(req.params.month) ? req.params.month[0] : req.params.month;
+  await mediaService.deleteMediaFolder({ entityType: entityType ?? "", year: year ?? "", month: month ?? "" });
+  return ApiResponse.ok(res, null, `پوشه ${entityType}/${year}/${month} حذف شد`);
 }

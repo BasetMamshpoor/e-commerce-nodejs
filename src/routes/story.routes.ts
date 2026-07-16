@@ -3,7 +3,7 @@ import * as storyController from "../controllers/story.controller";
 import { validate } from "../middlewares/validate";
 import { authenticate, authorize } from "../middlewares/auth.middleware";
 import { createStorySchema, updateStorySchema } from "../validations/story.validation";
-import { entityUpload } from "../services/media/upload-helper";
+import { entityUploadFields } from "../services/media/upload-helper";
 
 const router = Router();
 const manageOnly = [authenticate, authorize("ADMIN", "EDITOR")] as const;
@@ -13,8 +13,7 @@ router.get("/", storyController.listActive);
 router.post(
   "/",
   ...manageOnly,
-  entityUpload("storyCover"),
-  entityUpload("storyVideo"),
+  entityUploadFields(["storyCover", "storyVideo"]),
   validate(createStorySchema),
   storyController.create
 );
@@ -22,8 +21,7 @@ router.post(
 router.put(
   "/:id",
   ...manageOnly,
-  entityUpload("storyCover"),
-  entityUpload("storyVideo"),
+  entityUploadFields(["storyCover", "storyVideo"]),
   validate(updateStorySchema),
   storyController.update
 );

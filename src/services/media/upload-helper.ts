@@ -173,6 +173,90 @@ export function entityUpload(uploadKey: string) {
   };
 }
 
+export function entityUploadFields(uploadKeys: string[]) {
+  const configs = uploadKeys.map((key) => {
+    const config = UPLOAD_CONFIGS[key];
+    if (!config) {
+      throw new Error(`Upload config not found for key: ${key}`);
+    }
+    return config;
+  });
+
+  // اگر دو config از یک uploader استفاده کنند (مثل storyCover و storyVideo)
+  // فقط یکی را برمی‌داریم.
+  const uploader = configs[0].mimeSetter.fields(
+    configs.map((c) => ({
+      name: c.fieldName,
+      maxCount: 1,
+    }))
+  );
+
+  return async (req: Request, res: Response, next: NextFunction) => {
+    uploader(req, res, async (err: unknown) => {
+      if (err) return next(err);
+
+      try {
+        const files = req.files as
+          | Record<string, Express.Multer.File[]>
+          | undefined;
+
+        for (const config of configs) {
+          const file = files?.[config.fieldName]?.[0];
+
+          // اگر فایل ارسال نشده، از mediaId استفاده کن
+          if (!file) {
+            const mediaIdField =
+              config.mediaIdField ??
+              mapEntityTypeToMediaIdField(config.entityType);
+
+            const value = (req.body as Record<string, unknown>)[mediaIdField];
+            const mediaId =
+              value !== undefined && value !== null ? Number(value) : NaN;
+
+            if (!Number.isNaN(mediaId)) {
+              const media = await getMediaById(mediaId);
+
+              const urlField =
+                config.urlField ?? mapEntityTypeToUrlField(config.entityType);
+
+              req.body = {
+                ...req.body,
+                [urlField]: media.url,
+                [mediaIdField]: media.id,
+              };
+            }
+
+            continue;
+          }
+
+          const saved = await saveFileToMedia(
+            file,
+            config.entityType,
+            req.user?.id
+          );
+
+          const urlField =
+            config.urlField ?? mapEntityTypeToUrlField(config.entityType);
+
+          const mediaIdField =
+            config.mediaIdField ??
+            mapEntityTypeToMediaIdField(config.entityType);
+
+          req.body = {
+            ...req.body,
+            [urlField]: saved.url,
+            [mediaIdField]: saved.id,
+          };
+        }
+
+        next();
+      } catch (error) {
+        next(error);
+      }
+    });
+  };
+}
+
 /** نگاشت entityType به نام فیلد URL در دیتابیس */
 function mapEntityTypeToUrlField(entityType: string): string {
   const map: Record<string, string> = {
