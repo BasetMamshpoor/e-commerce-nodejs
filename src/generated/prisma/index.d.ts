@@ -54,6 +54,16 @@ export type OtpCode = $Result.DefaultSelection<Prisma.$OtpCodePayload>
  */
 export type Media = $Result.DefaultSelection<Prisma.$MediaPayload>
 /**
+ * Model Currency
+ * 
+ */
+export type Currency = $Result.DefaultSelection<Prisma.$CurrencyPayload>
+/**
+ * Model ExchangeRateHistory
+ * 
+ */
+export type ExchangeRateHistory = $Result.DefaultSelection<Prisma.$ExchangeRateHistoryPayload>
+/**
  * Model Category
  * 
  */
@@ -322,6 +332,23 @@ export const ProductStatus: {
 export type ProductStatus = (typeof ProductStatus)[keyof typeof ProductStatus]
 
 
+export const PricingMode: {
+  FIXED_IRT: 'FIXED_IRT',
+  CURRENCY_BASED: 'CURRENCY_BASED'
+};
+
+export type PricingMode = (typeof PricingMode)[keyof typeof PricingMode]
+
+
+export const ModifierType: {
+  PERCENTAGE: 'PERCENTAGE',
+  FIXED_SOURCE_CURRENCY: 'FIXED_SOURCE_CURRENCY',
+  FIXED_IRT: 'FIXED_IRT'
+};
+
+export type ModifierType = (typeof ModifierType)[keyof typeof ModifierType]
+
+
 export const DiscountType: {
   PERCENT: 'PERCENT',
   FIXED: 'FIXED'
@@ -545,6 +572,14 @@ export const Role: typeof $Enums.Role
 export type ProductStatus = $Enums.ProductStatus
 
 export const ProductStatus: typeof $Enums.ProductStatus
+
+export type PricingMode = $Enums.PricingMode
+
+export const PricingMode: typeof $Enums.PricingMode
+
+export type ModifierType = $Enums.ModifierType
+
+export const ModifierType: typeof $Enums.ModifierType
 
 export type DiscountType = $Enums.DiscountType
 
@@ -834,6 +869,26 @@ export class PrismaClient<
     * ```
     */
   get media(): Prisma.MediaDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.currency`: Exposes CRUD operations for the **Currency** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Currencies
+    * const currencies = await prisma.currency.findMany()
+    * ```
+    */
+  get currency(): Prisma.CurrencyDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.exchangeRateHistory`: Exposes CRUD operations for the **ExchangeRateHistory** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ExchangeRateHistories
+    * const exchangeRateHistories = await prisma.exchangeRateHistory.findMany()
+    * ```
+    */
+  get exchangeRateHistory(): Prisma.ExchangeRateHistoryDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.category`: Exposes CRUD operations for the **Category** model.
@@ -1766,6 +1821,8 @@ export namespace Prisma {
     BlockedIp: 'BlockedIp',
     OtpCode: 'OtpCode',
     Media: 'Media',
+    Currency: 'Currency',
+    ExchangeRateHistory: 'ExchangeRateHistory',
     Category: 'Category',
     Brand: 'Brand',
     Attribute: 'Attribute',
@@ -1830,7 +1887,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "walletWithdrawal" | "address" | "userSession" | "loginAttempt" | "blockedIp" | "otpCode" | "media" | "category" | "brand" | "attribute" | "attributeValue" | "categoryAttribute" | "product" | "productCategory" | "productImage" | "productVariant" | "productVariantAttributeValue" | "productDisplayAttributeValue" | "wishlist" | "cart" | "cartItem" | "discountCode" | "discountCodeProduct" | "discountCodeCategory" | "discountCodeUser" | "discountCodeUsage" | "shippingCompany" | "paymentGateway" | "transaction" | "order" | "orderItem" | "orderStatusHistory" | "orderCancellation" | "orderReturn" | "orderReturnImage" | "wallet" | "walletTransaction" | "ticketDepartment" | "ticket" | "ticketMessage" | "ticketAttachment" | "comment" | "commentLike" | "commentAttachment" | "blogCategory" | "blogPost" | "blogPostProduct" | "story" | "storyProduct" | "newsletter" | "notification" | "adminNotification" | "banner" | "popup" | "setting" | "auditLog"
+      modelProps: "user" | "walletWithdrawal" | "address" | "userSession" | "loginAttempt" | "blockedIp" | "otpCode" | "media" | "currency" | "exchangeRateHistory" | "category" | "brand" | "attribute" | "attributeValue" | "categoryAttribute" | "product" | "productCategory" | "productImage" | "productVariant" | "productVariantAttributeValue" | "productDisplayAttributeValue" | "wishlist" | "cart" | "cartItem" | "discountCode" | "discountCodeProduct" | "discountCodeCategory" | "discountCodeUser" | "discountCodeUsage" | "shippingCompany" | "paymentGateway" | "transaction" | "order" | "orderItem" | "orderStatusHistory" | "orderCancellation" | "orderReturn" | "orderReturnImage" | "wallet" | "walletTransaction" | "ticketDepartment" | "ticket" | "ticketMessage" | "ticketAttachment" | "comment" | "commentLike" | "commentAttachment" | "blogCategory" | "blogPost" | "blogPostProduct" | "story" | "storyProduct" | "newsletter" | "notification" | "adminNotification" | "banner" | "popup" | "setting" | "auditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2423,6 +2480,154 @@ export namespace Prisma {
           count: {
             args: Prisma.MediaCountArgs<ExtArgs>
             result: $Utils.Optional<MediaCountAggregateOutputType> | number
+          }
+        }
+      }
+      Currency: {
+        payload: Prisma.$CurrencyPayload<ExtArgs>
+        fields: Prisma.CurrencyFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CurrencyFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurrencyPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CurrencyFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurrencyPayload>
+          }
+          findFirst: {
+            args: Prisma.CurrencyFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurrencyPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CurrencyFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurrencyPayload>
+          }
+          findMany: {
+            args: Prisma.CurrencyFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurrencyPayload>[]
+          }
+          create: {
+            args: Prisma.CurrencyCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurrencyPayload>
+          }
+          createMany: {
+            args: Prisma.CurrencyCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CurrencyCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurrencyPayload>[]
+          }
+          delete: {
+            args: Prisma.CurrencyDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurrencyPayload>
+          }
+          update: {
+            args: Prisma.CurrencyUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurrencyPayload>
+          }
+          deleteMany: {
+            args: Prisma.CurrencyDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CurrencyUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CurrencyUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurrencyPayload>[]
+          }
+          upsert: {
+            args: Prisma.CurrencyUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurrencyPayload>
+          }
+          aggregate: {
+            args: Prisma.CurrencyAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCurrency>
+          }
+          groupBy: {
+            args: Prisma.CurrencyGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CurrencyGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CurrencyCountArgs<ExtArgs>
+            result: $Utils.Optional<CurrencyCountAggregateOutputType> | number
+          }
+        }
+      }
+      ExchangeRateHistory: {
+        payload: Prisma.$ExchangeRateHistoryPayload<ExtArgs>
+        fields: Prisma.ExchangeRateHistoryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExchangeRateHistoryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExchangeRateHistoryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExchangeRateHistoryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExchangeRateHistoryPayload>
+          }
+          findFirst: {
+            args: Prisma.ExchangeRateHistoryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExchangeRateHistoryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExchangeRateHistoryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExchangeRateHistoryPayload>
+          }
+          findMany: {
+            args: Prisma.ExchangeRateHistoryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExchangeRateHistoryPayload>[]
+          }
+          create: {
+            args: Prisma.ExchangeRateHistoryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExchangeRateHistoryPayload>
+          }
+          createMany: {
+            args: Prisma.ExchangeRateHistoryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExchangeRateHistoryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExchangeRateHistoryPayload>[]
+          }
+          delete: {
+            args: Prisma.ExchangeRateHistoryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExchangeRateHistoryPayload>
+          }
+          update: {
+            args: Prisma.ExchangeRateHistoryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExchangeRateHistoryPayload>
+          }
+          deleteMany: {
+            args: Prisma.ExchangeRateHistoryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExchangeRateHistoryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ExchangeRateHistoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExchangeRateHistoryPayload>[]
+          }
+          upsert: {
+            args: Prisma.ExchangeRateHistoryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExchangeRateHistoryPayload>
+          }
+          aggregate: {
+            args: Prisma.ExchangeRateHistoryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExchangeRateHistory>
+          }
+          groupBy: {
+            args: Prisma.ExchangeRateHistoryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExchangeRateHistoryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExchangeRateHistoryCountArgs<ExtArgs>
+            result: $Utils.Optional<ExchangeRateHistoryCountAggregateOutputType> | number
           }
         }
       }
@@ -6168,6 +6373,8 @@ export namespace Prisma {
     blockedIp?: BlockedIpOmit
     otpCode?: OtpCodeOmit
     media?: MediaOmit
+    currency?: CurrencyOmit
+    exchangeRateHistory?: ExchangeRateHistoryOmit
     category?: CategoryOmit
     brand?: BrandOmit
     attribute?: AttributeOmit
@@ -6643,6 +6850,46 @@ export namespace Prisma {
    */
   export type MediaCountOutputTypeCountStoryVideosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: StoryWhereInput
+  }
+
+
+  /**
+   * Count Type CurrencyCountOutputType
+   */
+
+  export type CurrencyCountOutputType = {
+    rateHistory: number
+    products: number
+  }
+
+  export type CurrencyCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    rateHistory?: boolean | CurrencyCountOutputTypeCountRateHistoryArgs
+    products?: boolean | CurrencyCountOutputTypeCountProductsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * CurrencyCountOutputType without action
+   */
+  export type CurrencyCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurrencyCountOutputType
+     */
+    select?: CurrencyCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CurrencyCountOutputType without action
+   */
+  export type CurrencyCountOutputTypeCountRateHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExchangeRateHistoryWhereInput
+  }
+
+  /**
+   * CurrencyCountOutputType without action
+   */
+  export type CurrencyCountOutputTypeCountProductsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProductWhereInput
   }
 
 
@@ -17878,6 +18125,2352 @@ export namespace Prisma {
 
 
   /**
+   * Model Currency
+   */
+
+  export type AggregateCurrency = {
+    _count: CurrencyCountAggregateOutputType | null
+    _avg: CurrencyAvgAggregateOutputType | null
+    _sum: CurrencySumAggregateOutputType | null
+    _min: CurrencyMinAggregateOutputType | null
+    _max: CurrencyMaxAggregateOutputType | null
+  }
+
+  export type CurrencyAvgAggregateOutputType = {
+    currentRate: number | null
+    lastAppliedRate: number | null
+  }
+
+  export type CurrencySumAggregateOutputType = {
+    currentRate: number | null
+    lastAppliedRate: number | null
+  }
+
+  export type CurrencyMinAggregateOutputType = {
+    id: string | null
+    code: string | null
+    name: string | null
+    symbol: string | null
+    isActive: boolean | null
+    currentRate: number | null
+    lastFetchedAt: Date | null
+    lastAppliedRate: number | null
+    lastAppliedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CurrencyMaxAggregateOutputType = {
+    id: string | null
+    code: string | null
+    name: string | null
+    symbol: string | null
+    isActive: boolean | null
+    currentRate: number | null
+    lastFetchedAt: Date | null
+    lastAppliedRate: number | null
+    lastAppliedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CurrencyCountAggregateOutputType = {
+    id: number
+    code: number
+    name: number
+    symbol: number
+    isActive: number
+    currentRate: number
+    lastFetchedAt: number
+    lastAppliedRate: number
+    lastAppliedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type CurrencyAvgAggregateInputType = {
+    currentRate?: true
+    lastAppliedRate?: true
+  }
+
+  export type CurrencySumAggregateInputType = {
+    currentRate?: true
+    lastAppliedRate?: true
+  }
+
+  export type CurrencyMinAggregateInputType = {
+    id?: true
+    code?: true
+    name?: true
+    symbol?: true
+    isActive?: true
+    currentRate?: true
+    lastFetchedAt?: true
+    lastAppliedRate?: true
+    lastAppliedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CurrencyMaxAggregateInputType = {
+    id?: true
+    code?: true
+    name?: true
+    symbol?: true
+    isActive?: true
+    currentRate?: true
+    lastFetchedAt?: true
+    lastAppliedRate?: true
+    lastAppliedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CurrencyCountAggregateInputType = {
+    id?: true
+    code?: true
+    name?: true
+    symbol?: true
+    isActive?: true
+    currentRate?: true
+    lastFetchedAt?: true
+    lastAppliedRate?: true
+    lastAppliedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type CurrencyAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Currency to aggregate.
+     */
+    where?: CurrencyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Currencies to fetch.
+     */
+    orderBy?: CurrencyOrderByWithRelationInput | CurrencyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CurrencyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Currencies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Currencies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Currencies
+    **/
+    _count?: true | CurrencyCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CurrencyAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CurrencySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CurrencyMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CurrencyMaxAggregateInputType
+  }
+
+  export type GetCurrencyAggregateType<T extends CurrencyAggregateArgs> = {
+        [P in keyof T & keyof AggregateCurrency]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCurrency[P]>
+      : GetScalarType<T[P], AggregateCurrency[P]>
+  }
+
+
+
+
+  export type CurrencyGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CurrencyWhereInput
+    orderBy?: CurrencyOrderByWithAggregationInput | CurrencyOrderByWithAggregationInput[]
+    by: CurrencyScalarFieldEnum[] | CurrencyScalarFieldEnum
+    having?: CurrencyScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CurrencyCountAggregateInputType | true
+    _avg?: CurrencyAvgAggregateInputType
+    _sum?: CurrencySumAggregateInputType
+    _min?: CurrencyMinAggregateInputType
+    _max?: CurrencyMaxAggregateInputType
+  }
+
+  export type CurrencyGroupByOutputType = {
+    id: string
+    code: string
+    name: string
+    symbol: string | null
+    isActive: boolean
+    currentRate: number | null
+    lastFetchedAt: Date | null
+    lastAppliedRate: number | null
+    lastAppliedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: CurrencyCountAggregateOutputType | null
+    _avg: CurrencyAvgAggregateOutputType | null
+    _sum: CurrencySumAggregateOutputType | null
+    _min: CurrencyMinAggregateOutputType | null
+    _max: CurrencyMaxAggregateOutputType | null
+  }
+
+  type GetCurrencyGroupByPayload<T extends CurrencyGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CurrencyGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CurrencyGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CurrencyGroupByOutputType[P]>
+            : GetScalarType<T[P], CurrencyGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CurrencySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    symbol?: boolean
+    isActive?: boolean
+    currentRate?: boolean
+    lastFetchedAt?: boolean
+    lastAppliedRate?: boolean
+    lastAppliedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    rateHistory?: boolean | Currency$rateHistoryArgs<ExtArgs>
+    products?: boolean | Currency$productsArgs<ExtArgs>
+    _count?: boolean | CurrencyCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["currency"]>
+
+  export type CurrencySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    symbol?: boolean
+    isActive?: boolean
+    currentRate?: boolean
+    lastFetchedAt?: boolean
+    lastAppliedRate?: boolean
+    lastAppliedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["currency"]>
+
+  export type CurrencySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    symbol?: boolean
+    isActive?: boolean
+    currentRate?: boolean
+    lastFetchedAt?: boolean
+    lastAppliedRate?: boolean
+    lastAppliedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["currency"]>
+
+  export type CurrencySelectScalar = {
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    symbol?: boolean
+    isActive?: boolean
+    currentRate?: boolean
+    lastFetchedAt?: boolean
+    lastAppliedRate?: boolean
+    lastAppliedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type CurrencyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "name" | "symbol" | "isActive" | "currentRate" | "lastFetchedAt" | "lastAppliedRate" | "lastAppliedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["currency"]>
+  export type CurrencyInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    rateHistory?: boolean | Currency$rateHistoryArgs<ExtArgs>
+    products?: boolean | Currency$productsArgs<ExtArgs>
+    _count?: boolean | CurrencyCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type CurrencyIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type CurrencyIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $CurrencyPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Currency"
+    objects: {
+      rateHistory: Prisma.$ExchangeRateHistoryPayload<ExtArgs>[]
+      products: Prisma.$ProductPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      code: string
+      name: string
+      symbol: string | null
+      isActive: boolean
+      currentRate: number | null
+      lastFetchedAt: Date | null
+      lastAppliedRate: number | null
+      lastAppliedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["currency"]>
+    composites: {}
+  }
+
+  type CurrencyGetPayload<S extends boolean | null | undefined | CurrencyDefaultArgs> = $Result.GetResult<Prisma.$CurrencyPayload, S>
+
+  type CurrencyCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CurrencyFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CurrencyCountAggregateInputType | true
+    }
+
+  export interface CurrencyDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Currency'], meta: { name: 'Currency' } }
+    /**
+     * Find zero or one Currency that matches the filter.
+     * @param {CurrencyFindUniqueArgs} args - Arguments to find a Currency
+     * @example
+     * // Get one Currency
+     * const currency = await prisma.currency.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CurrencyFindUniqueArgs>(args: SelectSubset<T, CurrencyFindUniqueArgs<ExtArgs>>): Prisma__CurrencyClient<$Result.GetResult<Prisma.$CurrencyPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Currency that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CurrencyFindUniqueOrThrowArgs} args - Arguments to find a Currency
+     * @example
+     * // Get one Currency
+     * const currency = await prisma.currency.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CurrencyFindUniqueOrThrowArgs>(args: SelectSubset<T, CurrencyFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CurrencyClient<$Result.GetResult<Prisma.$CurrencyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Currency that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CurrencyFindFirstArgs} args - Arguments to find a Currency
+     * @example
+     * // Get one Currency
+     * const currency = await prisma.currency.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CurrencyFindFirstArgs>(args?: SelectSubset<T, CurrencyFindFirstArgs<ExtArgs>>): Prisma__CurrencyClient<$Result.GetResult<Prisma.$CurrencyPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Currency that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CurrencyFindFirstOrThrowArgs} args - Arguments to find a Currency
+     * @example
+     * // Get one Currency
+     * const currency = await prisma.currency.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CurrencyFindFirstOrThrowArgs>(args?: SelectSubset<T, CurrencyFindFirstOrThrowArgs<ExtArgs>>): Prisma__CurrencyClient<$Result.GetResult<Prisma.$CurrencyPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Currencies that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CurrencyFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Currencies
+     * const currencies = await prisma.currency.findMany()
+     * 
+     * // Get first 10 Currencies
+     * const currencies = await prisma.currency.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const currencyWithIdOnly = await prisma.currency.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CurrencyFindManyArgs>(args?: SelectSubset<T, CurrencyFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CurrencyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Currency.
+     * @param {CurrencyCreateArgs} args - Arguments to create a Currency.
+     * @example
+     * // Create one Currency
+     * const Currency = await prisma.currency.create({
+     *   data: {
+     *     // ... data to create a Currency
+     *   }
+     * })
+     * 
+     */
+    create<T extends CurrencyCreateArgs>(args: SelectSubset<T, CurrencyCreateArgs<ExtArgs>>): Prisma__CurrencyClient<$Result.GetResult<Prisma.$CurrencyPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Currencies.
+     * @param {CurrencyCreateManyArgs} args - Arguments to create many Currencies.
+     * @example
+     * // Create many Currencies
+     * const currency = await prisma.currency.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CurrencyCreateManyArgs>(args?: SelectSubset<T, CurrencyCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Currencies and returns the data saved in the database.
+     * @param {CurrencyCreateManyAndReturnArgs} args - Arguments to create many Currencies.
+     * @example
+     * // Create many Currencies
+     * const currency = await prisma.currency.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Currencies and only return the `id`
+     * const currencyWithIdOnly = await prisma.currency.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CurrencyCreateManyAndReturnArgs>(args?: SelectSubset<T, CurrencyCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CurrencyPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Currency.
+     * @param {CurrencyDeleteArgs} args - Arguments to delete one Currency.
+     * @example
+     * // Delete one Currency
+     * const Currency = await prisma.currency.delete({
+     *   where: {
+     *     // ... filter to delete one Currency
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CurrencyDeleteArgs>(args: SelectSubset<T, CurrencyDeleteArgs<ExtArgs>>): Prisma__CurrencyClient<$Result.GetResult<Prisma.$CurrencyPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Currency.
+     * @param {CurrencyUpdateArgs} args - Arguments to update one Currency.
+     * @example
+     * // Update one Currency
+     * const currency = await prisma.currency.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CurrencyUpdateArgs>(args: SelectSubset<T, CurrencyUpdateArgs<ExtArgs>>): Prisma__CurrencyClient<$Result.GetResult<Prisma.$CurrencyPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Currencies.
+     * @param {CurrencyDeleteManyArgs} args - Arguments to filter Currencies to delete.
+     * @example
+     * // Delete a few Currencies
+     * const { count } = await prisma.currency.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CurrencyDeleteManyArgs>(args?: SelectSubset<T, CurrencyDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Currencies.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CurrencyUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Currencies
+     * const currency = await prisma.currency.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CurrencyUpdateManyArgs>(args: SelectSubset<T, CurrencyUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Currencies and returns the data updated in the database.
+     * @param {CurrencyUpdateManyAndReturnArgs} args - Arguments to update many Currencies.
+     * @example
+     * // Update many Currencies
+     * const currency = await prisma.currency.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Currencies and only return the `id`
+     * const currencyWithIdOnly = await prisma.currency.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CurrencyUpdateManyAndReturnArgs>(args: SelectSubset<T, CurrencyUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CurrencyPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Currency.
+     * @param {CurrencyUpsertArgs} args - Arguments to update or create a Currency.
+     * @example
+     * // Update or create a Currency
+     * const currency = await prisma.currency.upsert({
+     *   create: {
+     *     // ... data to create a Currency
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Currency we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CurrencyUpsertArgs>(args: SelectSubset<T, CurrencyUpsertArgs<ExtArgs>>): Prisma__CurrencyClient<$Result.GetResult<Prisma.$CurrencyPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Currencies.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CurrencyCountArgs} args - Arguments to filter Currencies to count.
+     * @example
+     * // Count the number of Currencies
+     * const count = await prisma.currency.count({
+     *   where: {
+     *     // ... the filter for the Currencies we want to count
+     *   }
+     * })
+    **/
+    count<T extends CurrencyCountArgs>(
+      args?: Subset<T, CurrencyCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CurrencyCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Currency.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CurrencyAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CurrencyAggregateArgs>(args: Subset<T, CurrencyAggregateArgs>): Prisma.PrismaPromise<GetCurrencyAggregateType<T>>
+
+    /**
+     * Group by Currency.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CurrencyGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CurrencyGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CurrencyGroupByArgs['orderBy'] }
+        : { orderBy?: CurrencyGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CurrencyGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCurrencyGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Currency model
+   */
+  readonly fields: CurrencyFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Currency.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CurrencyClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    rateHistory<T extends Currency$rateHistoryArgs<ExtArgs> = {}>(args?: Subset<T, Currency$rateHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExchangeRateHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    products<T extends Currency$productsArgs<ExtArgs> = {}>(args?: Subset<T, Currency$productsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Currency model
+   */
+  interface CurrencyFieldRefs {
+    readonly id: FieldRef<"Currency", 'String'>
+    readonly code: FieldRef<"Currency", 'String'>
+    readonly name: FieldRef<"Currency", 'String'>
+    readonly symbol: FieldRef<"Currency", 'String'>
+    readonly isActive: FieldRef<"Currency", 'Boolean'>
+    readonly currentRate: FieldRef<"Currency", 'Float'>
+    readonly lastFetchedAt: FieldRef<"Currency", 'DateTime'>
+    readonly lastAppliedRate: FieldRef<"Currency", 'Float'>
+    readonly lastAppliedAt: FieldRef<"Currency", 'DateTime'>
+    readonly createdAt: FieldRef<"Currency", 'DateTime'>
+    readonly updatedAt: FieldRef<"Currency", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Currency findUnique
+   */
+  export type CurrencyFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Currency
+     */
+    select?: CurrencySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Currency
+     */
+    omit?: CurrencyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurrencyInclude<ExtArgs> | null
+    /**
+     * Filter, which Currency to fetch.
+     */
+    where: CurrencyWhereUniqueInput
+  }
+
+  /**
+   * Currency findUniqueOrThrow
+   */
+  export type CurrencyFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Currency
+     */
+    select?: CurrencySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Currency
+     */
+    omit?: CurrencyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurrencyInclude<ExtArgs> | null
+    /**
+     * Filter, which Currency to fetch.
+     */
+    where: CurrencyWhereUniqueInput
+  }
+
+  /**
+   * Currency findFirst
+   */
+  export type CurrencyFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Currency
+     */
+    select?: CurrencySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Currency
+     */
+    omit?: CurrencyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurrencyInclude<ExtArgs> | null
+    /**
+     * Filter, which Currency to fetch.
+     */
+    where?: CurrencyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Currencies to fetch.
+     */
+    orderBy?: CurrencyOrderByWithRelationInput | CurrencyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Currencies.
+     */
+    cursor?: CurrencyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Currencies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Currencies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Currencies.
+     */
+    distinct?: CurrencyScalarFieldEnum | CurrencyScalarFieldEnum[]
+  }
+
+  /**
+   * Currency findFirstOrThrow
+   */
+  export type CurrencyFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Currency
+     */
+    select?: CurrencySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Currency
+     */
+    omit?: CurrencyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurrencyInclude<ExtArgs> | null
+    /**
+     * Filter, which Currency to fetch.
+     */
+    where?: CurrencyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Currencies to fetch.
+     */
+    orderBy?: CurrencyOrderByWithRelationInput | CurrencyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Currencies.
+     */
+    cursor?: CurrencyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Currencies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Currencies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Currencies.
+     */
+    distinct?: CurrencyScalarFieldEnum | CurrencyScalarFieldEnum[]
+  }
+
+  /**
+   * Currency findMany
+   */
+  export type CurrencyFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Currency
+     */
+    select?: CurrencySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Currency
+     */
+    omit?: CurrencyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurrencyInclude<ExtArgs> | null
+    /**
+     * Filter, which Currencies to fetch.
+     */
+    where?: CurrencyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Currencies to fetch.
+     */
+    orderBy?: CurrencyOrderByWithRelationInput | CurrencyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Currencies.
+     */
+    cursor?: CurrencyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Currencies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Currencies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Currencies.
+     */
+    distinct?: CurrencyScalarFieldEnum | CurrencyScalarFieldEnum[]
+  }
+
+  /**
+   * Currency create
+   */
+  export type CurrencyCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Currency
+     */
+    select?: CurrencySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Currency
+     */
+    omit?: CurrencyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurrencyInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Currency.
+     */
+    data: XOR<CurrencyCreateInput, CurrencyUncheckedCreateInput>
+  }
+
+  /**
+   * Currency createMany
+   */
+  export type CurrencyCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Currencies.
+     */
+    data: CurrencyCreateManyInput | CurrencyCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Currency createManyAndReturn
+   */
+  export type CurrencyCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Currency
+     */
+    select?: CurrencySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Currency
+     */
+    omit?: CurrencyOmit<ExtArgs> | null
+    /**
+     * The data used to create many Currencies.
+     */
+    data: CurrencyCreateManyInput | CurrencyCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Currency update
+   */
+  export type CurrencyUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Currency
+     */
+    select?: CurrencySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Currency
+     */
+    omit?: CurrencyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurrencyInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Currency.
+     */
+    data: XOR<CurrencyUpdateInput, CurrencyUncheckedUpdateInput>
+    /**
+     * Choose, which Currency to update.
+     */
+    where: CurrencyWhereUniqueInput
+  }
+
+  /**
+   * Currency updateMany
+   */
+  export type CurrencyUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Currencies.
+     */
+    data: XOR<CurrencyUpdateManyMutationInput, CurrencyUncheckedUpdateManyInput>
+    /**
+     * Filter which Currencies to update
+     */
+    where?: CurrencyWhereInput
+    /**
+     * Limit how many Currencies to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Currency updateManyAndReturn
+   */
+  export type CurrencyUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Currency
+     */
+    select?: CurrencySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Currency
+     */
+    omit?: CurrencyOmit<ExtArgs> | null
+    /**
+     * The data used to update Currencies.
+     */
+    data: XOR<CurrencyUpdateManyMutationInput, CurrencyUncheckedUpdateManyInput>
+    /**
+     * Filter which Currencies to update
+     */
+    where?: CurrencyWhereInput
+    /**
+     * Limit how many Currencies to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Currency upsert
+   */
+  export type CurrencyUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Currency
+     */
+    select?: CurrencySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Currency
+     */
+    omit?: CurrencyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurrencyInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Currency to update in case it exists.
+     */
+    where: CurrencyWhereUniqueInput
+    /**
+     * In case the Currency found by the `where` argument doesn't exist, create a new Currency with this data.
+     */
+    create: XOR<CurrencyCreateInput, CurrencyUncheckedCreateInput>
+    /**
+     * In case the Currency was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CurrencyUpdateInput, CurrencyUncheckedUpdateInput>
+  }
+
+  /**
+   * Currency delete
+   */
+  export type CurrencyDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Currency
+     */
+    select?: CurrencySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Currency
+     */
+    omit?: CurrencyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurrencyInclude<ExtArgs> | null
+    /**
+     * Filter which Currency to delete.
+     */
+    where: CurrencyWhereUniqueInput
+  }
+
+  /**
+   * Currency deleteMany
+   */
+  export type CurrencyDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Currencies to delete
+     */
+    where?: CurrencyWhereInput
+    /**
+     * Limit how many Currencies to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Currency.rateHistory
+   */
+  export type Currency$rateHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExchangeRateHistory
+     */
+    select?: ExchangeRateHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExchangeRateHistory
+     */
+    omit?: ExchangeRateHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExchangeRateHistoryInclude<ExtArgs> | null
+    where?: ExchangeRateHistoryWhereInput
+    orderBy?: ExchangeRateHistoryOrderByWithRelationInput | ExchangeRateHistoryOrderByWithRelationInput[]
+    cursor?: ExchangeRateHistoryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ExchangeRateHistoryScalarFieldEnum | ExchangeRateHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * Currency.products
+   */
+  export type Currency$productsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Product
+     */
+    select?: ProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Product
+     */
+    omit?: ProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductInclude<ExtArgs> | null
+    where?: ProductWhereInput
+    orderBy?: ProductOrderByWithRelationInput | ProductOrderByWithRelationInput[]
+    cursor?: ProductWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProductScalarFieldEnum | ProductScalarFieldEnum[]
+  }
+
+  /**
+   * Currency without action
+   */
+  export type CurrencyDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Currency
+     */
+    select?: CurrencySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Currency
+     */
+    omit?: CurrencyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurrencyInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ExchangeRateHistory
+   */
+
+  export type AggregateExchangeRateHistory = {
+    _count: ExchangeRateHistoryCountAggregateOutputType | null
+    _avg: ExchangeRateHistoryAvgAggregateOutputType | null
+    _sum: ExchangeRateHistorySumAggregateOutputType | null
+    _min: ExchangeRateHistoryMinAggregateOutputType | null
+    _max: ExchangeRateHistoryMaxAggregateOutputType | null
+  }
+
+  export type ExchangeRateHistoryAvgAggregateOutputType = {
+    rate: number | null
+    changePercent: number | null
+  }
+
+  export type ExchangeRateHistorySumAggregateOutputType = {
+    rate: number | null
+    changePercent: number | null
+  }
+
+  export type ExchangeRateHistoryMinAggregateOutputType = {
+    id: string | null
+    currencyId: string | null
+    rate: number | null
+    source: string | null
+    wasApplied: boolean | null
+    changePercent: number | null
+    fetchedAt: Date | null
+  }
+
+  export type ExchangeRateHistoryMaxAggregateOutputType = {
+    id: string | null
+    currencyId: string | null
+    rate: number | null
+    source: string | null
+    wasApplied: boolean | null
+    changePercent: number | null
+    fetchedAt: Date | null
+  }
+
+  export type ExchangeRateHistoryCountAggregateOutputType = {
+    id: number
+    currencyId: number
+    rate: number
+    source: number
+    wasApplied: number
+    changePercent: number
+    fetchedAt: number
+    _all: number
+  }
+
+
+  export type ExchangeRateHistoryAvgAggregateInputType = {
+    rate?: true
+    changePercent?: true
+  }
+
+  export type ExchangeRateHistorySumAggregateInputType = {
+    rate?: true
+    changePercent?: true
+  }
+
+  export type ExchangeRateHistoryMinAggregateInputType = {
+    id?: true
+    currencyId?: true
+    rate?: true
+    source?: true
+    wasApplied?: true
+    changePercent?: true
+    fetchedAt?: true
+  }
+
+  export type ExchangeRateHistoryMaxAggregateInputType = {
+    id?: true
+    currencyId?: true
+    rate?: true
+    source?: true
+    wasApplied?: true
+    changePercent?: true
+    fetchedAt?: true
+  }
+
+  export type ExchangeRateHistoryCountAggregateInputType = {
+    id?: true
+    currencyId?: true
+    rate?: true
+    source?: true
+    wasApplied?: true
+    changePercent?: true
+    fetchedAt?: true
+    _all?: true
+  }
+
+  export type ExchangeRateHistoryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExchangeRateHistory to aggregate.
+     */
+    where?: ExchangeRateHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExchangeRateHistories to fetch.
+     */
+    orderBy?: ExchangeRateHistoryOrderByWithRelationInput | ExchangeRateHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ExchangeRateHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExchangeRateHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExchangeRateHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ExchangeRateHistories
+    **/
+    _count?: true | ExchangeRateHistoryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ExchangeRateHistoryAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ExchangeRateHistorySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExchangeRateHistoryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExchangeRateHistoryMaxAggregateInputType
+  }
+
+  export type GetExchangeRateHistoryAggregateType<T extends ExchangeRateHistoryAggregateArgs> = {
+        [P in keyof T & keyof AggregateExchangeRateHistory]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExchangeRateHistory[P]>
+      : GetScalarType<T[P], AggregateExchangeRateHistory[P]>
+  }
+
+
+
+
+  export type ExchangeRateHistoryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExchangeRateHistoryWhereInput
+    orderBy?: ExchangeRateHistoryOrderByWithAggregationInput | ExchangeRateHistoryOrderByWithAggregationInput[]
+    by: ExchangeRateHistoryScalarFieldEnum[] | ExchangeRateHistoryScalarFieldEnum
+    having?: ExchangeRateHistoryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExchangeRateHistoryCountAggregateInputType | true
+    _avg?: ExchangeRateHistoryAvgAggregateInputType
+    _sum?: ExchangeRateHistorySumAggregateInputType
+    _min?: ExchangeRateHistoryMinAggregateInputType
+    _max?: ExchangeRateHistoryMaxAggregateInputType
+  }
+
+  export type ExchangeRateHistoryGroupByOutputType = {
+    id: string
+    currencyId: string
+    rate: number
+    source: string
+    wasApplied: boolean
+    changePercent: number | null
+    fetchedAt: Date
+    _count: ExchangeRateHistoryCountAggregateOutputType | null
+    _avg: ExchangeRateHistoryAvgAggregateOutputType | null
+    _sum: ExchangeRateHistorySumAggregateOutputType | null
+    _min: ExchangeRateHistoryMinAggregateOutputType | null
+    _max: ExchangeRateHistoryMaxAggregateOutputType | null
+  }
+
+  type GetExchangeRateHistoryGroupByPayload<T extends ExchangeRateHistoryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExchangeRateHistoryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExchangeRateHistoryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExchangeRateHistoryGroupByOutputType[P]>
+            : GetScalarType<T[P], ExchangeRateHistoryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExchangeRateHistorySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    currencyId?: boolean
+    rate?: boolean
+    source?: boolean
+    wasApplied?: boolean
+    changePercent?: boolean
+    fetchedAt?: boolean
+    currency?: boolean | CurrencyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["exchangeRateHistory"]>
+
+  export type ExchangeRateHistorySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    currencyId?: boolean
+    rate?: boolean
+    source?: boolean
+    wasApplied?: boolean
+    changePercent?: boolean
+    fetchedAt?: boolean
+    currency?: boolean | CurrencyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["exchangeRateHistory"]>
+
+  export type ExchangeRateHistorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    currencyId?: boolean
+    rate?: boolean
+    source?: boolean
+    wasApplied?: boolean
+    changePercent?: boolean
+    fetchedAt?: boolean
+    currency?: boolean | CurrencyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["exchangeRateHistory"]>
+
+  export type ExchangeRateHistorySelectScalar = {
+    id?: boolean
+    currencyId?: boolean
+    rate?: boolean
+    source?: boolean
+    wasApplied?: boolean
+    changePercent?: boolean
+    fetchedAt?: boolean
+  }
+
+  export type ExchangeRateHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "currencyId" | "rate" | "source" | "wasApplied" | "changePercent" | "fetchedAt", ExtArgs["result"]["exchangeRateHistory"]>
+  export type ExchangeRateHistoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    currency?: boolean | CurrencyDefaultArgs<ExtArgs>
+  }
+  export type ExchangeRateHistoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    currency?: boolean | CurrencyDefaultArgs<ExtArgs>
+  }
+  export type ExchangeRateHistoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    currency?: boolean | CurrencyDefaultArgs<ExtArgs>
+  }
+
+  export type $ExchangeRateHistoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ExchangeRateHistory"
+    objects: {
+      currency: Prisma.$CurrencyPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      currencyId: string
+      rate: number
+      source: string
+      wasApplied: boolean
+      changePercent: number | null
+      fetchedAt: Date
+    }, ExtArgs["result"]["exchangeRateHistory"]>
+    composites: {}
+  }
+
+  type ExchangeRateHistoryGetPayload<S extends boolean | null | undefined | ExchangeRateHistoryDefaultArgs> = $Result.GetResult<Prisma.$ExchangeRateHistoryPayload, S>
+
+  type ExchangeRateHistoryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ExchangeRateHistoryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ExchangeRateHistoryCountAggregateInputType | true
+    }
+
+  export interface ExchangeRateHistoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExchangeRateHistory'], meta: { name: 'ExchangeRateHistory' } }
+    /**
+     * Find zero or one ExchangeRateHistory that matches the filter.
+     * @param {ExchangeRateHistoryFindUniqueArgs} args - Arguments to find a ExchangeRateHistory
+     * @example
+     * // Get one ExchangeRateHistory
+     * const exchangeRateHistory = await prisma.exchangeRateHistory.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExchangeRateHistoryFindUniqueArgs>(args: SelectSubset<T, ExchangeRateHistoryFindUniqueArgs<ExtArgs>>): Prisma__ExchangeRateHistoryClient<$Result.GetResult<Prisma.$ExchangeRateHistoryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ExchangeRateHistory that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ExchangeRateHistoryFindUniqueOrThrowArgs} args - Arguments to find a ExchangeRateHistory
+     * @example
+     * // Get one ExchangeRateHistory
+     * const exchangeRateHistory = await prisma.exchangeRateHistory.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExchangeRateHistoryFindUniqueOrThrowArgs>(args: SelectSubset<T, ExchangeRateHistoryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExchangeRateHistoryClient<$Result.GetResult<Prisma.$ExchangeRateHistoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExchangeRateHistory that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExchangeRateHistoryFindFirstArgs} args - Arguments to find a ExchangeRateHistory
+     * @example
+     * // Get one ExchangeRateHistory
+     * const exchangeRateHistory = await prisma.exchangeRateHistory.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExchangeRateHistoryFindFirstArgs>(args?: SelectSubset<T, ExchangeRateHistoryFindFirstArgs<ExtArgs>>): Prisma__ExchangeRateHistoryClient<$Result.GetResult<Prisma.$ExchangeRateHistoryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExchangeRateHistory that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExchangeRateHistoryFindFirstOrThrowArgs} args - Arguments to find a ExchangeRateHistory
+     * @example
+     * // Get one ExchangeRateHistory
+     * const exchangeRateHistory = await prisma.exchangeRateHistory.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExchangeRateHistoryFindFirstOrThrowArgs>(args?: SelectSubset<T, ExchangeRateHistoryFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExchangeRateHistoryClient<$Result.GetResult<Prisma.$ExchangeRateHistoryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ExchangeRateHistories that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExchangeRateHistoryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ExchangeRateHistories
+     * const exchangeRateHistories = await prisma.exchangeRateHistory.findMany()
+     * 
+     * // Get first 10 ExchangeRateHistories
+     * const exchangeRateHistories = await prisma.exchangeRateHistory.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const exchangeRateHistoryWithIdOnly = await prisma.exchangeRateHistory.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ExchangeRateHistoryFindManyArgs>(args?: SelectSubset<T, ExchangeRateHistoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExchangeRateHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ExchangeRateHistory.
+     * @param {ExchangeRateHistoryCreateArgs} args - Arguments to create a ExchangeRateHistory.
+     * @example
+     * // Create one ExchangeRateHistory
+     * const ExchangeRateHistory = await prisma.exchangeRateHistory.create({
+     *   data: {
+     *     // ... data to create a ExchangeRateHistory
+     *   }
+     * })
+     * 
+     */
+    create<T extends ExchangeRateHistoryCreateArgs>(args: SelectSubset<T, ExchangeRateHistoryCreateArgs<ExtArgs>>): Prisma__ExchangeRateHistoryClient<$Result.GetResult<Prisma.$ExchangeRateHistoryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ExchangeRateHistories.
+     * @param {ExchangeRateHistoryCreateManyArgs} args - Arguments to create many ExchangeRateHistories.
+     * @example
+     * // Create many ExchangeRateHistories
+     * const exchangeRateHistory = await prisma.exchangeRateHistory.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ExchangeRateHistoryCreateManyArgs>(args?: SelectSubset<T, ExchangeRateHistoryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ExchangeRateHistories and returns the data saved in the database.
+     * @param {ExchangeRateHistoryCreateManyAndReturnArgs} args - Arguments to create many ExchangeRateHistories.
+     * @example
+     * // Create many ExchangeRateHistories
+     * const exchangeRateHistory = await prisma.exchangeRateHistory.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ExchangeRateHistories and only return the `id`
+     * const exchangeRateHistoryWithIdOnly = await prisma.exchangeRateHistory.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ExchangeRateHistoryCreateManyAndReturnArgs>(args?: SelectSubset<T, ExchangeRateHistoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExchangeRateHistoryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ExchangeRateHistory.
+     * @param {ExchangeRateHistoryDeleteArgs} args - Arguments to delete one ExchangeRateHistory.
+     * @example
+     * // Delete one ExchangeRateHistory
+     * const ExchangeRateHistory = await prisma.exchangeRateHistory.delete({
+     *   where: {
+     *     // ... filter to delete one ExchangeRateHistory
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ExchangeRateHistoryDeleteArgs>(args: SelectSubset<T, ExchangeRateHistoryDeleteArgs<ExtArgs>>): Prisma__ExchangeRateHistoryClient<$Result.GetResult<Prisma.$ExchangeRateHistoryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ExchangeRateHistory.
+     * @param {ExchangeRateHistoryUpdateArgs} args - Arguments to update one ExchangeRateHistory.
+     * @example
+     * // Update one ExchangeRateHistory
+     * const exchangeRateHistory = await prisma.exchangeRateHistory.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ExchangeRateHistoryUpdateArgs>(args: SelectSubset<T, ExchangeRateHistoryUpdateArgs<ExtArgs>>): Prisma__ExchangeRateHistoryClient<$Result.GetResult<Prisma.$ExchangeRateHistoryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ExchangeRateHistories.
+     * @param {ExchangeRateHistoryDeleteManyArgs} args - Arguments to filter ExchangeRateHistories to delete.
+     * @example
+     * // Delete a few ExchangeRateHistories
+     * const { count } = await prisma.exchangeRateHistory.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ExchangeRateHistoryDeleteManyArgs>(args?: SelectSubset<T, ExchangeRateHistoryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExchangeRateHistories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExchangeRateHistoryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ExchangeRateHistories
+     * const exchangeRateHistory = await prisma.exchangeRateHistory.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ExchangeRateHistoryUpdateManyArgs>(args: SelectSubset<T, ExchangeRateHistoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExchangeRateHistories and returns the data updated in the database.
+     * @param {ExchangeRateHistoryUpdateManyAndReturnArgs} args - Arguments to update many ExchangeRateHistories.
+     * @example
+     * // Update many ExchangeRateHistories
+     * const exchangeRateHistory = await prisma.exchangeRateHistory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ExchangeRateHistories and only return the `id`
+     * const exchangeRateHistoryWithIdOnly = await prisma.exchangeRateHistory.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ExchangeRateHistoryUpdateManyAndReturnArgs>(args: SelectSubset<T, ExchangeRateHistoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExchangeRateHistoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ExchangeRateHistory.
+     * @param {ExchangeRateHistoryUpsertArgs} args - Arguments to update or create a ExchangeRateHistory.
+     * @example
+     * // Update or create a ExchangeRateHistory
+     * const exchangeRateHistory = await prisma.exchangeRateHistory.upsert({
+     *   create: {
+     *     // ... data to create a ExchangeRateHistory
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ExchangeRateHistory we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExchangeRateHistoryUpsertArgs>(args: SelectSubset<T, ExchangeRateHistoryUpsertArgs<ExtArgs>>): Prisma__ExchangeRateHistoryClient<$Result.GetResult<Prisma.$ExchangeRateHistoryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ExchangeRateHistories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExchangeRateHistoryCountArgs} args - Arguments to filter ExchangeRateHistories to count.
+     * @example
+     * // Count the number of ExchangeRateHistories
+     * const count = await prisma.exchangeRateHistory.count({
+     *   where: {
+     *     // ... the filter for the ExchangeRateHistories we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExchangeRateHistoryCountArgs>(
+      args?: Subset<T, ExchangeRateHistoryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExchangeRateHistoryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ExchangeRateHistory.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExchangeRateHistoryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExchangeRateHistoryAggregateArgs>(args: Subset<T, ExchangeRateHistoryAggregateArgs>): Prisma.PrismaPromise<GetExchangeRateHistoryAggregateType<T>>
+
+    /**
+     * Group by ExchangeRateHistory.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExchangeRateHistoryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ExchangeRateHistoryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExchangeRateHistoryGroupByArgs['orderBy'] }
+        : { orderBy?: ExchangeRateHistoryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExchangeRateHistoryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExchangeRateHistoryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ExchangeRateHistory model
+   */
+  readonly fields: ExchangeRateHistoryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ExchangeRateHistory.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExchangeRateHistoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    currency<T extends CurrencyDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CurrencyDefaultArgs<ExtArgs>>): Prisma__CurrencyClient<$Result.GetResult<Prisma.$CurrencyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ExchangeRateHistory model
+   */
+  interface ExchangeRateHistoryFieldRefs {
+    readonly id: FieldRef<"ExchangeRateHistory", 'String'>
+    readonly currencyId: FieldRef<"ExchangeRateHistory", 'String'>
+    readonly rate: FieldRef<"ExchangeRateHistory", 'Float'>
+    readonly source: FieldRef<"ExchangeRateHistory", 'String'>
+    readonly wasApplied: FieldRef<"ExchangeRateHistory", 'Boolean'>
+    readonly changePercent: FieldRef<"ExchangeRateHistory", 'Float'>
+    readonly fetchedAt: FieldRef<"ExchangeRateHistory", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ExchangeRateHistory findUnique
+   */
+  export type ExchangeRateHistoryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExchangeRateHistory
+     */
+    select?: ExchangeRateHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExchangeRateHistory
+     */
+    omit?: ExchangeRateHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExchangeRateHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which ExchangeRateHistory to fetch.
+     */
+    where: ExchangeRateHistoryWhereUniqueInput
+  }
+
+  /**
+   * ExchangeRateHistory findUniqueOrThrow
+   */
+  export type ExchangeRateHistoryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExchangeRateHistory
+     */
+    select?: ExchangeRateHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExchangeRateHistory
+     */
+    omit?: ExchangeRateHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExchangeRateHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which ExchangeRateHistory to fetch.
+     */
+    where: ExchangeRateHistoryWhereUniqueInput
+  }
+
+  /**
+   * ExchangeRateHistory findFirst
+   */
+  export type ExchangeRateHistoryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExchangeRateHistory
+     */
+    select?: ExchangeRateHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExchangeRateHistory
+     */
+    omit?: ExchangeRateHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExchangeRateHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which ExchangeRateHistory to fetch.
+     */
+    where?: ExchangeRateHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExchangeRateHistories to fetch.
+     */
+    orderBy?: ExchangeRateHistoryOrderByWithRelationInput | ExchangeRateHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExchangeRateHistories.
+     */
+    cursor?: ExchangeRateHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExchangeRateHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExchangeRateHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExchangeRateHistories.
+     */
+    distinct?: ExchangeRateHistoryScalarFieldEnum | ExchangeRateHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * ExchangeRateHistory findFirstOrThrow
+   */
+  export type ExchangeRateHistoryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExchangeRateHistory
+     */
+    select?: ExchangeRateHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExchangeRateHistory
+     */
+    omit?: ExchangeRateHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExchangeRateHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which ExchangeRateHistory to fetch.
+     */
+    where?: ExchangeRateHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExchangeRateHistories to fetch.
+     */
+    orderBy?: ExchangeRateHistoryOrderByWithRelationInput | ExchangeRateHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExchangeRateHistories.
+     */
+    cursor?: ExchangeRateHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExchangeRateHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExchangeRateHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExchangeRateHistories.
+     */
+    distinct?: ExchangeRateHistoryScalarFieldEnum | ExchangeRateHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * ExchangeRateHistory findMany
+   */
+  export type ExchangeRateHistoryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExchangeRateHistory
+     */
+    select?: ExchangeRateHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExchangeRateHistory
+     */
+    omit?: ExchangeRateHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExchangeRateHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which ExchangeRateHistories to fetch.
+     */
+    where?: ExchangeRateHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExchangeRateHistories to fetch.
+     */
+    orderBy?: ExchangeRateHistoryOrderByWithRelationInput | ExchangeRateHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ExchangeRateHistories.
+     */
+    cursor?: ExchangeRateHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExchangeRateHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExchangeRateHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExchangeRateHistories.
+     */
+    distinct?: ExchangeRateHistoryScalarFieldEnum | ExchangeRateHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * ExchangeRateHistory create
+   */
+  export type ExchangeRateHistoryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExchangeRateHistory
+     */
+    select?: ExchangeRateHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExchangeRateHistory
+     */
+    omit?: ExchangeRateHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExchangeRateHistoryInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ExchangeRateHistory.
+     */
+    data: XOR<ExchangeRateHistoryCreateInput, ExchangeRateHistoryUncheckedCreateInput>
+  }
+
+  /**
+   * ExchangeRateHistory createMany
+   */
+  export type ExchangeRateHistoryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ExchangeRateHistories.
+     */
+    data: ExchangeRateHistoryCreateManyInput | ExchangeRateHistoryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExchangeRateHistory createManyAndReturn
+   */
+  export type ExchangeRateHistoryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExchangeRateHistory
+     */
+    select?: ExchangeRateHistorySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExchangeRateHistory
+     */
+    omit?: ExchangeRateHistoryOmit<ExtArgs> | null
+    /**
+     * The data used to create many ExchangeRateHistories.
+     */
+    data: ExchangeRateHistoryCreateManyInput | ExchangeRateHistoryCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExchangeRateHistoryIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ExchangeRateHistory update
+   */
+  export type ExchangeRateHistoryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExchangeRateHistory
+     */
+    select?: ExchangeRateHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExchangeRateHistory
+     */
+    omit?: ExchangeRateHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExchangeRateHistoryInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ExchangeRateHistory.
+     */
+    data: XOR<ExchangeRateHistoryUpdateInput, ExchangeRateHistoryUncheckedUpdateInput>
+    /**
+     * Choose, which ExchangeRateHistory to update.
+     */
+    where: ExchangeRateHistoryWhereUniqueInput
+  }
+
+  /**
+   * ExchangeRateHistory updateMany
+   */
+  export type ExchangeRateHistoryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ExchangeRateHistories.
+     */
+    data: XOR<ExchangeRateHistoryUpdateManyMutationInput, ExchangeRateHistoryUncheckedUpdateManyInput>
+    /**
+     * Filter which ExchangeRateHistories to update
+     */
+    where?: ExchangeRateHistoryWhereInput
+    /**
+     * Limit how many ExchangeRateHistories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExchangeRateHistory updateManyAndReturn
+   */
+  export type ExchangeRateHistoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExchangeRateHistory
+     */
+    select?: ExchangeRateHistorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExchangeRateHistory
+     */
+    omit?: ExchangeRateHistoryOmit<ExtArgs> | null
+    /**
+     * The data used to update ExchangeRateHistories.
+     */
+    data: XOR<ExchangeRateHistoryUpdateManyMutationInput, ExchangeRateHistoryUncheckedUpdateManyInput>
+    /**
+     * Filter which ExchangeRateHistories to update
+     */
+    where?: ExchangeRateHistoryWhereInput
+    /**
+     * Limit how many ExchangeRateHistories to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExchangeRateHistoryIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ExchangeRateHistory upsert
+   */
+  export type ExchangeRateHistoryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExchangeRateHistory
+     */
+    select?: ExchangeRateHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExchangeRateHistory
+     */
+    omit?: ExchangeRateHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExchangeRateHistoryInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ExchangeRateHistory to update in case it exists.
+     */
+    where: ExchangeRateHistoryWhereUniqueInput
+    /**
+     * In case the ExchangeRateHistory found by the `where` argument doesn't exist, create a new ExchangeRateHistory with this data.
+     */
+    create: XOR<ExchangeRateHistoryCreateInput, ExchangeRateHistoryUncheckedCreateInput>
+    /**
+     * In case the ExchangeRateHistory was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExchangeRateHistoryUpdateInput, ExchangeRateHistoryUncheckedUpdateInput>
+  }
+
+  /**
+   * ExchangeRateHistory delete
+   */
+  export type ExchangeRateHistoryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExchangeRateHistory
+     */
+    select?: ExchangeRateHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExchangeRateHistory
+     */
+    omit?: ExchangeRateHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExchangeRateHistoryInclude<ExtArgs> | null
+    /**
+     * Filter which ExchangeRateHistory to delete.
+     */
+    where: ExchangeRateHistoryWhereUniqueInput
+  }
+
+  /**
+   * ExchangeRateHistory deleteMany
+   */
+  export type ExchangeRateHistoryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExchangeRateHistories to delete
+     */
+    where?: ExchangeRateHistoryWhereInput
+    /**
+     * Limit how many ExchangeRateHistories to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExchangeRateHistory without action
+   */
+  export type ExchangeRateHistoryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExchangeRateHistory
+     */
+    select?: ExchangeRateHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExchangeRateHistory
+     */
+    omit?: ExchangeRateHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExchangeRateHistoryInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model Category
    */
 
@@ -23934,6 +26527,9 @@ export namespace Prisma {
     brandId: number | null
     viewCount: number | null
     basePrice: number | null
+    sourcePrice: number | null
+    priceBufferPercent: number | null
+    currentPriceIRT: number | null
     discountValue: number | null
     minPrice: number | null
     maxPrice: number | null
@@ -23948,6 +26544,9 @@ export namespace Prisma {
     brandId: number | null
     viewCount: number | null
     basePrice: number | null
+    sourcePrice: number | null
+    priceBufferPercent: number | null
+    currentPriceIRT: number | null
     discountValue: number | null
     minPrice: number | null
     maxPrice: number | null
@@ -23968,6 +26567,12 @@ export namespace Prisma {
     isFeatured: boolean | null
     viewCount: number | null
     basePrice: number | null
+    pricingMode: $Enums.PricingMode | null
+    currencyId: string | null
+    sourcePrice: number | null
+    priceBufferPercent: number | null
+    currentPriceIRT: number | null
+    priceUpdatedAt: Date | null
     discountType: $Enums.DiscountType | null
     discountValue: number | null
     minPrice: number | null
@@ -23996,6 +26601,12 @@ export namespace Prisma {
     isFeatured: boolean | null
     viewCount: number | null
     basePrice: number | null
+    pricingMode: $Enums.PricingMode | null
+    currencyId: string | null
+    sourcePrice: number | null
+    priceBufferPercent: number | null
+    currentPriceIRT: number | null
+    priceUpdatedAt: Date | null
     discountType: $Enums.DiscountType | null
     discountValue: number | null
     minPrice: number | null
@@ -24024,6 +26635,12 @@ export namespace Prisma {
     isFeatured: number
     viewCount: number
     basePrice: number
+    pricingMode: number
+    currencyId: number
+    sourcePrice: number
+    priceBufferPercent: number
+    currentPriceIRT: number
+    priceUpdatedAt: number
     discountType: number
     discountValue: number
     minPrice: number
@@ -24049,6 +26666,9 @@ export namespace Prisma {
     brandId?: true
     viewCount?: true
     basePrice?: true
+    sourcePrice?: true
+    priceBufferPercent?: true
+    currentPriceIRT?: true
     discountValue?: true
     minPrice?: true
     maxPrice?: true
@@ -24063,6 +26683,9 @@ export namespace Prisma {
     brandId?: true
     viewCount?: true
     basePrice?: true
+    sourcePrice?: true
+    priceBufferPercent?: true
+    currentPriceIRT?: true
     discountValue?: true
     minPrice?: true
     maxPrice?: true
@@ -24083,6 +26706,12 @@ export namespace Prisma {
     isFeatured?: true
     viewCount?: true
     basePrice?: true
+    pricingMode?: true
+    currencyId?: true
+    sourcePrice?: true
+    priceBufferPercent?: true
+    currentPriceIRT?: true
+    priceUpdatedAt?: true
     discountType?: true
     discountValue?: true
     minPrice?: true
@@ -24111,6 +26740,12 @@ export namespace Prisma {
     isFeatured?: true
     viewCount?: true
     basePrice?: true
+    pricingMode?: true
+    currencyId?: true
+    sourcePrice?: true
+    priceBufferPercent?: true
+    currentPriceIRT?: true
+    priceUpdatedAt?: true
     discountType?: true
     discountValue?: true
     minPrice?: true
@@ -24139,6 +26774,12 @@ export namespace Prisma {
     isFeatured?: true
     viewCount?: true
     basePrice?: true
+    pricingMode?: true
+    currencyId?: true
+    sourcePrice?: true
+    priceBufferPercent?: true
+    currentPriceIRT?: true
+    priceUpdatedAt?: true
     discountType?: true
     discountValue?: true
     minPrice?: true
@@ -24255,6 +26896,12 @@ export namespace Prisma {
     isFeatured: boolean
     viewCount: number
     basePrice: number
+    pricingMode: $Enums.PricingMode
+    currencyId: string | null
+    sourcePrice: number | null
+    priceBufferPercent: number | null
+    currentPriceIRT: number
+    priceUpdatedAt: Date | null
     discountType: $Enums.DiscountType | null
     discountValue: number | null
     minPrice: number
@@ -24303,6 +26950,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: boolean
     basePrice?: boolean
+    pricingMode?: boolean
+    currencyId?: boolean
+    sourcePrice?: boolean
+    priceBufferPercent?: boolean
+    currentPriceIRT?: boolean
+    priceUpdatedAt?: boolean
     discountType?: boolean
     discountValue?: boolean
     minPrice?: boolean
@@ -24320,6 +26973,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     brand?: boolean | Product$brandArgs<ExtArgs>
+    currency?: boolean | Product$currencyArgs<ExtArgs>
     createdBy?: boolean | Product$createdByArgs<ExtArgs>
     categories?: boolean | Product$categoriesArgs<ExtArgs>
     variants?: boolean | Product$variantsArgs<ExtArgs>
@@ -24343,6 +26997,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: boolean
     basePrice?: boolean
+    pricingMode?: boolean
+    currencyId?: boolean
+    sourcePrice?: boolean
+    priceBufferPercent?: boolean
+    currentPriceIRT?: boolean
+    priceUpdatedAt?: boolean
     discountType?: boolean
     discountValue?: boolean
     minPrice?: boolean
@@ -24360,6 +27020,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     brand?: boolean | Product$brandArgs<ExtArgs>
+    currency?: boolean | Product$currencyArgs<ExtArgs>
     createdBy?: boolean | Product$createdByArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
 
@@ -24374,6 +27035,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: boolean
     basePrice?: boolean
+    pricingMode?: boolean
+    currencyId?: boolean
+    sourcePrice?: boolean
+    priceBufferPercent?: boolean
+    currentPriceIRT?: boolean
+    priceUpdatedAt?: boolean
     discountType?: boolean
     discountValue?: boolean
     minPrice?: boolean
@@ -24391,6 +27058,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     brand?: boolean | Product$brandArgs<ExtArgs>
+    currency?: boolean | Product$currencyArgs<ExtArgs>
     createdBy?: boolean | Product$createdByArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
 
@@ -24405,6 +27073,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: boolean
     basePrice?: boolean
+    pricingMode?: boolean
+    currencyId?: boolean
+    sourcePrice?: boolean
+    priceBufferPercent?: boolean
+    currentPriceIRT?: boolean
+    priceUpdatedAt?: boolean
     discountType?: boolean
     discountValue?: boolean
     minPrice?: boolean
@@ -24423,9 +27097,10 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "brandId" | "shortDescription" | "description" | "status" | "isFeatured" | "viewCount" | "basePrice" | "discountType" | "discountValue" | "minPrice" | "maxPrice" | "isInStock" | "hasActiveDiscount" | "avgRating" | "reviewCount" | "totalSold" | "metaTitle" | "metaDescription" | "canonicalUrl" | "structuredData" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "brandId" | "shortDescription" | "description" | "status" | "isFeatured" | "viewCount" | "basePrice" | "pricingMode" | "currencyId" | "sourcePrice" | "priceBufferPercent" | "currentPriceIRT" | "priceUpdatedAt" | "discountType" | "discountValue" | "minPrice" | "maxPrice" | "isInStock" | "hasActiveDiscount" | "avgRating" | "reviewCount" | "totalSold" | "metaTitle" | "metaDescription" | "canonicalUrl" | "structuredData" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     brand?: boolean | Product$brandArgs<ExtArgs>
+    currency?: boolean | Product$currencyArgs<ExtArgs>
     createdBy?: boolean | Product$createdByArgs<ExtArgs>
     categories?: boolean | Product$categoriesArgs<ExtArgs>
     variants?: boolean | Product$variantsArgs<ExtArgs>
@@ -24439,10 +27114,12 @@ export namespace Prisma {
   }
   export type ProductIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     brand?: boolean | Product$brandArgs<ExtArgs>
+    currency?: boolean | Product$currencyArgs<ExtArgs>
     createdBy?: boolean | Product$createdByArgs<ExtArgs>
   }
   export type ProductIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     brand?: boolean | Product$brandArgs<ExtArgs>
+    currency?: boolean | Product$currencyArgs<ExtArgs>
     createdBy?: boolean | Product$createdByArgs<ExtArgs>
   }
 
@@ -24450,6 +27127,7 @@ export namespace Prisma {
     name: "Product"
     objects: {
       brand: Prisma.$BrandPayload<ExtArgs> | null
+      currency: Prisma.$CurrencyPayload<ExtArgs> | null
       createdBy: Prisma.$UserPayload<ExtArgs> | null
       categories: Prisma.$ProductCategoryPayload<ExtArgs>[]
       variants: Prisma.$ProductVariantPayload<ExtArgs>[]
@@ -24471,6 +27149,12 @@ export namespace Prisma {
       isFeatured: boolean
       viewCount: number
       basePrice: number
+      pricingMode: $Enums.PricingMode
+      currencyId: string | null
+      sourcePrice: number | null
+      priceBufferPercent: number | null
+      currentPriceIRT: number
+      priceUpdatedAt: Date | null
       discountType: $Enums.DiscountType | null
       discountValue: number | null
       minPrice: number
@@ -24882,6 +27566,7 @@ export namespace Prisma {
   export interface Prisma__ProductClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     brand<T extends Product$brandArgs<ExtArgs> = {}>(args?: Subset<T, Product$brandArgs<ExtArgs>>): Prisma__BrandClient<$Result.GetResult<Prisma.$BrandPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    currency<T extends Product$currencyArgs<ExtArgs> = {}>(args?: Subset<T, Product$currencyArgs<ExtArgs>>): Prisma__CurrencyClient<$Result.GetResult<Prisma.$CurrencyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     createdBy<T extends Product$createdByArgs<ExtArgs> = {}>(args?: Subset<T, Product$createdByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     categories<T extends Product$categoriesArgs<ExtArgs> = {}>(args?: Subset<T, Product$categoriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductCategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     variants<T extends Product$variantsArgs<ExtArgs> = {}>(args?: Subset<T, Product$variantsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductVariantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -24930,6 +27615,12 @@ export namespace Prisma {
     readonly isFeatured: FieldRef<"Product", 'Boolean'>
     readonly viewCount: FieldRef<"Product", 'Int'>
     readonly basePrice: FieldRef<"Product", 'Int'>
+    readonly pricingMode: FieldRef<"Product", 'PricingMode'>
+    readonly currencyId: FieldRef<"Product", 'String'>
+    readonly sourcePrice: FieldRef<"Product", 'Float'>
+    readonly priceBufferPercent: FieldRef<"Product", 'Float'>
+    readonly currentPriceIRT: FieldRef<"Product", 'Int'>
+    readonly priceUpdatedAt: FieldRef<"Product", 'DateTime'>
     readonly discountType: FieldRef<"Product", 'DiscountType'>
     readonly discountValue: FieldRef<"Product", 'Int'>
     readonly minPrice: FieldRef<"Product", 'Int'>
@@ -25363,6 +28054,25 @@ export namespace Prisma {
      */
     include?: BrandInclude<ExtArgs> | null
     where?: BrandWhereInput
+  }
+
+  /**
+   * Product.currency
+   */
+  export type Product$currencyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Currency
+     */
+    select?: CurrencySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Currency
+     */
+    omit?: CurrencyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurrencyInclude<ExtArgs> | null
+    where?: CurrencyWhereInput
   }
 
   /**
@@ -29079,30 +31789,38 @@ export namespace Prisma {
     id: number | null
     variantId: number | null
     attributeValueId: number | null
+    modifierValue: number | null
   }
 
   export type ProductVariantAttributeValueSumAggregateOutputType = {
     id: number | null
     variantId: number | null
     attributeValueId: number | null
+    modifierValue: number | null
   }
 
   export type ProductVariantAttributeValueMinAggregateOutputType = {
     id: number | null
     variantId: number | null
     attributeValueId: number | null
+    modifierType: $Enums.ModifierType | null
+    modifierValue: number | null
   }
 
   export type ProductVariantAttributeValueMaxAggregateOutputType = {
     id: number | null
     variantId: number | null
     attributeValueId: number | null
+    modifierType: $Enums.ModifierType | null
+    modifierValue: number | null
   }
 
   export type ProductVariantAttributeValueCountAggregateOutputType = {
     id: number
     variantId: number
     attributeValueId: number
+    modifierType: number
+    modifierValue: number
     _all: number
   }
 
@@ -29111,30 +31829,38 @@ export namespace Prisma {
     id?: true
     variantId?: true
     attributeValueId?: true
+    modifierValue?: true
   }
 
   export type ProductVariantAttributeValueSumAggregateInputType = {
     id?: true
     variantId?: true
     attributeValueId?: true
+    modifierValue?: true
   }
 
   export type ProductVariantAttributeValueMinAggregateInputType = {
     id?: true
     variantId?: true
     attributeValueId?: true
+    modifierType?: true
+    modifierValue?: true
   }
 
   export type ProductVariantAttributeValueMaxAggregateInputType = {
     id?: true
     variantId?: true
     attributeValueId?: true
+    modifierType?: true
+    modifierValue?: true
   }
 
   export type ProductVariantAttributeValueCountAggregateInputType = {
     id?: true
     variantId?: true
     attributeValueId?: true
+    modifierType?: true
+    modifierValue?: true
     _all?: true
   }
 
@@ -29228,6 +31954,8 @@ export namespace Prisma {
     id: number
     variantId: number
     attributeValueId: number
+    modifierType: $Enums.ModifierType | null
+    modifierValue: number | null
     _count: ProductVariantAttributeValueCountAggregateOutputType | null
     _avg: ProductVariantAttributeValueAvgAggregateOutputType | null
     _sum: ProductVariantAttributeValueSumAggregateOutputType | null
@@ -29253,6 +31981,8 @@ export namespace Prisma {
     id?: boolean
     variantId?: boolean
     attributeValueId?: boolean
+    modifierType?: boolean
+    modifierValue?: boolean
     variant?: boolean | ProductVariantDefaultArgs<ExtArgs>
     attributeValue?: boolean | AttributeValueDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["productVariantAttributeValue"]>
@@ -29261,6 +31991,8 @@ export namespace Prisma {
     id?: boolean
     variantId?: boolean
     attributeValueId?: boolean
+    modifierType?: boolean
+    modifierValue?: boolean
     variant?: boolean | ProductVariantDefaultArgs<ExtArgs>
     attributeValue?: boolean | AttributeValueDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["productVariantAttributeValue"]>
@@ -29269,6 +32001,8 @@ export namespace Prisma {
     id?: boolean
     variantId?: boolean
     attributeValueId?: boolean
+    modifierType?: boolean
+    modifierValue?: boolean
     variant?: boolean | ProductVariantDefaultArgs<ExtArgs>
     attributeValue?: boolean | AttributeValueDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["productVariantAttributeValue"]>
@@ -29277,9 +32011,11 @@ export namespace Prisma {
     id?: boolean
     variantId?: boolean
     attributeValueId?: boolean
+    modifierType?: boolean
+    modifierValue?: boolean
   }
 
-  export type ProductVariantAttributeValueOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "variantId" | "attributeValueId", ExtArgs["result"]["productVariantAttributeValue"]>
+  export type ProductVariantAttributeValueOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "variantId" | "attributeValueId" | "modifierType" | "modifierValue", ExtArgs["result"]["productVariantAttributeValue"]>
   export type ProductVariantAttributeValueInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     variant?: boolean | ProductVariantDefaultArgs<ExtArgs>
     attributeValue?: boolean | AttributeValueDefaultArgs<ExtArgs>
@@ -29303,6 +32039,8 @@ export namespace Prisma {
       id: number
       variantId: number
       attributeValueId: number
+      modifierType: $Enums.ModifierType | null
+      modifierValue: number | null
     }, ExtArgs["result"]["productVariantAttributeValue"]>
     composites: {}
   }
@@ -29731,6 +32469,8 @@ export namespace Prisma {
     readonly id: FieldRef<"ProductVariantAttributeValue", 'Int'>
     readonly variantId: FieldRef<"ProductVariantAttributeValue", 'Int'>
     readonly attributeValueId: FieldRef<"ProductVariantAttributeValue", 'Int'>
+    readonly modifierType: FieldRef<"ProductVariantAttributeValue", 'ModifierType'>
+    readonly modifierValue: FieldRef<"ProductVariantAttributeValue", 'Float'>
   }
     
 
@@ -45680,6 +48420,8 @@ export namespace Prisma {
     price: number | null
     quantity: number | null
     discountAmount: number | null
+    finalPriceIRT: number | null
+    appliedRate: number | null
   }
 
   export type OrderItemSumAggregateOutputType = {
@@ -45689,6 +48431,8 @@ export namespace Prisma {
     price: number | null
     quantity: number | null
     discountAmount: number | null
+    finalPriceIRT: number | null
+    appliedRate: number | null
   }
 
   export type OrderItemMinAggregateOutputType = {
@@ -45700,6 +48444,10 @@ export namespace Prisma {
     price: number | null
     quantity: number | null
     discountAmount: number | null
+    finalPriceIRT: number | null
+    pricingModeSnapshot: $Enums.PricingMode | null
+    sourceCurrencyCode: string | null
+    appliedRate: number | null
   }
 
   export type OrderItemMaxAggregateOutputType = {
@@ -45711,6 +48459,10 @@ export namespace Prisma {
     price: number | null
     quantity: number | null
     discountAmount: number | null
+    finalPriceIRT: number | null
+    pricingModeSnapshot: $Enums.PricingMode | null
+    sourceCurrencyCode: string | null
+    appliedRate: number | null
   }
 
   export type OrderItemCountAggregateOutputType = {
@@ -45722,6 +48474,10 @@ export namespace Prisma {
     price: number
     quantity: number
     discountAmount: number
+    finalPriceIRT: number
+    pricingModeSnapshot: number
+    sourceCurrencyCode: number
+    appliedRate: number
     _all: number
   }
 
@@ -45733,6 +48489,8 @@ export namespace Prisma {
     price?: true
     quantity?: true
     discountAmount?: true
+    finalPriceIRT?: true
+    appliedRate?: true
   }
 
   export type OrderItemSumAggregateInputType = {
@@ -45742,6 +48500,8 @@ export namespace Prisma {
     price?: true
     quantity?: true
     discountAmount?: true
+    finalPriceIRT?: true
+    appliedRate?: true
   }
 
   export type OrderItemMinAggregateInputType = {
@@ -45753,6 +48513,10 @@ export namespace Prisma {
     price?: true
     quantity?: true
     discountAmount?: true
+    finalPriceIRT?: true
+    pricingModeSnapshot?: true
+    sourceCurrencyCode?: true
+    appliedRate?: true
   }
 
   export type OrderItemMaxAggregateInputType = {
@@ -45764,6 +48528,10 @@ export namespace Prisma {
     price?: true
     quantity?: true
     discountAmount?: true
+    finalPriceIRT?: true
+    pricingModeSnapshot?: true
+    sourceCurrencyCode?: true
+    appliedRate?: true
   }
 
   export type OrderItemCountAggregateInputType = {
@@ -45775,6 +48543,10 @@ export namespace Prisma {
     price?: true
     quantity?: true
     discountAmount?: true
+    finalPriceIRT?: true
+    pricingModeSnapshot?: true
+    sourceCurrencyCode?: true
+    appliedRate?: true
     _all?: true
   }
 
@@ -45873,6 +48645,10 @@ export namespace Prisma {
     price: number
     quantity: number
     discountAmount: number
+    finalPriceIRT: number
+    pricingModeSnapshot: $Enums.PricingMode
+    sourceCurrencyCode: string | null
+    appliedRate: number | null
     _count: OrderItemCountAggregateOutputType | null
     _avg: OrderItemAvgAggregateOutputType | null
     _sum: OrderItemSumAggregateOutputType | null
@@ -45903,6 +48679,10 @@ export namespace Prisma {
     price?: boolean
     quantity?: boolean
     discountAmount?: boolean
+    finalPriceIRT?: boolean
+    pricingModeSnapshot?: boolean
+    sourceCurrencyCode?: boolean
+    appliedRate?: boolean
     order?: boolean | OrderDefaultArgs<ExtArgs>
     variant?: boolean | ProductVariantDefaultArgs<ExtArgs>
     returns?: boolean | OrderItem$returnsArgs<ExtArgs>
@@ -45918,6 +48698,10 @@ export namespace Prisma {
     price?: boolean
     quantity?: boolean
     discountAmount?: boolean
+    finalPriceIRT?: boolean
+    pricingModeSnapshot?: boolean
+    sourceCurrencyCode?: boolean
+    appliedRate?: boolean
     order?: boolean | OrderDefaultArgs<ExtArgs>
     variant?: boolean | ProductVariantDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["orderItem"]>
@@ -45931,6 +48715,10 @@ export namespace Prisma {
     price?: boolean
     quantity?: boolean
     discountAmount?: boolean
+    finalPriceIRT?: boolean
+    pricingModeSnapshot?: boolean
+    sourceCurrencyCode?: boolean
+    appliedRate?: boolean
     order?: boolean | OrderDefaultArgs<ExtArgs>
     variant?: boolean | ProductVariantDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["orderItem"]>
@@ -45944,9 +48732,13 @@ export namespace Prisma {
     price?: boolean
     quantity?: boolean
     discountAmount?: boolean
+    finalPriceIRT?: boolean
+    pricingModeSnapshot?: boolean
+    sourceCurrencyCode?: boolean
+    appliedRate?: boolean
   }
 
-  export type OrderItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderId" | "variantId" | "productName" | "variantAttributes" | "price" | "quantity" | "discountAmount", ExtArgs["result"]["orderItem"]>
+  export type OrderItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderId" | "variantId" | "productName" | "variantAttributes" | "price" | "quantity" | "discountAmount" | "finalPriceIRT" | "pricingModeSnapshot" | "sourceCurrencyCode" | "appliedRate", ExtArgs["result"]["orderItem"]>
   export type OrderItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     order?: boolean | OrderDefaultArgs<ExtArgs>
     variant?: boolean | ProductVariantDefaultArgs<ExtArgs>
@@ -45978,6 +48770,10 @@ export namespace Prisma {
       price: number
       quantity: number
       discountAmount: number
+      finalPriceIRT: number
+      pricingModeSnapshot: $Enums.PricingMode
+      sourceCurrencyCode: string | null
+      appliedRate: number | null
     }, ExtArgs["result"]["orderItem"]>
     composites: {}
   }
@@ -46412,6 +49208,10 @@ export namespace Prisma {
     readonly price: FieldRef<"OrderItem", 'Int'>
     readonly quantity: FieldRef<"OrderItem", 'Int'>
     readonly discountAmount: FieldRef<"OrderItem", 'Int'>
+    readonly finalPriceIRT: FieldRef<"OrderItem", 'Int'>
+    readonly pricingModeSnapshot: FieldRef<"OrderItem", 'PricingMode'>
+    readonly sourceCurrencyCode: FieldRef<"OrderItem", 'String'>
+    readonly appliedRate: FieldRef<"OrderItem", 'Float'>
   }
     
 
@@ -75581,6 +78381,36 @@ export namespace Prisma {
   export type MediaScalarFieldEnum = (typeof MediaScalarFieldEnum)[keyof typeof MediaScalarFieldEnum]
 
 
+  export const CurrencyScalarFieldEnum: {
+    id: 'id',
+    code: 'code',
+    name: 'name',
+    symbol: 'symbol',
+    isActive: 'isActive',
+    currentRate: 'currentRate',
+    lastFetchedAt: 'lastFetchedAt',
+    lastAppliedRate: 'lastAppliedRate',
+    lastAppliedAt: 'lastAppliedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type CurrencyScalarFieldEnum = (typeof CurrencyScalarFieldEnum)[keyof typeof CurrencyScalarFieldEnum]
+
+
+  export const ExchangeRateHistoryScalarFieldEnum: {
+    id: 'id',
+    currencyId: 'currencyId',
+    rate: 'rate',
+    source: 'source',
+    wasApplied: 'wasApplied',
+    changePercent: 'changePercent',
+    fetchedAt: 'fetchedAt'
+  };
+
+  export type ExchangeRateHistoryScalarFieldEnum = (typeof ExchangeRateHistoryScalarFieldEnum)[keyof typeof ExchangeRateHistoryScalarFieldEnum]
+
+
   export const CategoryScalarFieldEnum: {
     id: 'id',
     name: 'name',
@@ -75663,6 +78493,12 @@ export namespace Prisma {
     isFeatured: 'isFeatured',
     viewCount: 'viewCount',
     basePrice: 'basePrice',
+    pricingMode: 'pricingMode',
+    currencyId: 'currencyId',
+    sourcePrice: 'sourcePrice',
+    priceBufferPercent: 'priceBufferPercent',
+    currentPriceIRT: 'currentPriceIRT',
+    priceUpdatedAt: 'priceUpdatedAt',
     discountType: 'discountType',
     discountValue: 'discountValue',
     minPrice: 'minPrice',
@@ -75723,7 +78559,9 @@ export namespace Prisma {
   export const ProductVariantAttributeValueScalarFieldEnum: {
     id: 'id',
     variantId: 'variantId',
-    attributeValueId: 'attributeValueId'
+    attributeValueId: 'attributeValueId',
+    modifierType: 'modifierType',
+    modifierValue: 'modifierValue'
   };
 
   export type ProductVariantAttributeValueScalarFieldEnum = (typeof ProductVariantAttributeValueScalarFieldEnum)[keyof typeof ProductVariantAttributeValueScalarFieldEnum]
@@ -75913,7 +78751,11 @@ export namespace Prisma {
     variantAttributes: 'variantAttributes',
     price: 'price',
     quantity: 'quantity',
-    discountAmount: 'discountAmount'
+    discountAmount: 'discountAmount',
+    finalPriceIRT: 'finalPriceIRT',
+    pricingModeSnapshot: 'pricingModeSnapshot',
+    sourceCurrencyCode: 'sourceCurrencyCode',
+    appliedRate: 'appliedRate'
   };
 
   export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum]
@@ -76456,6 +79298,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'PricingMode'
+   */
+  export type EnumPricingModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PricingMode'>
+    
+
+
+  /**
+   * Reference to a field of type 'PricingMode[]'
+   */
+  export type ListEnumPricingModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PricingMode[]'>
+    
+
+
+  /**
    * Reference to a field of type 'DiscountType'
    */
   export type EnumDiscountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DiscountType'>
@@ -76466,6 +79322,20 @@ export namespace Prisma {
    * Reference to a field of type 'DiscountType[]'
    */
   export type ListEnumDiscountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DiscountType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ModifierType'
+   */
+  export type EnumModifierTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ModifierType'>
+    
+
+
+  /**
+   * Reference to a field of type 'ModifierType[]'
+   */
+  export type ListEnumModifierTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ModifierType[]'>
     
 
 
@@ -77483,6 +80353,163 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"Media"> | Date | string
   }
 
+  export type CurrencyWhereInput = {
+    AND?: CurrencyWhereInput | CurrencyWhereInput[]
+    OR?: CurrencyWhereInput[]
+    NOT?: CurrencyWhereInput | CurrencyWhereInput[]
+    id?: StringFilter<"Currency"> | string
+    code?: StringFilter<"Currency"> | string
+    name?: StringFilter<"Currency"> | string
+    symbol?: StringNullableFilter<"Currency"> | string | null
+    isActive?: BoolFilter<"Currency"> | boolean
+    currentRate?: FloatNullableFilter<"Currency"> | number | null
+    lastFetchedAt?: DateTimeNullableFilter<"Currency"> | Date | string | null
+    lastAppliedRate?: FloatNullableFilter<"Currency"> | number | null
+    lastAppliedAt?: DateTimeNullableFilter<"Currency"> | Date | string | null
+    createdAt?: DateTimeFilter<"Currency"> | Date | string
+    updatedAt?: DateTimeFilter<"Currency"> | Date | string
+    rateHistory?: ExchangeRateHistoryListRelationFilter
+    products?: ProductListRelationFilter
+  }
+
+  export type CurrencyOrderByWithRelationInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    symbol?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    currentRate?: SortOrderInput | SortOrder
+    lastFetchedAt?: SortOrderInput | SortOrder
+    lastAppliedRate?: SortOrderInput | SortOrder
+    lastAppliedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    rateHistory?: ExchangeRateHistoryOrderByRelationAggregateInput
+    products?: ProductOrderByRelationAggregateInput
+  }
+
+  export type CurrencyWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    code?: string
+    AND?: CurrencyWhereInput | CurrencyWhereInput[]
+    OR?: CurrencyWhereInput[]
+    NOT?: CurrencyWhereInput | CurrencyWhereInput[]
+    name?: StringFilter<"Currency"> | string
+    symbol?: StringNullableFilter<"Currency"> | string | null
+    isActive?: BoolFilter<"Currency"> | boolean
+    currentRate?: FloatNullableFilter<"Currency"> | number | null
+    lastFetchedAt?: DateTimeNullableFilter<"Currency"> | Date | string | null
+    lastAppliedRate?: FloatNullableFilter<"Currency"> | number | null
+    lastAppliedAt?: DateTimeNullableFilter<"Currency"> | Date | string | null
+    createdAt?: DateTimeFilter<"Currency"> | Date | string
+    updatedAt?: DateTimeFilter<"Currency"> | Date | string
+    rateHistory?: ExchangeRateHistoryListRelationFilter
+    products?: ProductListRelationFilter
+  }, "id" | "code">
+
+  export type CurrencyOrderByWithAggregationInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    symbol?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    currentRate?: SortOrderInput | SortOrder
+    lastFetchedAt?: SortOrderInput | SortOrder
+    lastAppliedRate?: SortOrderInput | SortOrder
+    lastAppliedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: CurrencyCountOrderByAggregateInput
+    _avg?: CurrencyAvgOrderByAggregateInput
+    _max?: CurrencyMaxOrderByAggregateInput
+    _min?: CurrencyMinOrderByAggregateInput
+    _sum?: CurrencySumOrderByAggregateInput
+  }
+
+  export type CurrencyScalarWhereWithAggregatesInput = {
+    AND?: CurrencyScalarWhereWithAggregatesInput | CurrencyScalarWhereWithAggregatesInput[]
+    OR?: CurrencyScalarWhereWithAggregatesInput[]
+    NOT?: CurrencyScalarWhereWithAggregatesInput | CurrencyScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Currency"> | string
+    code?: StringWithAggregatesFilter<"Currency"> | string
+    name?: StringWithAggregatesFilter<"Currency"> | string
+    symbol?: StringNullableWithAggregatesFilter<"Currency"> | string | null
+    isActive?: BoolWithAggregatesFilter<"Currency"> | boolean
+    currentRate?: FloatNullableWithAggregatesFilter<"Currency"> | number | null
+    lastFetchedAt?: DateTimeNullableWithAggregatesFilter<"Currency"> | Date | string | null
+    lastAppliedRate?: FloatNullableWithAggregatesFilter<"Currency"> | number | null
+    lastAppliedAt?: DateTimeNullableWithAggregatesFilter<"Currency"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Currency"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Currency"> | Date | string
+  }
+
+  export type ExchangeRateHistoryWhereInput = {
+    AND?: ExchangeRateHistoryWhereInput | ExchangeRateHistoryWhereInput[]
+    OR?: ExchangeRateHistoryWhereInput[]
+    NOT?: ExchangeRateHistoryWhereInput | ExchangeRateHistoryWhereInput[]
+    id?: StringFilter<"ExchangeRateHistory"> | string
+    currencyId?: StringFilter<"ExchangeRateHistory"> | string
+    rate?: FloatFilter<"ExchangeRateHistory"> | number
+    source?: StringFilter<"ExchangeRateHistory"> | string
+    wasApplied?: BoolFilter<"ExchangeRateHistory"> | boolean
+    changePercent?: FloatNullableFilter<"ExchangeRateHistory"> | number | null
+    fetchedAt?: DateTimeFilter<"ExchangeRateHistory"> | Date | string
+    currency?: XOR<CurrencyScalarRelationFilter, CurrencyWhereInput>
+  }
+
+  export type ExchangeRateHistoryOrderByWithRelationInput = {
+    id?: SortOrder
+    currencyId?: SortOrder
+    rate?: SortOrder
+    source?: SortOrder
+    wasApplied?: SortOrder
+    changePercent?: SortOrderInput | SortOrder
+    fetchedAt?: SortOrder
+    currency?: CurrencyOrderByWithRelationInput
+  }
+
+  export type ExchangeRateHistoryWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ExchangeRateHistoryWhereInput | ExchangeRateHistoryWhereInput[]
+    OR?: ExchangeRateHistoryWhereInput[]
+    NOT?: ExchangeRateHistoryWhereInput | ExchangeRateHistoryWhereInput[]
+    currencyId?: StringFilter<"ExchangeRateHistory"> | string
+    rate?: FloatFilter<"ExchangeRateHistory"> | number
+    source?: StringFilter<"ExchangeRateHistory"> | string
+    wasApplied?: BoolFilter<"ExchangeRateHistory"> | boolean
+    changePercent?: FloatNullableFilter<"ExchangeRateHistory"> | number | null
+    fetchedAt?: DateTimeFilter<"ExchangeRateHistory"> | Date | string
+    currency?: XOR<CurrencyScalarRelationFilter, CurrencyWhereInput>
+  }, "id">
+
+  export type ExchangeRateHistoryOrderByWithAggregationInput = {
+    id?: SortOrder
+    currencyId?: SortOrder
+    rate?: SortOrder
+    source?: SortOrder
+    wasApplied?: SortOrder
+    changePercent?: SortOrderInput | SortOrder
+    fetchedAt?: SortOrder
+    _count?: ExchangeRateHistoryCountOrderByAggregateInput
+    _avg?: ExchangeRateHistoryAvgOrderByAggregateInput
+    _max?: ExchangeRateHistoryMaxOrderByAggregateInput
+    _min?: ExchangeRateHistoryMinOrderByAggregateInput
+    _sum?: ExchangeRateHistorySumOrderByAggregateInput
+  }
+
+  export type ExchangeRateHistoryScalarWhereWithAggregatesInput = {
+    AND?: ExchangeRateHistoryScalarWhereWithAggregatesInput | ExchangeRateHistoryScalarWhereWithAggregatesInput[]
+    OR?: ExchangeRateHistoryScalarWhereWithAggregatesInput[]
+    NOT?: ExchangeRateHistoryScalarWhereWithAggregatesInput | ExchangeRateHistoryScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ExchangeRateHistory"> | string
+    currencyId?: StringWithAggregatesFilter<"ExchangeRateHistory"> | string
+    rate?: FloatWithAggregatesFilter<"ExchangeRateHistory"> | number
+    source?: StringWithAggregatesFilter<"ExchangeRateHistory"> | string
+    wasApplied?: BoolWithAggregatesFilter<"ExchangeRateHistory"> | boolean
+    changePercent?: FloatNullableWithAggregatesFilter<"ExchangeRateHistory"> | number | null
+    fetchedAt?: DateTimeWithAggregatesFilter<"ExchangeRateHistory"> | Date | string
+  }
+
   export type CategoryWhereInput = {
     AND?: CategoryWhereInput | CategoryWhereInput[]
     OR?: CategoryWhereInput[]
@@ -77894,6 +80921,12 @@ export namespace Prisma {
     isFeatured?: BoolFilter<"Product"> | boolean
     viewCount?: IntFilter<"Product"> | number
     basePrice?: IntFilter<"Product"> | number
+    pricingMode?: EnumPricingModeFilter<"Product"> | $Enums.PricingMode
+    currencyId?: StringNullableFilter<"Product"> | string | null
+    sourcePrice?: FloatNullableFilter<"Product"> | number | null
+    priceBufferPercent?: FloatNullableFilter<"Product"> | number | null
+    currentPriceIRT?: IntFilter<"Product"> | number
+    priceUpdatedAt?: DateTimeNullableFilter<"Product"> | Date | string | null
     discountType?: EnumDiscountTypeNullableFilter<"Product"> | $Enums.DiscountType | null
     discountValue?: IntNullableFilter<"Product"> | number | null
     minPrice?: IntFilter<"Product"> | number
@@ -77911,6 +80944,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Product"> | Date | string
     updatedAt?: DateTimeFilter<"Product"> | Date | string
     brand?: XOR<BrandNullableScalarRelationFilter, BrandWhereInput> | null
+    currency?: XOR<CurrencyNullableScalarRelationFilter, CurrencyWhereInput> | null
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     categories?: ProductCategoryListRelationFilter
     variants?: ProductVariantListRelationFilter
@@ -77933,6 +80967,12 @@ export namespace Prisma {
     isFeatured?: SortOrder
     viewCount?: SortOrder
     basePrice?: SortOrder
+    pricingMode?: SortOrder
+    currencyId?: SortOrderInput | SortOrder
+    sourcePrice?: SortOrderInput | SortOrder
+    priceBufferPercent?: SortOrderInput | SortOrder
+    currentPriceIRT?: SortOrder
+    priceUpdatedAt?: SortOrderInput | SortOrder
     discountType?: SortOrderInput | SortOrder
     discountValue?: SortOrderInput | SortOrder
     minPrice?: SortOrder
@@ -77950,6 +80990,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     brand?: BrandOrderByWithRelationInput
+    currency?: CurrencyOrderByWithRelationInput
     createdBy?: UserOrderByWithRelationInput
     categories?: ProductCategoryOrderByRelationAggregateInput
     variants?: ProductVariantOrderByRelationAggregateInput
@@ -77975,6 +81016,12 @@ export namespace Prisma {
     isFeatured?: BoolFilter<"Product"> | boolean
     viewCount?: IntFilter<"Product"> | number
     basePrice?: IntFilter<"Product"> | number
+    pricingMode?: EnumPricingModeFilter<"Product"> | $Enums.PricingMode
+    currencyId?: StringNullableFilter<"Product"> | string | null
+    sourcePrice?: FloatNullableFilter<"Product"> | number | null
+    priceBufferPercent?: FloatNullableFilter<"Product"> | number | null
+    currentPriceIRT?: IntFilter<"Product"> | number
+    priceUpdatedAt?: DateTimeNullableFilter<"Product"> | Date | string | null
     discountType?: EnumDiscountTypeNullableFilter<"Product"> | $Enums.DiscountType | null
     discountValue?: IntNullableFilter<"Product"> | number | null
     minPrice?: IntFilter<"Product"> | number
@@ -77992,6 +81039,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Product"> | Date | string
     updatedAt?: DateTimeFilter<"Product"> | Date | string
     brand?: XOR<BrandNullableScalarRelationFilter, BrandWhereInput> | null
+    currency?: XOR<CurrencyNullableScalarRelationFilter, CurrencyWhereInput> | null
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     categories?: ProductCategoryListRelationFilter
     variants?: ProductVariantListRelationFilter
@@ -78014,6 +81062,12 @@ export namespace Prisma {
     isFeatured?: SortOrder
     viewCount?: SortOrder
     basePrice?: SortOrder
+    pricingMode?: SortOrder
+    currencyId?: SortOrderInput | SortOrder
+    sourcePrice?: SortOrderInput | SortOrder
+    priceBufferPercent?: SortOrderInput | SortOrder
+    currentPriceIRT?: SortOrder
+    priceUpdatedAt?: SortOrderInput | SortOrder
     discountType?: SortOrderInput | SortOrder
     discountValue?: SortOrderInput | SortOrder
     minPrice?: SortOrder
@@ -78051,6 +81105,12 @@ export namespace Prisma {
     isFeatured?: BoolWithAggregatesFilter<"Product"> | boolean
     viewCount?: IntWithAggregatesFilter<"Product"> | number
     basePrice?: IntWithAggregatesFilter<"Product"> | number
+    pricingMode?: EnumPricingModeWithAggregatesFilter<"Product"> | $Enums.PricingMode
+    currencyId?: StringNullableWithAggregatesFilter<"Product"> | string | null
+    sourcePrice?: FloatNullableWithAggregatesFilter<"Product"> | number | null
+    priceBufferPercent?: FloatNullableWithAggregatesFilter<"Product"> | number | null
+    currentPriceIRT?: IntWithAggregatesFilter<"Product"> | number
+    priceUpdatedAt?: DateTimeNullableWithAggregatesFilter<"Product"> | Date | string | null
     discountType?: EnumDiscountTypeNullableWithAggregatesFilter<"Product"> | $Enums.DiscountType | null
     discountValue?: IntNullableWithAggregatesFilter<"Product"> | number | null
     minPrice?: IntWithAggregatesFilter<"Product"> | number
@@ -78278,6 +81338,8 @@ export namespace Prisma {
     id?: IntFilter<"ProductVariantAttributeValue"> | number
     variantId?: IntFilter<"ProductVariantAttributeValue"> | number
     attributeValueId?: IntFilter<"ProductVariantAttributeValue"> | number
+    modifierType?: EnumModifierTypeNullableFilter<"ProductVariantAttributeValue"> | $Enums.ModifierType | null
+    modifierValue?: FloatNullableFilter<"ProductVariantAttributeValue"> | number | null
     variant?: XOR<ProductVariantScalarRelationFilter, ProductVariantWhereInput>
     attributeValue?: XOR<AttributeValueScalarRelationFilter, AttributeValueWhereInput>
   }
@@ -78286,6 +81348,8 @@ export namespace Prisma {
     id?: SortOrder
     variantId?: SortOrder
     attributeValueId?: SortOrder
+    modifierType?: SortOrderInput | SortOrder
+    modifierValue?: SortOrderInput | SortOrder
     variant?: ProductVariantOrderByWithRelationInput
     attributeValue?: AttributeValueOrderByWithRelationInput
   }
@@ -78298,6 +81362,8 @@ export namespace Prisma {
     NOT?: ProductVariantAttributeValueWhereInput | ProductVariantAttributeValueWhereInput[]
     variantId?: IntFilter<"ProductVariantAttributeValue"> | number
     attributeValueId?: IntFilter<"ProductVariantAttributeValue"> | number
+    modifierType?: EnumModifierTypeNullableFilter<"ProductVariantAttributeValue"> | $Enums.ModifierType | null
+    modifierValue?: FloatNullableFilter<"ProductVariantAttributeValue"> | number | null
     variant?: XOR<ProductVariantScalarRelationFilter, ProductVariantWhereInput>
     attributeValue?: XOR<AttributeValueScalarRelationFilter, AttributeValueWhereInput>
   }, "id" | "variantId_attributeValueId">
@@ -78306,6 +81372,8 @@ export namespace Prisma {
     id?: SortOrder
     variantId?: SortOrder
     attributeValueId?: SortOrder
+    modifierType?: SortOrderInput | SortOrder
+    modifierValue?: SortOrderInput | SortOrder
     _count?: ProductVariantAttributeValueCountOrderByAggregateInput
     _avg?: ProductVariantAttributeValueAvgOrderByAggregateInput
     _max?: ProductVariantAttributeValueMaxOrderByAggregateInput
@@ -78320,6 +81388,8 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"ProductVariantAttributeValue"> | number
     variantId?: IntWithAggregatesFilter<"ProductVariantAttributeValue"> | number
     attributeValueId?: IntWithAggregatesFilter<"ProductVariantAttributeValue"> | number
+    modifierType?: EnumModifierTypeNullableWithAggregatesFilter<"ProductVariantAttributeValue"> | $Enums.ModifierType | null
+    modifierValue?: FloatNullableWithAggregatesFilter<"ProductVariantAttributeValue"> | number | null
   }
 
   export type ProductDisplayAttributeValueWhereInput = {
@@ -79327,6 +82397,10 @@ export namespace Prisma {
     price?: IntFilter<"OrderItem"> | number
     quantity?: IntFilter<"OrderItem"> | number
     discountAmount?: IntFilter<"OrderItem"> | number
+    finalPriceIRT?: IntFilter<"OrderItem"> | number
+    pricingModeSnapshot?: EnumPricingModeFilter<"OrderItem"> | $Enums.PricingMode
+    sourceCurrencyCode?: StringNullableFilter<"OrderItem"> | string | null
+    appliedRate?: FloatNullableFilter<"OrderItem"> | number | null
     order?: XOR<OrderScalarRelationFilter, OrderWhereInput>
     variant?: XOR<ProductVariantScalarRelationFilter, ProductVariantWhereInput>
     returns?: OrderReturnListRelationFilter
@@ -79341,6 +82415,10 @@ export namespace Prisma {
     price?: SortOrder
     quantity?: SortOrder
     discountAmount?: SortOrder
+    finalPriceIRT?: SortOrder
+    pricingModeSnapshot?: SortOrder
+    sourceCurrencyCode?: SortOrderInput | SortOrder
+    appliedRate?: SortOrderInput | SortOrder
     order?: OrderOrderByWithRelationInput
     variant?: ProductVariantOrderByWithRelationInput
     returns?: OrderReturnOrderByRelationAggregateInput
@@ -79358,6 +82436,10 @@ export namespace Prisma {
     price?: IntFilter<"OrderItem"> | number
     quantity?: IntFilter<"OrderItem"> | number
     discountAmount?: IntFilter<"OrderItem"> | number
+    finalPriceIRT?: IntFilter<"OrderItem"> | number
+    pricingModeSnapshot?: EnumPricingModeFilter<"OrderItem"> | $Enums.PricingMode
+    sourceCurrencyCode?: StringNullableFilter<"OrderItem"> | string | null
+    appliedRate?: FloatNullableFilter<"OrderItem"> | number | null
     order?: XOR<OrderScalarRelationFilter, OrderWhereInput>
     variant?: XOR<ProductVariantScalarRelationFilter, ProductVariantWhereInput>
     returns?: OrderReturnListRelationFilter
@@ -79372,6 +82454,10 @@ export namespace Prisma {
     price?: SortOrder
     quantity?: SortOrder
     discountAmount?: SortOrder
+    finalPriceIRT?: SortOrder
+    pricingModeSnapshot?: SortOrder
+    sourceCurrencyCode?: SortOrderInput | SortOrder
+    appliedRate?: SortOrderInput | SortOrder
     _count?: OrderItemCountOrderByAggregateInput
     _avg?: OrderItemAvgOrderByAggregateInput
     _max?: OrderItemMaxOrderByAggregateInput
@@ -79391,6 +82477,10 @@ export namespace Prisma {
     price?: IntWithAggregatesFilter<"OrderItem"> | number
     quantity?: IntWithAggregatesFilter<"OrderItem"> | number
     discountAmount?: IntWithAggregatesFilter<"OrderItem"> | number
+    finalPriceIRT?: IntWithAggregatesFilter<"OrderItem"> | number
+    pricingModeSnapshot?: EnumPricingModeWithAggregatesFilter<"OrderItem"> | $Enums.PricingMode
+    sourceCurrencyCode?: StringNullableWithAggregatesFilter<"OrderItem"> | string | null
+    appliedRate?: FloatNullableWithAggregatesFilter<"OrderItem"> | number | null
   }
 
   export type OrderStatusHistoryWhereInput = {
@@ -81967,6 +85057,181 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type CurrencyCreateInput = {
+    id?: string
+    code: string
+    name: string
+    symbol?: string | null
+    isActive?: boolean
+    currentRate?: number | null
+    lastFetchedAt?: Date | string | null
+    lastAppliedRate?: number | null
+    lastAppliedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    rateHistory?: ExchangeRateHistoryCreateNestedManyWithoutCurrencyInput
+    products?: ProductCreateNestedManyWithoutCurrencyInput
+  }
+
+  export type CurrencyUncheckedCreateInput = {
+    id?: string
+    code: string
+    name: string
+    symbol?: string | null
+    isActive?: boolean
+    currentRate?: number | null
+    lastFetchedAt?: Date | string | null
+    lastAppliedRate?: number | null
+    lastAppliedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    rateHistory?: ExchangeRateHistoryUncheckedCreateNestedManyWithoutCurrencyInput
+    products?: ProductUncheckedCreateNestedManyWithoutCurrencyInput
+  }
+
+  export type CurrencyUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    currentRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastAppliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateHistory?: ExchangeRateHistoryUpdateManyWithoutCurrencyNestedInput
+    products?: ProductUpdateManyWithoutCurrencyNestedInput
+  }
+
+  export type CurrencyUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    currentRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastAppliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateHistory?: ExchangeRateHistoryUncheckedUpdateManyWithoutCurrencyNestedInput
+    products?: ProductUncheckedUpdateManyWithoutCurrencyNestedInput
+  }
+
+  export type CurrencyCreateManyInput = {
+    id?: string
+    code: string
+    name: string
+    symbol?: string | null
+    isActive?: boolean
+    currentRate?: number | null
+    lastFetchedAt?: Date | string | null
+    lastAppliedRate?: number | null
+    lastAppliedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CurrencyUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    currentRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastAppliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CurrencyUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    currentRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastAppliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExchangeRateHistoryCreateInput = {
+    id?: string
+    rate: number
+    source: string
+    wasApplied?: boolean
+    changePercent?: number | null
+    fetchedAt?: Date | string
+    currency: CurrencyCreateNestedOneWithoutRateHistoryInput
+  }
+
+  export type ExchangeRateHistoryUncheckedCreateInput = {
+    id?: string
+    currencyId: string
+    rate: number
+    source: string
+    wasApplied?: boolean
+    changePercent?: number | null
+    fetchedAt?: Date | string
+  }
+
+  export type ExchangeRateHistoryUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    rate?: FloatFieldUpdateOperationsInput | number
+    source?: StringFieldUpdateOperationsInput | string
+    wasApplied?: BoolFieldUpdateOperationsInput | boolean
+    changePercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    fetchedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    currency?: CurrencyUpdateOneRequiredWithoutRateHistoryNestedInput
+  }
+
+  export type ExchangeRateHistoryUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    currencyId?: StringFieldUpdateOperationsInput | string
+    rate?: FloatFieldUpdateOperationsInput | number
+    source?: StringFieldUpdateOperationsInput | string
+    wasApplied?: BoolFieldUpdateOperationsInput | boolean
+    changePercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    fetchedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExchangeRateHistoryCreateManyInput = {
+    id?: string
+    currencyId: string
+    rate: number
+    source: string
+    wasApplied?: boolean
+    changePercent?: number | null
+    fetchedAt?: Date | string
+  }
+
+  export type ExchangeRateHistoryUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    rate?: FloatFieldUpdateOperationsInput | number
+    source?: StringFieldUpdateOperationsInput | string
+    wasApplied?: BoolFieldUpdateOperationsInput | boolean
+    changePercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    fetchedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExchangeRateHistoryUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    currencyId?: StringFieldUpdateOperationsInput | string
+    rate?: FloatFieldUpdateOperationsInput | number
+    source?: StringFieldUpdateOperationsInput | string
+    wasApplied?: BoolFieldUpdateOperationsInput | boolean
+    changePercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    fetchedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type CategoryCreateInput = {
     name: string
     slug: string
@@ -82384,6 +85649,11 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -82400,6 +85670,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     brand?: BrandCreateNestedOneWithoutProductsInput
+    currency?: CurrencyCreateNestedOneWithoutProductsInput
     createdBy?: UserCreateNestedOneWithoutCreatedProductsInput
     categories?: ProductCategoryCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
@@ -82422,6 +85693,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    currencyId?: string | null
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -82457,6 +85734,11 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -82473,6 +85755,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     brand?: BrandUpdateOneWithoutProductsNestedInput
+    currency?: CurrencyUpdateOneWithoutProductsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedProductsNestedInput
     categories?: ProductCategoryUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
@@ -82495,6 +85778,12 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -82532,6 +85821,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    currencyId?: string | null
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -82559,6 +85854,11 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -82587,6 +85887,12 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -82794,6 +86100,8 @@ export namespace Prisma {
   }
 
   export type ProductVariantAttributeValueCreateInput = {
+    modifierType?: $Enums.ModifierType | null
+    modifierValue?: number | null
     variant: ProductVariantCreateNestedOneWithoutAttributeValuesInput
     attributeValue: AttributeValueCreateNestedOneWithoutVariantValuesInput
   }
@@ -82802,9 +86110,13 @@ export namespace Prisma {
     id?: number
     variantId: number
     attributeValueId: number
+    modifierType?: $Enums.ModifierType | null
+    modifierValue?: number | null
   }
 
   export type ProductVariantAttributeValueUpdateInput = {
+    modifierType?: NullableEnumModifierTypeFieldUpdateOperationsInput | $Enums.ModifierType | null
+    modifierValue?: NullableFloatFieldUpdateOperationsInput | number | null
     variant?: ProductVariantUpdateOneRequiredWithoutAttributeValuesNestedInput
     attributeValue?: AttributeValueUpdateOneRequiredWithoutVariantValuesNestedInput
   }
@@ -82813,22 +86125,29 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     variantId?: IntFieldUpdateOperationsInput | number
     attributeValueId?: IntFieldUpdateOperationsInput | number
+    modifierType?: NullableEnumModifierTypeFieldUpdateOperationsInput | $Enums.ModifierType | null
+    modifierValue?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type ProductVariantAttributeValueCreateManyInput = {
     id?: number
     variantId: number
     attributeValueId: number
+    modifierType?: $Enums.ModifierType | null
+    modifierValue?: number | null
   }
 
   export type ProductVariantAttributeValueUpdateManyMutationInput = {
-
+    modifierType?: NullableEnumModifierTypeFieldUpdateOperationsInput | $Enums.ModifierType | null
+    modifierValue?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type ProductVariantAttributeValueUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     variantId?: IntFieldUpdateOperationsInput | number
     attributeValueId?: IntFieldUpdateOperationsInput | number
+    modifierType?: NullableEnumModifierTypeFieldUpdateOperationsInput | $Enums.ModifierType | null
+    modifierValue?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type ProductDisplayAttributeValueCreateInput = {
@@ -83800,6 +87119,10 @@ export namespace Prisma {
     price: number
     quantity: number
     discountAmount?: number
+    finalPriceIRT?: number
+    pricingModeSnapshot?: $Enums.PricingMode
+    sourceCurrencyCode?: string | null
+    appliedRate?: number | null
     order: OrderCreateNestedOneWithoutItemsInput
     variant: ProductVariantCreateNestedOneWithoutOrderItemsInput
     returns?: OrderReturnCreateNestedManyWithoutOrderItemInput
@@ -83814,6 +87137,10 @@ export namespace Prisma {
     price: number
     quantity: number
     discountAmount?: number
+    finalPriceIRT?: number
+    pricingModeSnapshot?: $Enums.PricingMode
+    sourceCurrencyCode?: string | null
+    appliedRate?: number | null
     returns?: OrderReturnUncheckedCreateNestedManyWithoutOrderItemInput
   }
 
@@ -83823,6 +87150,10 @@ export namespace Prisma {
     price?: IntFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     discountAmount?: IntFieldUpdateOperationsInput | number
+    finalPriceIRT?: IntFieldUpdateOperationsInput | number
+    pricingModeSnapshot?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourceCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
     order?: OrderUpdateOneRequiredWithoutItemsNestedInput
     variant?: ProductVariantUpdateOneRequiredWithoutOrderItemsNestedInput
     returns?: OrderReturnUpdateManyWithoutOrderItemNestedInput
@@ -83837,6 +87168,10 @@ export namespace Prisma {
     price?: IntFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     discountAmount?: IntFieldUpdateOperationsInput | number
+    finalPriceIRT?: IntFieldUpdateOperationsInput | number
+    pricingModeSnapshot?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourceCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
     returns?: OrderReturnUncheckedUpdateManyWithoutOrderItemNestedInput
   }
 
@@ -83849,6 +87184,10 @@ export namespace Prisma {
     price: number
     quantity: number
     discountAmount?: number
+    finalPriceIRT?: number
+    pricingModeSnapshot?: $Enums.PricingMode
+    sourceCurrencyCode?: string | null
+    appliedRate?: number | null
   }
 
   export type OrderItemUpdateManyMutationInput = {
@@ -83857,6 +87196,10 @@ export namespace Prisma {
     price?: IntFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     discountAmount?: IntFieldUpdateOperationsInput | number
+    finalPriceIRT?: IntFieldUpdateOperationsInput | number
+    pricingModeSnapshot?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourceCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type OrderItemUncheckedUpdateManyInput = {
@@ -83868,6 +87211,10 @@ export namespace Prisma {
     price?: IntFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     discountAmount?: IntFieldUpdateOperationsInput | number
+    finalPriceIRT?: IntFieldUpdateOperationsInput | number
+    pricingModeSnapshot?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourceCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type OrderStatusHistoryCreateInput = {
@@ -86565,6 +89912,140 @@ export namespace Prisma {
     _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
+  export type ExchangeRateHistoryListRelationFilter = {
+    every?: ExchangeRateHistoryWhereInput
+    some?: ExchangeRateHistoryWhereInput
+    none?: ExchangeRateHistoryWhereInput
+  }
+
+  export type ExchangeRateHistoryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CurrencyCountOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    symbol?: SortOrder
+    isActive?: SortOrder
+    currentRate?: SortOrder
+    lastFetchedAt?: SortOrder
+    lastAppliedRate?: SortOrder
+    lastAppliedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CurrencyAvgOrderByAggregateInput = {
+    currentRate?: SortOrder
+    lastAppliedRate?: SortOrder
+  }
+
+  export type CurrencyMaxOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    symbol?: SortOrder
+    isActive?: SortOrder
+    currentRate?: SortOrder
+    lastFetchedAt?: SortOrder
+    lastAppliedRate?: SortOrder
+    lastAppliedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CurrencyMinOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    symbol?: SortOrder
+    isActive?: SortOrder
+    currentRate?: SortOrder
+    lastFetchedAt?: SortOrder
+    lastAppliedRate?: SortOrder
+    lastAppliedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CurrencySumOrderByAggregateInput = {
+    currentRate?: SortOrder
+    lastAppliedRate?: SortOrder
+  }
+
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type CurrencyScalarRelationFilter = {
+    is?: CurrencyWhereInput
+    isNot?: CurrencyWhereInput
+  }
+
+  export type ExchangeRateHistoryCountOrderByAggregateInput = {
+    id?: SortOrder
+    currencyId?: SortOrder
+    rate?: SortOrder
+    source?: SortOrder
+    wasApplied?: SortOrder
+    changePercent?: SortOrder
+    fetchedAt?: SortOrder
+  }
+
+  export type ExchangeRateHistoryAvgOrderByAggregateInput = {
+    rate?: SortOrder
+    changePercent?: SortOrder
+  }
+
+  export type ExchangeRateHistoryMaxOrderByAggregateInput = {
+    id?: SortOrder
+    currencyId?: SortOrder
+    rate?: SortOrder
+    source?: SortOrder
+    wasApplied?: SortOrder
+    changePercent?: SortOrder
+    fetchedAt?: SortOrder
+  }
+
+  export type ExchangeRateHistoryMinOrderByAggregateInput = {
+    id?: SortOrder
+    currencyId?: SortOrder
+    rate?: SortOrder
+    source?: SortOrder
+    wasApplied?: SortOrder
+    changePercent?: SortOrder
+    fetchedAt?: SortOrder
+  }
+
+  export type ExchangeRateHistorySumOrderByAggregateInput = {
+    rate?: SortOrder
+    changePercent?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
   export type MediaNullableScalarRelationFilter = {
     is?: MediaWhereInput | null
     isNot?: MediaWhereInput | null
@@ -86903,6 +90384,13 @@ export namespace Prisma {
     not?: NestedEnumProductStatusFilter<$PrismaModel> | $Enums.ProductStatus
   }
 
+  export type EnumPricingModeFilter<$PrismaModel = never> = {
+    equals?: $Enums.PricingMode | EnumPricingModeFieldRefInput<$PrismaModel>
+    in?: $Enums.PricingMode[] | ListEnumPricingModeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PricingMode[] | ListEnumPricingModeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPricingModeFilter<$PrismaModel> | $Enums.PricingMode
+  }
+
   export type EnumDiscountTypeNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.DiscountType | EnumDiscountTypeFieldRefInput<$PrismaModel> | null
     in?: $Enums.DiscountType[] | ListEnumDiscountTypeFieldRefInput<$PrismaModel> | null
@@ -86910,20 +90398,14 @@ export namespace Prisma {
     not?: NestedEnumDiscountTypeNullableFilter<$PrismaModel> | $Enums.DiscountType | null
   }
 
-  export type FloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
   export type BrandNullableScalarRelationFilter = {
     is?: BrandWhereInput | null
     isNot?: BrandWhereInput | null
+  }
+
+  export type CurrencyNullableScalarRelationFilter = {
+    is?: CurrencyWhereInput | null
+    isNot?: CurrencyWhereInput | null
   }
 
   export type ProductVariantListRelationFilter = {
@@ -86977,6 +90459,12 @@ export namespace Prisma {
     isFeatured?: SortOrder
     viewCount?: SortOrder
     basePrice?: SortOrder
+    pricingMode?: SortOrder
+    currencyId?: SortOrder
+    sourcePrice?: SortOrder
+    priceBufferPercent?: SortOrder
+    currentPriceIRT?: SortOrder
+    priceUpdatedAt?: SortOrder
     discountType?: SortOrder
     discountValue?: SortOrder
     minPrice?: SortOrder
@@ -87000,6 +90488,9 @@ export namespace Prisma {
     brandId?: SortOrder
     viewCount?: SortOrder
     basePrice?: SortOrder
+    sourcePrice?: SortOrder
+    priceBufferPercent?: SortOrder
+    currentPriceIRT?: SortOrder
     discountValue?: SortOrder
     minPrice?: SortOrder
     maxPrice?: SortOrder
@@ -87020,6 +90511,12 @@ export namespace Prisma {
     isFeatured?: SortOrder
     viewCount?: SortOrder
     basePrice?: SortOrder
+    pricingMode?: SortOrder
+    currencyId?: SortOrder
+    sourcePrice?: SortOrder
+    priceBufferPercent?: SortOrder
+    currentPriceIRT?: SortOrder
+    priceUpdatedAt?: SortOrder
     discountType?: SortOrder
     discountValue?: SortOrder
     minPrice?: SortOrder
@@ -87048,6 +90545,12 @@ export namespace Prisma {
     isFeatured?: SortOrder
     viewCount?: SortOrder
     basePrice?: SortOrder
+    pricingMode?: SortOrder
+    currencyId?: SortOrder
+    sourcePrice?: SortOrder
+    priceBufferPercent?: SortOrder
+    currentPriceIRT?: SortOrder
+    priceUpdatedAt?: SortOrder
     discountType?: SortOrder
     discountValue?: SortOrder
     minPrice?: SortOrder
@@ -87070,6 +90573,9 @@ export namespace Prisma {
     brandId?: SortOrder
     viewCount?: SortOrder
     basePrice?: SortOrder
+    sourcePrice?: SortOrder
+    priceBufferPercent?: SortOrder
+    currentPriceIRT?: SortOrder
     discountValue?: SortOrder
     minPrice?: SortOrder
     maxPrice?: SortOrder
@@ -87089,6 +90595,16 @@ export namespace Prisma {
     _max?: NestedEnumProductStatusFilter<$PrismaModel>
   }
 
+  export type EnumPricingModeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PricingMode | EnumPricingModeFieldRefInput<$PrismaModel>
+    in?: $Enums.PricingMode[] | ListEnumPricingModeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PricingMode[] | ListEnumPricingModeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPricingModeWithAggregatesFilter<$PrismaModel> | $Enums.PricingMode
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPricingModeFilter<$PrismaModel>
+    _max?: NestedEnumPricingModeFilter<$PrismaModel>
+  }
+
   export type EnumDiscountTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.DiscountType | EnumDiscountTypeFieldRefInput<$PrismaModel> | null
     in?: $Enums.DiscountType[] | ListEnumDiscountTypeFieldRefInput<$PrismaModel> | null
@@ -87097,22 +90613,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedEnumDiscountTypeNullableFilter<$PrismaModel>
     _max?: NestedEnumDiscountTypeNullableFilter<$PrismaModel>
-  }
-
-  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type ProductScalarRelationFilter = {
@@ -87273,6 +90773,13 @@ export namespace Prisma {
     weight?: SortOrder
   }
 
+  export type EnumModifierTypeNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.ModifierType | EnumModifierTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ModifierType[] | ListEnumModifierTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ModifierType[] | ListEnumModifierTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumModifierTypeNullableFilter<$PrismaModel> | $Enums.ModifierType | null
+  }
+
   export type ProductVariantScalarRelationFilter = {
     is?: ProductVariantWhereInput
     isNot?: ProductVariantWhereInput
@@ -87292,30 +90799,48 @@ export namespace Prisma {
     id?: SortOrder
     variantId?: SortOrder
     attributeValueId?: SortOrder
+    modifierType?: SortOrder
+    modifierValue?: SortOrder
   }
 
   export type ProductVariantAttributeValueAvgOrderByAggregateInput = {
     id?: SortOrder
     variantId?: SortOrder
     attributeValueId?: SortOrder
+    modifierValue?: SortOrder
   }
 
   export type ProductVariantAttributeValueMaxOrderByAggregateInput = {
     id?: SortOrder
     variantId?: SortOrder
     attributeValueId?: SortOrder
+    modifierType?: SortOrder
+    modifierValue?: SortOrder
   }
 
   export type ProductVariantAttributeValueMinOrderByAggregateInput = {
     id?: SortOrder
     variantId?: SortOrder
     attributeValueId?: SortOrder
+    modifierType?: SortOrder
+    modifierValue?: SortOrder
   }
 
   export type ProductVariantAttributeValueSumOrderByAggregateInput = {
     id?: SortOrder
     variantId?: SortOrder
     attributeValueId?: SortOrder
+    modifierValue?: SortOrder
+  }
+
+  export type EnumModifierTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ModifierType | EnumModifierTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ModifierType[] | ListEnumModifierTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ModifierType[] | ListEnumModifierTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumModifierTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.ModifierType | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumModifierTypeNullableFilter<$PrismaModel>
+    _max?: NestedEnumModifierTypeNullableFilter<$PrismaModel>
   }
 
   export type ProductDisplayAttributeValueProductIdAttributeIdCompoundUniqueInput = {
@@ -88140,6 +91665,10 @@ export namespace Prisma {
     price?: SortOrder
     quantity?: SortOrder
     discountAmount?: SortOrder
+    finalPriceIRT?: SortOrder
+    pricingModeSnapshot?: SortOrder
+    sourceCurrencyCode?: SortOrder
+    appliedRate?: SortOrder
   }
 
   export type OrderItemAvgOrderByAggregateInput = {
@@ -88149,6 +91678,8 @@ export namespace Prisma {
     price?: SortOrder
     quantity?: SortOrder
     discountAmount?: SortOrder
+    finalPriceIRT?: SortOrder
+    appliedRate?: SortOrder
   }
 
   export type OrderItemMaxOrderByAggregateInput = {
@@ -88160,6 +91691,10 @@ export namespace Prisma {
     price?: SortOrder
     quantity?: SortOrder
     discountAmount?: SortOrder
+    finalPriceIRT?: SortOrder
+    pricingModeSnapshot?: SortOrder
+    sourceCurrencyCode?: SortOrder
+    appliedRate?: SortOrder
   }
 
   export type OrderItemMinOrderByAggregateInput = {
@@ -88171,6 +91706,10 @@ export namespace Prisma {
     price?: SortOrder
     quantity?: SortOrder
     discountAmount?: SortOrder
+    finalPriceIRT?: SortOrder
+    pricingModeSnapshot?: SortOrder
+    sourceCurrencyCode?: SortOrder
+    appliedRate?: SortOrder
   }
 
   export type OrderItemSumOrderByAggregateInput = {
@@ -88180,6 +91719,8 @@ export namespace Prisma {
     price?: SortOrder
     quantity?: SortOrder
     discountAmount?: SortOrder
+    finalPriceIRT?: SortOrder
+    appliedRate?: SortOrder
   }
 
   export type OrderStatusHistoryCountOrderByAggregateInput = {
@@ -91011,6 +94552,112 @@ export namespace Prisma {
     deleteMany?: StoryScalarWhereInput | StoryScalarWhereInput[]
   }
 
+  export type ExchangeRateHistoryCreateNestedManyWithoutCurrencyInput = {
+    create?: XOR<ExchangeRateHistoryCreateWithoutCurrencyInput, ExchangeRateHistoryUncheckedCreateWithoutCurrencyInput> | ExchangeRateHistoryCreateWithoutCurrencyInput[] | ExchangeRateHistoryUncheckedCreateWithoutCurrencyInput[]
+    connectOrCreate?: ExchangeRateHistoryCreateOrConnectWithoutCurrencyInput | ExchangeRateHistoryCreateOrConnectWithoutCurrencyInput[]
+    createMany?: ExchangeRateHistoryCreateManyCurrencyInputEnvelope
+    connect?: ExchangeRateHistoryWhereUniqueInput | ExchangeRateHistoryWhereUniqueInput[]
+  }
+
+  export type ProductCreateNestedManyWithoutCurrencyInput = {
+    create?: XOR<ProductCreateWithoutCurrencyInput, ProductUncheckedCreateWithoutCurrencyInput> | ProductCreateWithoutCurrencyInput[] | ProductUncheckedCreateWithoutCurrencyInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutCurrencyInput | ProductCreateOrConnectWithoutCurrencyInput[]
+    createMany?: ProductCreateManyCurrencyInputEnvelope
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+  }
+
+  export type ExchangeRateHistoryUncheckedCreateNestedManyWithoutCurrencyInput = {
+    create?: XOR<ExchangeRateHistoryCreateWithoutCurrencyInput, ExchangeRateHistoryUncheckedCreateWithoutCurrencyInput> | ExchangeRateHistoryCreateWithoutCurrencyInput[] | ExchangeRateHistoryUncheckedCreateWithoutCurrencyInput[]
+    connectOrCreate?: ExchangeRateHistoryCreateOrConnectWithoutCurrencyInput | ExchangeRateHistoryCreateOrConnectWithoutCurrencyInput[]
+    createMany?: ExchangeRateHistoryCreateManyCurrencyInputEnvelope
+    connect?: ExchangeRateHistoryWhereUniqueInput | ExchangeRateHistoryWhereUniqueInput[]
+  }
+
+  export type ProductUncheckedCreateNestedManyWithoutCurrencyInput = {
+    create?: XOR<ProductCreateWithoutCurrencyInput, ProductUncheckedCreateWithoutCurrencyInput> | ProductCreateWithoutCurrencyInput[] | ProductUncheckedCreateWithoutCurrencyInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutCurrencyInput | ProductCreateOrConnectWithoutCurrencyInput[]
+    createMany?: ProductCreateManyCurrencyInputEnvelope
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+  }
+
+  export type ExchangeRateHistoryUpdateManyWithoutCurrencyNestedInput = {
+    create?: XOR<ExchangeRateHistoryCreateWithoutCurrencyInput, ExchangeRateHistoryUncheckedCreateWithoutCurrencyInput> | ExchangeRateHistoryCreateWithoutCurrencyInput[] | ExchangeRateHistoryUncheckedCreateWithoutCurrencyInput[]
+    connectOrCreate?: ExchangeRateHistoryCreateOrConnectWithoutCurrencyInput | ExchangeRateHistoryCreateOrConnectWithoutCurrencyInput[]
+    upsert?: ExchangeRateHistoryUpsertWithWhereUniqueWithoutCurrencyInput | ExchangeRateHistoryUpsertWithWhereUniqueWithoutCurrencyInput[]
+    createMany?: ExchangeRateHistoryCreateManyCurrencyInputEnvelope
+    set?: ExchangeRateHistoryWhereUniqueInput | ExchangeRateHistoryWhereUniqueInput[]
+    disconnect?: ExchangeRateHistoryWhereUniqueInput | ExchangeRateHistoryWhereUniqueInput[]
+    delete?: ExchangeRateHistoryWhereUniqueInput | ExchangeRateHistoryWhereUniqueInput[]
+    connect?: ExchangeRateHistoryWhereUniqueInput | ExchangeRateHistoryWhereUniqueInput[]
+    update?: ExchangeRateHistoryUpdateWithWhereUniqueWithoutCurrencyInput | ExchangeRateHistoryUpdateWithWhereUniqueWithoutCurrencyInput[]
+    updateMany?: ExchangeRateHistoryUpdateManyWithWhereWithoutCurrencyInput | ExchangeRateHistoryUpdateManyWithWhereWithoutCurrencyInput[]
+    deleteMany?: ExchangeRateHistoryScalarWhereInput | ExchangeRateHistoryScalarWhereInput[]
+  }
+
+  export type ProductUpdateManyWithoutCurrencyNestedInput = {
+    create?: XOR<ProductCreateWithoutCurrencyInput, ProductUncheckedCreateWithoutCurrencyInput> | ProductCreateWithoutCurrencyInput[] | ProductUncheckedCreateWithoutCurrencyInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutCurrencyInput | ProductCreateOrConnectWithoutCurrencyInput[]
+    upsert?: ProductUpsertWithWhereUniqueWithoutCurrencyInput | ProductUpsertWithWhereUniqueWithoutCurrencyInput[]
+    createMany?: ProductCreateManyCurrencyInputEnvelope
+    set?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    disconnect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    delete?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    update?: ProductUpdateWithWhereUniqueWithoutCurrencyInput | ProductUpdateWithWhereUniqueWithoutCurrencyInput[]
+    updateMany?: ProductUpdateManyWithWhereWithoutCurrencyInput | ProductUpdateManyWithWhereWithoutCurrencyInput[]
+    deleteMany?: ProductScalarWhereInput | ProductScalarWhereInput[]
+  }
+
+  export type ExchangeRateHistoryUncheckedUpdateManyWithoutCurrencyNestedInput = {
+    create?: XOR<ExchangeRateHistoryCreateWithoutCurrencyInput, ExchangeRateHistoryUncheckedCreateWithoutCurrencyInput> | ExchangeRateHistoryCreateWithoutCurrencyInput[] | ExchangeRateHistoryUncheckedCreateWithoutCurrencyInput[]
+    connectOrCreate?: ExchangeRateHistoryCreateOrConnectWithoutCurrencyInput | ExchangeRateHistoryCreateOrConnectWithoutCurrencyInput[]
+    upsert?: ExchangeRateHistoryUpsertWithWhereUniqueWithoutCurrencyInput | ExchangeRateHistoryUpsertWithWhereUniqueWithoutCurrencyInput[]
+    createMany?: ExchangeRateHistoryCreateManyCurrencyInputEnvelope
+    set?: ExchangeRateHistoryWhereUniqueInput | ExchangeRateHistoryWhereUniqueInput[]
+    disconnect?: ExchangeRateHistoryWhereUniqueInput | ExchangeRateHistoryWhereUniqueInput[]
+    delete?: ExchangeRateHistoryWhereUniqueInput | ExchangeRateHistoryWhereUniqueInput[]
+    connect?: ExchangeRateHistoryWhereUniqueInput | ExchangeRateHistoryWhereUniqueInput[]
+    update?: ExchangeRateHistoryUpdateWithWhereUniqueWithoutCurrencyInput | ExchangeRateHistoryUpdateWithWhereUniqueWithoutCurrencyInput[]
+    updateMany?: ExchangeRateHistoryUpdateManyWithWhereWithoutCurrencyInput | ExchangeRateHistoryUpdateManyWithWhereWithoutCurrencyInput[]
+    deleteMany?: ExchangeRateHistoryScalarWhereInput | ExchangeRateHistoryScalarWhereInput[]
+  }
+
+  export type ProductUncheckedUpdateManyWithoutCurrencyNestedInput = {
+    create?: XOR<ProductCreateWithoutCurrencyInput, ProductUncheckedCreateWithoutCurrencyInput> | ProductCreateWithoutCurrencyInput[] | ProductUncheckedCreateWithoutCurrencyInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutCurrencyInput | ProductCreateOrConnectWithoutCurrencyInput[]
+    upsert?: ProductUpsertWithWhereUniqueWithoutCurrencyInput | ProductUpsertWithWhereUniqueWithoutCurrencyInput[]
+    createMany?: ProductCreateManyCurrencyInputEnvelope
+    set?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    disconnect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    delete?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    update?: ProductUpdateWithWhereUniqueWithoutCurrencyInput | ProductUpdateWithWhereUniqueWithoutCurrencyInput[]
+    updateMany?: ProductUpdateManyWithWhereWithoutCurrencyInput | ProductUpdateManyWithWhereWithoutCurrencyInput[]
+    deleteMany?: ProductScalarWhereInput | ProductScalarWhereInput[]
+  }
+
+  export type CurrencyCreateNestedOneWithoutRateHistoryInput = {
+    create?: XOR<CurrencyCreateWithoutRateHistoryInput, CurrencyUncheckedCreateWithoutRateHistoryInput>
+    connectOrCreate?: CurrencyCreateOrConnectWithoutRateHistoryInput
+    connect?: CurrencyWhereUniqueInput
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type CurrencyUpdateOneRequiredWithoutRateHistoryNestedInput = {
+    create?: XOR<CurrencyCreateWithoutRateHistoryInput, CurrencyUncheckedCreateWithoutRateHistoryInput>
+    connectOrCreate?: CurrencyCreateOrConnectWithoutRateHistoryInput
+    upsert?: CurrencyUpsertWithoutRateHistoryInput
+    connect?: CurrencyWhereUniqueInput
+    update?: XOR<XOR<CurrencyUpdateToOneWithWhereWithoutRateHistoryInput, CurrencyUpdateWithoutRateHistoryInput>, CurrencyUncheckedUpdateWithoutRateHistoryInput>
+  }
+
   export type MediaCreateNestedOneWithoutCategoryImagesInput = {
     create?: XOR<MediaCreateWithoutCategoryImagesInput, MediaUncheckedCreateWithoutCategoryImagesInput>
     connectOrCreate?: MediaCreateOrConnectWithoutCategoryImagesInput
@@ -91489,6 +95136,12 @@ export namespace Prisma {
     connect?: BrandWhereUniqueInput
   }
 
+  export type CurrencyCreateNestedOneWithoutProductsInput = {
+    create?: XOR<CurrencyCreateWithoutProductsInput, CurrencyUncheckedCreateWithoutProductsInput>
+    connectOrCreate?: CurrencyCreateOrConnectWithoutProductsInput
+    connect?: CurrencyWhereUniqueInput
+  }
+
   export type UserCreateNestedOneWithoutCreatedProductsInput = {
     create?: XOR<UserCreateWithoutCreatedProductsInput, UserUncheckedCreateWithoutCreatedProductsInput>
     connectOrCreate?: UserCreateOrConnectWithoutCreatedProductsInput
@@ -91611,16 +95264,12 @@ export namespace Prisma {
     set?: $Enums.ProductStatus
   }
 
-  export type NullableEnumDiscountTypeFieldUpdateOperationsInput = {
-    set?: $Enums.DiscountType | null
+  export type EnumPricingModeFieldUpdateOperationsInput = {
+    set?: $Enums.PricingMode
   }
 
-  export type FloatFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
+  export type NullableEnumDiscountTypeFieldUpdateOperationsInput = {
+    set?: $Enums.DiscountType | null
   }
 
   export type BrandUpdateOneWithoutProductsNestedInput = {
@@ -91631,6 +95280,16 @@ export namespace Prisma {
     delete?: BrandWhereInput | boolean
     connect?: BrandWhereUniqueInput
     update?: XOR<XOR<BrandUpdateToOneWithWhereWithoutProductsInput, BrandUpdateWithoutProductsInput>, BrandUncheckedUpdateWithoutProductsInput>
+  }
+
+  export type CurrencyUpdateOneWithoutProductsNestedInput = {
+    create?: XOR<CurrencyCreateWithoutProductsInput, CurrencyUncheckedCreateWithoutProductsInput>
+    connectOrCreate?: CurrencyCreateOrConnectWithoutProductsInput
+    upsert?: CurrencyUpsertWithoutProductsInput
+    disconnect?: CurrencyWhereInput | boolean
+    delete?: CurrencyWhereInput | boolean
+    connect?: CurrencyWhereUniqueInput
+    update?: XOR<XOR<CurrencyUpdateToOneWithWhereWithoutProductsInput, CurrencyUpdateWithoutProductsInput>, CurrencyUncheckedUpdateWithoutProductsInput>
   }
 
   export type UserUpdateOneWithoutCreatedProductsNestedInput = {
@@ -92073,6 +95732,10 @@ export namespace Prisma {
     create?: XOR<AttributeValueCreateWithoutVariantValuesInput, AttributeValueUncheckedCreateWithoutVariantValuesInput>
     connectOrCreate?: AttributeValueCreateOrConnectWithoutVariantValuesInput
     connect?: AttributeValueWhereUniqueInput
+  }
+
+  export type NullableEnumModifierTypeFieldUpdateOperationsInput = {
+    set?: $Enums.ModifierType | null
   }
 
   export type ProductVariantUpdateOneRequiredWithoutAttributeValuesNestedInput = {
@@ -94543,6 +98206,22 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
   export type NestedEnumAttributeInputTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.AttributeInputType | EnumAttributeInputTypeFieldRefInput<$PrismaModel>
     in?: $Enums.AttributeInputType[] | ListEnumAttributeInputTypeFieldRefInput<$PrismaModel>
@@ -94567,6 +98246,13 @@ export namespace Prisma {
     not?: NestedEnumProductStatusFilter<$PrismaModel> | $Enums.ProductStatus
   }
 
+  export type NestedEnumPricingModeFilter<$PrismaModel = never> = {
+    equals?: $Enums.PricingMode | EnumPricingModeFieldRefInput<$PrismaModel>
+    in?: $Enums.PricingMode[] | ListEnumPricingModeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PricingMode[] | ListEnumPricingModeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPricingModeFilter<$PrismaModel> | $Enums.PricingMode
+  }
+
   export type NestedEnumDiscountTypeNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.DiscountType | EnumDiscountTypeFieldRefInput<$PrismaModel> | null
     in?: $Enums.DiscountType[] | ListEnumDiscountTypeFieldRefInput<$PrismaModel> | null
@@ -94584,6 +98270,16 @@ export namespace Prisma {
     _max?: NestedEnumProductStatusFilter<$PrismaModel>
   }
 
+  export type NestedEnumPricingModeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PricingMode | EnumPricingModeFieldRefInput<$PrismaModel>
+    in?: $Enums.PricingMode[] | ListEnumPricingModeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PricingMode[] | ListEnumPricingModeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPricingModeWithAggregatesFilter<$PrismaModel> | $Enums.PricingMode
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPricingModeFilter<$PrismaModel>
+    _max?: NestedEnumPricingModeFilter<$PrismaModel>
+  }
+
   export type NestedEnumDiscountTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.DiscountType | EnumDiscountTypeFieldRefInput<$PrismaModel> | null
     in?: $Enums.DiscountType[] | ListEnumDiscountTypeFieldRefInput<$PrismaModel> | null
@@ -94594,20 +98290,21 @@ export namespace Prisma {
     _max?: NestedEnumDiscountTypeNullableFilter<$PrismaModel>
   }
 
-  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
+  export type NestedEnumModifierTypeNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.ModifierType | EnumModifierTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ModifierType[] | ListEnumModifierTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ModifierType[] | ListEnumModifierTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumModifierTypeNullableFilter<$PrismaModel> | $Enums.ModifierType | null
+  }
+
+  export type NestedEnumModifierTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ModifierType | EnumModifierTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ModifierType[] | ListEnumModifierTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ModifierType[] | ListEnumModifierTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumModifierTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.ModifierType | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumModifierTypeNullableFilter<$PrismaModel>
+    _max?: NestedEnumModifierTypeNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumDiscountTypeFilter<$PrismaModel = never> = {
@@ -95467,6 +99164,11 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -95483,6 +99185,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     brand?: BrandCreateNestedOneWithoutProductsInput
+    currency?: CurrencyCreateNestedOneWithoutProductsInput
     categories?: ProductCategoryCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
     images?: ProductImageCreateNestedManyWithoutProductInput
@@ -95504,6 +99207,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    currencyId?: string | null
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -96204,6 +99913,12 @@ export namespace Prisma {
     isFeatured?: BoolFilter<"Product"> | boolean
     viewCount?: IntFilter<"Product"> | number
     basePrice?: IntFilter<"Product"> | number
+    pricingMode?: EnumPricingModeFilter<"Product"> | $Enums.PricingMode
+    currencyId?: StringNullableFilter<"Product"> | string | null
+    sourcePrice?: FloatNullableFilter<"Product"> | number | null
+    priceBufferPercent?: FloatNullableFilter<"Product"> | number | null
+    currentPriceIRT?: IntFilter<"Product"> | number
+    priceUpdatedAt?: DateTimeNullableFilter<"Product"> | Date | string | null
     discountType?: EnumDiscountTypeNullableFilter<"Product"> | $Enums.DiscountType | null
     discountValue?: IntNullableFilter<"Product"> | number | null
     minPrice?: IntFilter<"Product"> | number
@@ -98140,6 +101855,248 @@ export namespace Prisma {
     data: XOR<StoryUpdateManyMutationInput, StoryUncheckedUpdateManyWithoutVideoInput>
   }
 
+  export type ExchangeRateHistoryCreateWithoutCurrencyInput = {
+    id?: string
+    rate: number
+    source: string
+    wasApplied?: boolean
+    changePercent?: number | null
+    fetchedAt?: Date | string
+  }
+
+  export type ExchangeRateHistoryUncheckedCreateWithoutCurrencyInput = {
+    id?: string
+    rate: number
+    source: string
+    wasApplied?: boolean
+    changePercent?: number | null
+    fetchedAt?: Date | string
+  }
+
+  export type ExchangeRateHistoryCreateOrConnectWithoutCurrencyInput = {
+    where: ExchangeRateHistoryWhereUniqueInput
+    create: XOR<ExchangeRateHistoryCreateWithoutCurrencyInput, ExchangeRateHistoryUncheckedCreateWithoutCurrencyInput>
+  }
+
+  export type ExchangeRateHistoryCreateManyCurrencyInputEnvelope = {
+    data: ExchangeRateHistoryCreateManyCurrencyInput | ExchangeRateHistoryCreateManyCurrencyInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ProductCreateWithoutCurrencyInput = {
+    name: string
+    slug: string
+    shortDescription?: string | null
+    description?: string | null
+    status?: $Enums.ProductStatus
+    isFeatured?: boolean
+    viewCount?: number
+    basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
+    discountType?: $Enums.DiscountType | null
+    discountValue?: number | null
+    minPrice?: number
+    maxPrice?: number
+    isInStock?: boolean
+    hasActiveDiscount?: boolean
+    avgRating?: number
+    reviewCount?: number
+    totalSold?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    canonicalUrl?: string | null
+    structuredData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    brand?: BrandCreateNestedOneWithoutProductsInput
+    createdBy?: UserCreateNestedOneWithoutCreatedProductsInput
+    categories?: ProductCategoryCreateNestedManyWithoutProductInput
+    variants?: ProductVariantCreateNestedManyWithoutProductInput
+    images?: ProductImageCreateNestedManyWithoutProductInput
+    wishlists?: WishlistCreateNestedManyWithoutProductInput
+    discountCodes?: DiscountCodeProductCreateNestedManyWithoutProductInput
+    displayAttributeValues?: ProductDisplayAttributeValueCreateNestedManyWithoutProductInput
+    stories?: StoryProductCreateNestedManyWithoutProductInput
+    blogPosts?: BlogPostProductCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductUncheckedCreateWithoutCurrencyInput = {
+    id?: number
+    name: string
+    slug: string
+    brandId?: number | null
+    shortDescription?: string | null
+    description?: string | null
+    status?: $Enums.ProductStatus
+    isFeatured?: boolean
+    viewCount?: number
+    basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
+    discountType?: $Enums.DiscountType | null
+    discountValue?: number | null
+    minPrice?: number
+    maxPrice?: number
+    isInStock?: boolean
+    hasActiveDiscount?: boolean
+    avgRating?: number
+    reviewCount?: number
+    totalSold?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    canonicalUrl?: string | null
+    structuredData?: NullableJsonNullValueInput | InputJsonValue
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    categories?: ProductCategoryUncheckedCreateNestedManyWithoutProductInput
+    variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
+    images?: ProductImageUncheckedCreateNestedManyWithoutProductInput
+    wishlists?: WishlistUncheckedCreateNestedManyWithoutProductInput
+    discountCodes?: DiscountCodeProductUncheckedCreateNestedManyWithoutProductInput
+    displayAttributeValues?: ProductDisplayAttributeValueUncheckedCreateNestedManyWithoutProductInput
+    stories?: StoryProductUncheckedCreateNestedManyWithoutProductInput
+    blogPosts?: BlogPostProductUncheckedCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductCreateOrConnectWithoutCurrencyInput = {
+    where: ProductWhereUniqueInput
+    create: XOR<ProductCreateWithoutCurrencyInput, ProductUncheckedCreateWithoutCurrencyInput>
+  }
+
+  export type ProductCreateManyCurrencyInputEnvelope = {
+    data: ProductCreateManyCurrencyInput | ProductCreateManyCurrencyInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ExchangeRateHistoryUpsertWithWhereUniqueWithoutCurrencyInput = {
+    where: ExchangeRateHistoryWhereUniqueInput
+    update: XOR<ExchangeRateHistoryUpdateWithoutCurrencyInput, ExchangeRateHistoryUncheckedUpdateWithoutCurrencyInput>
+    create: XOR<ExchangeRateHistoryCreateWithoutCurrencyInput, ExchangeRateHistoryUncheckedCreateWithoutCurrencyInput>
+  }
+
+  export type ExchangeRateHistoryUpdateWithWhereUniqueWithoutCurrencyInput = {
+    where: ExchangeRateHistoryWhereUniqueInput
+    data: XOR<ExchangeRateHistoryUpdateWithoutCurrencyInput, ExchangeRateHistoryUncheckedUpdateWithoutCurrencyInput>
+  }
+
+  export type ExchangeRateHistoryUpdateManyWithWhereWithoutCurrencyInput = {
+    where: ExchangeRateHistoryScalarWhereInput
+    data: XOR<ExchangeRateHistoryUpdateManyMutationInput, ExchangeRateHistoryUncheckedUpdateManyWithoutCurrencyInput>
+  }
+
+  export type ExchangeRateHistoryScalarWhereInput = {
+    AND?: ExchangeRateHistoryScalarWhereInput | ExchangeRateHistoryScalarWhereInput[]
+    OR?: ExchangeRateHistoryScalarWhereInput[]
+    NOT?: ExchangeRateHistoryScalarWhereInput | ExchangeRateHistoryScalarWhereInput[]
+    id?: StringFilter<"ExchangeRateHistory"> | string
+    currencyId?: StringFilter<"ExchangeRateHistory"> | string
+    rate?: FloatFilter<"ExchangeRateHistory"> | number
+    source?: StringFilter<"ExchangeRateHistory"> | string
+    wasApplied?: BoolFilter<"ExchangeRateHistory"> | boolean
+    changePercent?: FloatNullableFilter<"ExchangeRateHistory"> | number | null
+    fetchedAt?: DateTimeFilter<"ExchangeRateHistory"> | Date | string
+  }
+
+  export type ProductUpsertWithWhereUniqueWithoutCurrencyInput = {
+    where: ProductWhereUniqueInput
+    update: XOR<ProductUpdateWithoutCurrencyInput, ProductUncheckedUpdateWithoutCurrencyInput>
+    create: XOR<ProductCreateWithoutCurrencyInput, ProductUncheckedCreateWithoutCurrencyInput>
+  }
+
+  export type ProductUpdateWithWhereUniqueWithoutCurrencyInput = {
+    where: ProductWhereUniqueInput
+    data: XOR<ProductUpdateWithoutCurrencyInput, ProductUncheckedUpdateWithoutCurrencyInput>
+  }
+
+  export type ProductUpdateManyWithWhereWithoutCurrencyInput = {
+    where: ProductScalarWhereInput
+    data: XOR<ProductUpdateManyMutationInput, ProductUncheckedUpdateManyWithoutCurrencyInput>
+  }
+
+  export type CurrencyCreateWithoutRateHistoryInput = {
+    id?: string
+    code: string
+    name: string
+    symbol?: string | null
+    isActive?: boolean
+    currentRate?: number | null
+    lastFetchedAt?: Date | string | null
+    lastAppliedRate?: number | null
+    lastAppliedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    products?: ProductCreateNestedManyWithoutCurrencyInput
+  }
+
+  export type CurrencyUncheckedCreateWithoutRateHistoryInput = {
+    id?: string
+    code: string
+    name: string
+    symbol?: string | null
+    isActive?: boolean
+    currentRate?: number | null
+    lastFetchedAt?: Date | string | null
+    lastAppliedRate?: number | null
+    lastAppliedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    products?: ProductUncheckedCreateNestedManyWithoutCurrencyInput
+  }
+
+  export type CurrencyCreateOrConnectWithoutRateHistoryInput = {
+    where: CurrencyWhereUniqueInput
+    create: XOR<CurrencyCreateWithoutRateHistoryInput, CurrencyUncheckedCreateWithoutRateHistoryInput>
+  }
+
+  export type CurrencyUpsertWithoutRateHistoryInput = {
+    update: XOR<CurrencyUpdateWithoutRateHistoryInput, CurrencyUncheckedUpdateWithoutRateHistoryInput>
+    create: XOR<CurrencyCreateWithoutRateHistoryInput, CurrencyUncheckedCreateWithoutRateHistoryInput>
+    where?: CurrencyWhereInput
+  }
+
+  export type CurrencyUpdateToOneWithWhereWithoutRateHistoryInput = {
+    where?: CurrencyWhereInput
+    data: XOR<CurrencyUpdateWithoutRateHistoryInput, CurrencyUncheckedUpdateWithoutRateHistoryInput>
+  }
+
+  export type CurrencyUpdateWithoutRateHistoryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    currentRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastAppliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    products?: ProductUpdateManyWithoutCurrencyNestedInput
+  }
+
+  export type CurrencyUncheckedUpdateWithoutRateHistoryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    currentRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastAppliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    products?: ProductUncheckedUpdateManyWithoutCurrencyNestedInput
+  }
+
   export type MediaCreateWithoutCategoryImagesInput = {
     fileName: string
     originalName: string
@@ -98626,6 +102583,11 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -98641,6 +102603,7 @@ export namespace Prisma {
     structuredData?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    currency?: CurrencyCreateNestedOneWithoutProductsInput
     createdBy?: UserCreateNestedOneWithoutCreatedProductsInput
     categories?: ProductCategoryCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
@@ -98662,6 +102625,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    currencyId?: string | null
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -98945,12 +102914,16 @@ export namespace Prisma {
   }
 
   export type ProductVariantAttributeValueCreateWithoutAttributeValueInput = {
+    modifierType?: $Enums.ModifierType | null
+    modifierValue?: number | null
     variant: ProductVariantCreateNestedOneWithoutAttributeValuesInput
   }
 
   export type ProductVariantAttributeValueUncheckedCreateWithoutAttributeValueInput = {
     id?: number
     variantId: number
+    modifierType?: $Enums.ModifierType | null
+    modifierValue?: number | null
   }
 
   export type ProductVariantAttributeValueCreateOrConnectWithoutAttributeValueInput = {
@@ -99022,6 +102995,8 @@ export namespace Prisma {
     id?: IntFilter<"ProductVariantAttributeValue"> | number
     variantId?: IntFilter<"ProductVariantAttributeValue"> | number
     attributeValueId?: IntFilter<"ProductVariantAttributeValue"> | number
+    modifierType?: EnumModifierTypeNullableFilter<"ProductVariantAttributeValue"> | $Enums.ModifierType | null
+    modifierValue?: FloatNullableFilter<"ProductVariantAttributeValue"> | number | null
   }
 
   export type CategoryCreateWithoutAttributesInput = {
@@ -99214,6 +103189,41 @@ export namespace Prisma {
   export type BrandCreateOrConnectWithoutProductsInput = {
     where: BrandWhereUniqueInput
     create: XOR<BrandCreateWithoutProductsInput, BrandUncheckedCreateWithoutProductsInput>
+  }
+
+  export type CurrencyCreateWithoutProductsInput = {
+    id?: string
+    code: string
+    name: string
+    symbol?: string | null
+    isActive?: boolean
+    currentRate?: number | null
+    lastFetchedAt?: Date | string | null
+    lastAppliedRate?: number | null
+    lastAppliedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    rateHistory?: ExchangeRateHistoryCreateNestedManyWithoutCurrencyInput
+  }
+
+  export type CurrencyUncheckedCreateWithoutProductsInput = {
+    id?: string
+    code: string
+    name: string
+    symbol?: string | null
+    isActive?: boolean
+    currentRate?: number | null
+    lastFetchedAt?: Date | string | null
+    lastAppliedRate?: number | null
+    lastAppliedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    rateHistory?: ExchangeRateHistoryUncheckedCreateNestedManyWithoutCurrencyInput
+  }
+
+  export type CurrencyCreateOrConnectWithoutProductsInput = {
+    where: CurrencyWhereUniqueInput
+    create: XOR<CurrencyCreateWithoutProductsInput, CurrencyUncheckedCreateWithoutProductsInput>
   }
 
   export type UserCreateWithoutCreatedProductsInput = {
@@ -99514,6 +103524,47 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type CurrencyUpsertWithoutProductsInput = {
+    update: XOR<CurrencyUpdateWithoutProductsInput, CurrencyUncheckedUpdateWithoutProductsInput>
+    create: XOR<CurrencyCreateWithoutProductsInput, CurrencyUncheckedCreateWithoutProductsInput>
+    where?: CurrencyWhereInput
+  }
+
+  export type CurrencyUpdateToOneWithWhereWithoutProductsInput = {
+    where?: CurrencyWhereInput
+    data: XOR<CurrencyUpdateWithoutProductsInput, CurrencyUncheckedUpdateWithoutProductsInput>
+  }
+
+  export type CurrencyUpdateWithoutProductsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    currentRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastAppliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateHistory?: ExchangeRateHistoryUpdateManyWithoutCurrencyNestedInput
+  }
+
+  export type CurrencyUncheckedUpdateWithoutProductsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    currentRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastAppliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateHistory?: ExchangeRateHistoryUncheckedUpdateManyWithoutCurrencyNestedInput
+  }
+
   export type UserUpsertWithoutCreatedProductsInput = {
     update: XOR<UserUpdateWithoutCreatedProductsInput, UserUncheckedUpdateWithoutCreatedProductsInput>
     create: XOR<UserCreateWithoutCreatedProductsInput, UserUncheckedCreateWithoutCreatedProductsInput>
@@ -99780,6 +103831,11 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -99796,6 +103852,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     brand?: BrandCreateNestedOneWithoutProductsInput
+    currency?: CurrencyCreateNestedOneWithoutProductsInput
     createdBy?: UserCreateNestedOneWithoutCreatedProductsInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
     images?: ProductImageCreateNestedManyWithoutProductInput
@@ -99817,6 +103874,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    currencyId?: string | null
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -99911,6 +103974,11 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -99927,6 +103995,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     brand?: BrandUpdateOneWithoutProductsNestedInput
+    currency?: CurrencyUpdateOneWithoutProductsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedProductsNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
     images?: ProductImageUpdateManyWithoutProductNestedInput
@@ -99948,6 +104017,12 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -100032,6 +104107,11 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -100048,6 +104128,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     brand?: BrandCreateNestedOneWithoutProductsInput
+    currency?: CurrencyCreateNestedOneWithoutProductsInput
     createdBy?: UserCreateNestedOneWithoutCreatedProductsInput
     categories?: ProductCategoryCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
@@ -100069,6 +104150,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    currencyId?: string | null
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -100179,6 +104266,11 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -100195,6 +104287,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     brand?: BrandUpdateOneWithoutProductsNestedInput
+    currency?: CurrencyUpdateOneWithoutProductsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedProductsNestedInput
     categories?: ProductCategoryUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
@@ -100216,6 +104309,12 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -100316,6 +104415,11 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -100332,6 +104436,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     brand?: BrandCreateNestedOneWithoutProductsInput
+    currency?: CurrencyCreateNestedOneWithoutProductsInput
     createdBy?: UserCreateNestedOneWithoutCreatedProductsInput
     categories?: ProductCategoryCreateNestedManyWithoutProductInput
     images?: ProductImageCreateNestedManyWithoutProductInput
@@ -100353,6 +104458,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    currencyId?: string | null
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -100384,12 +104495,16 @@ export namespace Prisma {
   }
 
   export type ProductVariantAttributeValueCreateWithoutVariantInput = {
+    modifierType?: $Enums.ModifierType | null
+    modifierValue?: number | null
     attributeValue: AttributeValueCreateNestedOneWithoutVariantValuesInput
   }
 
   export type ProductVariantAttributeValueUncheckedCreateWithoutVariantInput = {
     id?: number
     attributeValueId: number
+    modifierType?: $Enums.ModifierType | null
+    modifierValue?: number | null
   }
 
   export type ProductVariantAttributeValueCreateOrConnectWithoutVariantInput = {
@@ -100433,6 +104548,10 @@ export namespace Prisma {
     price: number
     quantity: number
     discountAmount?: number
+    finalPriceIRT?: number
+    pricingModeSnapshot?: $Enums.PricingMode
+    sourceCurrencyCode?: string | null
+    appliedRate?: number | null
     order: OrderCreateNestedOneWithoutItemsInput
     returns?: OrderReturnCreateNestedManyWithoutOrderItemInput
   }
@@ -100445,6 +104564,10 @@ export namespace Prisma {
     price: number
     quantity: number
     discountAmount?: number
+    finalPriceIRT?: number
+    pricingModeSnapshot?: $Enums.PricingMode
+    sourceCurrencyCode?: string | null
+    appliedRate?: number | null
     returns?: OrderReturnUncheckedCreateNestedManyWithoutOrderItemInput
   }
 
@@ -100478,6 +104601,11 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -100494,6 +104622,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     brand?: BrandUpdateOneWithoutProductsNestedInput
+    currency?: CurrencyUpdateOneWithoutProductsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedProductsNestedInput
     categories?: ProductCategoryUpdateManyWithoutProductNestedInput
     images?: ProductImageUpdateManyWithoutProductNestedInput
@@ -100515,6 +104644,12 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -100612,6 +104747,10 @@ export namespace Prisma {
     price?: IntFilter<"OrderItem"> | number
     quantity?: IntFilter<"OrderItem"> | number
     discountAmount?: IntFilter<"OrderItem"> | number
+    finalPriceIRT?: IntFilter<"OrderItem"> | number
+    pricingModeSnapshot?: EnumPricingModeFilter<"OrderItem"> | $Enums.PricingMode
+    sourceCurrencyCode?: StringNullableFilter<"OrderItem"> | string | null
+    appliedRate?: FloatNullableFilter<"OrderItem"> | number | null
   }
 
   export type ProductVariantCreateWithoutAttributeValuesInput = {
@@ -100743,6 +104882,11 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -100759,6 +104903,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     brand?: BrandCreateNestedOneWithoutProductsInput
+    currency?: CurrencyCreateNestedOneWithoutProductsInput
     createdBy?: UserCreateNestedOneWithoutCreatedProductsInput
     categories?: ProductCategoryCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
@@ -100780,6 +104925,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    currencyId?: string | null
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -100860,6 +105011,11 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -100876,6 +105032,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     brand?: BrandUpdateOneWithoutProductsNestedInput
+    currency?: CurrencyUpdateOneWithoutProductsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedProductsNestedInput
     categories?: ProductCategoryUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
@@ -100897,6 +105054,12 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -101047,6 +105210,11 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -101063,6 +105231,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     brand?: BrandCreateNestedOneWithoutProductsInput
+    currency?: CurrencyCreateNestedOneWithoutProductsInput
     createdBy?: UserCreateNestedOneWithoutCreatedProductsInput
     categories?: ProductCategoryCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
@@ -101084,6 +105253,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    currencyId?: string | null
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -101220,6 +105395,11 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -101236,6 +105416,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     brand?: BrandUpdateOneWithoutProductsNestedInput
+    currency?: CurrencyUpdateOneWithoutProductsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedProductsNestedInput
     categories?: ProductCategoryUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
@@ -101257,6 +105438,12 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -101897,6 +106084,11 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -101913,6 +106105,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     brand?: BrandCreateNestedOneWithoutProductsInput
+    currency?: CurrencyCreateNestedOneWithoutProductsInput
     createdBy?: UserCreateNestedOneWithoutCreatedProductsInput
     categories?: ProductCategoryCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
@@ -101934,6 +106127,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    currencyId?: string | null
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -102036,6 +106235,11 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -102052,6 +106256,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     brand?: BrandUpdateOneWithoutProductsNestedInput
+    currency?: CurrencyUpdateOneWithoutProductsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedProductsNestedInput
     categories?: ProductCategoryUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
@@ -102073,6 +106278,12 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -103776,6 +107987,10 @@ export namespace Prisma {
     price: number
     quantity: number
     discountAmount?: number
+    finalPriceIRT?: number
+    pricingModeSnapshot?: $Enums.PricingMode
+    sourceCurrencyCode?: string | null
+    appliedRate?: number | null
     variant: ProductVariantCreateNestedOneWithoutOrderItemsInput
     returns?: OrderReturnCreateNestedManyWithoutOrderItemInput
   }
@@ -103788,6 +108003,10 @@ export namespace Prisma {
     price: number
     quantity: number
     discountAmount?: number
+    finalPriceIRT?: number
+    pricingModeSnapshot?: $Enums.PricingMode
+    sourceCurrencyCode?: string | null
+    appliedRate?: number | null
     returns?: OrderReturnUncheckedCreateNestedManyWithoutOrderItemInput
   }
 
@@ -105016,6 +109235,10 @@ export namespace Prisma {
     price: number
     quantity: number
     discountAmount?: number
+    finalPriceIRT?: number
+    pricingModeSnapshot?: $Enums.PricingMode
+    sourceCurrencyCode?: string | null
+    appliedRate?: number | null
     order: OrderCreateNestedOneWithoutItemsInput
     variant: ProductVariantCreateNestedOneWithoutOrderItemsInput
   }
@@ -105029,6 +109252,10 @@ export namespace Prisma {
     price: number
     quantity: number
     discountAmount?: number
+    finalPriceIRT?: number
+    pricingModeSnapshot?: $Enums.PricingMode
+    sourceCurrencyCode?: string | null
+    appliedRate?: number | null
   }
 
   export type OrderItemCreateOrConnectWithoutReturnsInput = {
@@ -105144,6 +109371,10 @@ export namespace Prisma {
     price?: IntFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     discountAmount?: IntFieldUpdateOperationsInput | number
+    finalPriceIRT?: IntFieldUpdateOperationsInput | number
+    pricingModeSnapshot?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourceCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
     order?: OrderUpdateOneRequiredWithoutItemsNestedInput
     variant?: ProductVariantUpdateOneRequiredWithoutOrderItemsNestedInput
   }
@@ -105157,6 +109388,10 @@ export namespace Prisma {
     price?: IntFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     discountAmount?: IntFieldUpdateOperationsInput | number
+    finalPriceIRT?: IntFieldUpdateOperationsInput | number
+    pricingModeSnapshot?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourceCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type OrderReturnImageUpsertWithWhereUniqueWithoutReturnInput = {
@@ -107931,6 +112166,11 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -107947,6 +112187,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     brand?: BrandCreateNestedOneWithoutProductsInput
+    currency?: CurrencyCreateNestedOneWithoutProductsInput
     createdBy?: UserCreateNestedOneWithoutCreatedProductsInput
     categories?: ProductCategoryCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
@@ -107968,6 +112209,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    currencyId?: string | null
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -108070,6 +112317,11 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -108086,6 +112338,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     brand?: BrandUpdateOneWithoutProductsNestedInput
+    currency?: CurrencyUpdateOneWithoutProductsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedProductsNestedInput
     categories?: ProductCategoryUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
@@ -108107,6 +112360,12 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -108458,6 +112717,11 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -108474,6 +112738,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     brand?: BrandCreateNestedOneWithoutProductsInput
+    currency?: CurrencyCreateNestedOneWithoutProductsInput
     createdBy?: UserCreateNestedOneWithoutCreatedProductsInput
     categories?: ProductCategoryCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
@@ -108495,6 +112760,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    currencyId?: string | null
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -108581,6 +112852,11 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -108597,6 +112873,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     brand?: BrandUpdateOneWithoutProductsNestedInput
+    currency?: CurrencyUpdateOneWithoutProductsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedProductsNestedInput
     categories?: ProductCategoryUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
@@ -108618,6 +112895,12 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -109404,6 +113687,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    currencyId?: string | null
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -110009,6 +114298,11 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -110025,6 +114319,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     brand?: BrandUpdateOneWithoutProductsNestedInput
+    currency?: CurrencyUpdateOneWithoutProductsNestedInput
     categories?: ProductCategoryUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
     images?: ProductImageUpdateManyWithoutProductNestedInput
@@ -110046,6 +114341,12 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -110082,6 +114383,12 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -110883,6 +115190,193 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ExchangeRateHistoryCreateManyCurrencyInput = {
+    id?: string
+    rate: number
+    source: string
+    wasApplied?: boolean
+    changePercent?: number | null
+    fetchedAt?: Date | string
+  }
+
+  export type ProductCreateManyCurrencyInput = {
+    id?: number
+    name: string
+    slug: string
+    brandId?: number | null
+    shortDescription?: string | null
+    description?: string | null
+    status?: $Enums.ProductStatus
+    isFeatured?: boolean
+    viewCount?: number
+    basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
+    discountType?: $Enums.DiscountType | null
+    discountValue?: number | null
+    minPrice?: number
+    maxPrice?: number
+    isInStock?: boolean
+    hasActiveDiscount?: boolean
+    avgRating?: number
+    reviewCount?: number
+    totalSold?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    canonicalUrl?: string | null
+    structuredData?: NullableJsonNullValueInput | InputJsonValue
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExchangeRateHistoryUpdateWithoutCurrencyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    rate?: FloatFieldUpdateOperationsInput | number
+    source?: StringFieldUpdateOperationsInput | string
+    wasApplied?: BoolFieldUpdateOperationsInput | boolean
+    changePercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    fetchedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExchangeRateHistoryUncheckedUpdateWithoutCurrencyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    rate?: FloatFieldUpdateOperationsInput | number
+    source?: StringFieldUpdateOperationsInput | string
+    wasApplied?: BoolFieldUpdateOperationsInput | boolean
+    changePercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    fetchedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExchangeRateHistoryUncheckedUpdateManyWithoutCurrencyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    rate?: FloatFieldUpdateOperationsInput | number
+    source?: StringFieldUpdateOperationsInput | string
+    wasApplied?: BoolFieldUpdateOperationsInput | boolean
+    changePercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    fetchedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProductUpdateWithoutCurrencyInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    viewCount?: IntFieldUpdateOperationsInput | number
+    basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
+    discountValue?: NullableIntFieldUpdateOperationsInput | number | null
+    minPrice?: IntFieldUpdateOperationsInput | number
+    maxPrice?: IntFieldUpdateOperationsInput | number
+    isInStock?: BoolFieldUpdateOperationsInput | boolean
+    hasActiveDiscount?: BoolFieldUpdateOperationsInput | boolean
+    avgRating?: FloatFieldUpdateOperationsInput | number
+    reviewCount?: IntFieldUpdateOperationsInput | number
+    totalSold?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    structuredData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    brand?: BrandUpdateOneWithoutProductsNestedInput
+    createdBy?: UserUpdateOneWithoutCreatedProductsNestedInput
+    categories?: ProductCategoryUpdateManyWithoutProductNestedInput
+    variants?: ProductVariantUpdateManyWithoutProductNestedInput
+    images?: ProductImageUpdateManyWithoutProductNestedInput
+    wishlists?: WishlistUpdateManyWithoutProductNestedInput
+    discountCodes?: DiscountCodeProductUpdateManyWithoutProductNestedInput
+    displayAttributeValues?: ProductDisplayAttributeValueUpdateManyWithoutProductNestedInput
+    stories?: StoryProductUpdateManyWithoutProductNestedInput
+    blogPosts?: BlogPostProductUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductUncheckedUpdateWithoutCurrencyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    brandId?: NullableIntFieldUpdateOperationsInput | number | null
+    shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    viewCount?: IntFieldUpdateOperationsInput | number
+    basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
+    discountValue?: NullableIntFieldUpdateOperationsInput | number | null
+    minPrice?: IntFieldUpdateOperationsInput | number
+    maxPrice?: IntFieldUpdateOperationsInput | number
+    isInStock?: BoolFieldUpdateOperationsInput | boolean
+    hasActiveDiscount?: BoolFieldUpdateOperationsInput | boolean
+    avgRating?: FloatFieldUpdateOperationsInput | number
+    reviewCount?: IntFieldUpdateOperationsInput | number
+    totalSold?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    structuredData?: NullableJsonNullValueInput | InputJsonValue
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    categories?: ProductCategoryUncheckedUpdateManyWithoutProductNestedInput
+    variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
+    images?: ProductImageUncheckedUpdateManyWithoutProductNestedInput
+    wishlists?: WishlistUncheckedUpdateManyWithoutProductNestedInput
+    discountCodes?: DiscountCodeProductUncheckedUpdateManyWithoutProductNestedInput
+    displayAttributeValues?: ProductDisplayAttributeValueUncheckedUpdateManyWithoutProductNestedInput
+    stories?: StoryProductUncheckedUpdateManyWithoutProductNestedInput
+    blogPosts?: BlogPostProductUncheckedUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductUncheckedUpdateManyWithoutCurrencyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    brandId?: NullableIntFieldUpdateOperationsInput | number | null
+    shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    viewCount?: IntFieldUpdateOperationsInput | number
+    basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
+    discountValue?: NullableIntFieldUpdateOperationsInput | number | null
+    minPrice?: IntFieldUpdateOperationsInput | number
+    maxPrice?: IntFieldUpdateOperationsInput | number
+    isInStock?: BoolFieldUpdateOperationsInput | boolean
+    hasActiveDiscount?: BoolFieldUpdateOperationsInput | boolean
+    avgRating?: FloatFieldUpdateOperationsInput | number
+    reviewCount?: IntFieldUpdateOperationsInput | number
+    totalSold?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    canonicalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    structuredData?: NullableJsonNullValueInput | InputJsonValue
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type CategoryCreateManyParentInput = {
     id?: number
     name: string
@@ -111021,6 +115515,12 @@ export namespace Prisma {
     isFeatured?: boolean
     viewCount?: number
     basePrice?: number
+    pricingMode?: $Enums.PricingMode
+    currencyId?: string | null
+    sourcePrice?: number | null
+    priceBufferPercent?: number | null
+    currentPriceIRT?: number
+    priceUpdatedAt?: Date | string | null
     discountType?: $Enums.DiscountType | null
     discountValue?: number | null
     minPrice?: number
@@ -111048,6 +115548,11 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -111063,6 +115568,7 @@ export namespace Prisma {
     structuredData?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    currency?: CurrencyUpdateOneWithoutProductsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedProductsNestedInput
     categories?: ProductCategoryUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
@@ -111084,6 +115590,12 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -111120,6 +115632,12 @@ export namespace Prisma {
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
+    pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
+    currentPriceIRT?: IntFieldUpdateOperationsInput | number
+    priceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     discountType?: NullableEnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType | null
     discountValue?: NullableIntFieldUpdateOperationsInput | number | null
     minPrice?: IntFieldUpdateOperationsInput | number
@@ -111212,20 +115730,28 @@ export namespace Prisma {
   export type ProductVariantAttributeValueCreateManyAttributeValueInput = {
     id?: number
     variantId: number
+    modifierType?: $Enums.ModifierType | null
+    modifierValue?: number | null
   }
 
   export type ProductVariantAttributeValueUpdateWithoutAttributeValueInput = {
+    modifierType?: NullableEnumModifierTypeFieldUpdateOperationsInput | $Enums.ModifierType | null
+    modifierValue?: NullableFloatFieldUpdateOperationsInput | number | null
     variant?: ProductVariantUpdateOneRequiredWithoutAttributeValuesNestedInput
   }
 
   export type ProductVariantAttributeValueUncheckedUpdateWithoutAttributeValueInput = {
     id?: IntFieldUpdateOperationsInput | number
     variantId?: IntFieldUpdateOperationsInput | number
+    modifierType?: NullableEnumModifierTypeFieldUpdateOperationsInput | $Enums.ModifierType | null
+    modifierValue?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type ProductVariantAttributeValueUncheckedUpdateManyWithoutAttributeValueInput = {
     id?: IntFieldUpdateOperationsInput | number
     variantId?: IntFieldUpdateOperationsInput | number
+    modifierType?: NullableEnumModifierTypeFieldUpdateOperationsInput | $Enums.ModifierType | null
+    modifierValue?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type ProductCategoryCreateManyProductInput = {
@@ -111433,6 +115959,8 @@ export namespace Prisma {
   export type ProductVariantAttributeValueCreateManyVariantInput = {
     id?: number
     attributeValueId: number
+    modifierType?: $Enums.ModifierType | null
+    modifierValue?: number | null
   }
 
   export type CartItemCreateManyVariantInput = {
@@ -111451,20 +115979,30 @@ export namespace Prisma {
     price: number
     quantity: number
     discountAmount?: number
+    finalPriceIRT?: number
+    pricingModeSnapshot?: $Enums.PricingMode
+    sourceCurrencyCode?: string | null
+    appliedRate?: number | null
   }
 
   export type ProductVariantAttributeValueUpdateWithoutVariantInput = {
+    modifierType?: NullableEnumModifierTypeFieldUpdateOperationsInput | $Enums.ModifierType | null
+    modifierValue?: NullableFloatFieldUpdateOperationsInput | number | null
     attributeValue?: AttributeValueUpdateOneRequiredWithoutVariantValuesNestedInput
   }
 
   export type ProductVariantAttributeValueUncheckedUpdateWithoutVariantInput = {
     id?: IntFieldUpdateOperationsInput | number
     attributeValueId?: IntFieldUpdateOperationsInput | number
+    modifierType?: NullableEnumModifierTypeFieldUpdateOperationsInput | $Enums.ModifierType | null
+    modifierValue?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type ProductVariantAttributeValueUncheckedUpdateManyWithoutVariantInput = {
     id?: IntFieldUpdateOperationsInput | number
     attributeValueId?: IntFieldUpdateOperationsInput | number
+    modifierType?: NullableEnumModifierTypeFieldUpdateOperationsInput | $Enums.ModifierType | null
+    modifierValue?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type CartItemUpdateWithoutVariantInput = {
@@ -111496,6 +116034,10 @@ export namespace Prisma {
     price?: IntFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     discountAmount?: IntFieldUpdateOperationsInput | number
+    finalPriceIRT?: IntFieldUpdateOperationsInput | number
+    pricingModeSnapshot?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourceCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
     order?: OrderUpdateOneRequiredWithoutItemsNestedInput
     returns?: OrderReturnUpdateManyWithoutOrderItemNestedInput
   }
@@ -111508,6 +116050,10 @@ export namespace Prisma {
     price?: IntFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     discountAmount?: IntFieldUpdateOperationsInput | number
+    finalPriceIRT?: IntFieldUpdateOperationsInput | number
+    pricingModeSnapshot?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourceCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
     returns?: OrderReturnUncheckedUpdateManyWithoutOrderItemNestedInput
   }
 
@@ -111519,6 +116065,10 @@ export namespace Prisma {
     price?: IntFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     discountAmount?: IntFieldUpdateOperationsInput | number
+    finalPriceIRT?: IntFieldUpdateOperationsInput | number
+    pricingModeSnapshot?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourceCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type CartItemCreateManyCartInput = {
@@ -111909,6 +116459,10 @@ export namespace Prisma {
     price: number
     quantity: number
     discountAmount?: number
+    finalPriceIRT?: number
+    pricingModeSnapshot?: $Enums.PricingMode
+    sourceCurrencyCode?: string | null
+    appliedRate?: number | null
   }
 
   export type TransactionCreateManyOrderInput = {
@@ -111967,6 +116521,10 @@ export namespace Prisma {
     price?: IntFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     discountAmount?: IntFieldUpdateOperationsInput | number
+    finalPriceIRT?: IntFieldUpdateOperationsInput | number
+    pricingModeSnapshot?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourceCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
     variant?: ProductVariantUpdateOneRequiredWithoutOrderItemsNestedInput
     returns?: OrderReturnUpdateManyWithoutOrderItemNestedInput
   }
@@ -111979,6 +116537,10 @@ export namespace Prisma {
     price?: IntFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     discountAmount?: IntFieldUpdateOperationsInput | number
+    finalPriceIRT?: IntFieldUpdateOperationsInput | number
+    pricingModeSnapshot?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourceCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
     returns?: OrderReturnUncheckedUpdateManyWithoutOrderItemNestedInput
   }
 
@@ -111990,6 +116552,10 @@ export namespace Prisma {
     price?: IntFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     discountAmount?: IntFieldUpdateOperationsInput | number
+    finalPriceIRT?: IntFieldUpdateOperationsInput | number
+    pricingModeSnapshot?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
+    sourceCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRate?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type TransactionUpdateWithoutOrderInput = {

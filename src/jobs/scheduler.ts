@@ -3,6 +3,7 @@ import { runExpireStaleOrdersJob } from "./expire-stale-orders.job";
 import { runCleanupOtpJob } from "./cleanup-otp.job";
 import { runRefreshDiscountAggregatesJob } from "./refresh-discount-aggregates.job";
 import { runAutoCloseTicketsJob } from "./auto-close-tickets.job";
+import { runCurrencyRateFetchJob } from "./currency-rate-fetch.job";
 
 // ----------------------------------------------------------------------------
 // یک scheduler ساده‌ی مبتنی بر setInterval (بدون پکیج اضافه مثل node-cron،
@@ -26,6 +27,7 @@ const jobs: Job[] = [
   { name: "cleanup-otp", run: runCleanupOtpJob },
   { name: "refresh-discount-aggregates", run: runRefreshDiscountAggregatesJob },
   { name: "auto-close-tickets", run: runAutoCloseTicketsJob },
+  { name: "currency-rate-fetch", run: runCurrencyRateFetchJob },
 ];
 
 async function runAllJobs(): Promise<void> {

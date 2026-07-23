@@ -3,6 +3,7 @@ import { ApiError } from "../../utils/ApiError";
 import { parsePagination, buildPaginationMeta } from "../../utils/pagination";
 import { generateOrderNumber } from "../../utils/orderNumber";
 import { allocateProportionally } from "../../utils/allocation";
+import { pricingConfig } from "../../config/pricing.config";
 import * as cartService from "../shopping/cart.service";
 import * as discountApplyService from "../discount/discount-apply.service";
 import * as walletService from "../wallet/wallet.service";
@@ -17,7 +18,8 @@ import {
   AdminListOrdersQuery,
   AdminUpdateOrderStatusInput,
 } from "../../validations/order.validation";
-import { Order, OrderStatus } from "../../generated/prisma";
+import { Order, OrderStatus, PricingMode } from "../../generated/prisma";
+import { calculateFinalPrice } from "../pricingEngine";
 
 // ----------------------------------------------------------------------------
 // سفارش‌ها — آیتم ۸، ۹، ۱۰. این فایل مسئول «ساخت سفارش از سبد خرید» و
@@ -52,6 +54,65 @@ export async function createOrder(userId: number, input: CreateOrderInput): Prom
     throw ApiError.badRequest(
       `برخی کالاهای سبد خرید دیگر موجود نیستند: ${unavailable.map((i) => i.productName).join("، ")}`
     );
+  }
+
+  // بررسی مجدد قیمت‌ها در لحظه ثبت سفارش (برای محصولات ارزی)
+  const cartItemIds = cart.items.map((i) => i.variantId);
+  const freshVariants = await prisma.productVariant.findMany({
+    where: { id: { in: cartItemIds } },
+    include: {
+      product: {
+        include: {
+          currency: { select: { code: true, currentRate: true } },
+        },
+      },
+      attributeValues: {
+        select: { modifierType: true, modifierValue: true },
+      },
+    },
+  });
+
+  const variantMap = new Map(freshVariants.map((v) => [v.id, v]));
+
+  for (const item of cart.items) {
+    const freshVariant = variantMap.get(item.variantId);
+    if (!freshVariant) {
+      throw ApiError.conflict(`تنوع کالای «${item.productName}» دیگر وجود ندارد`);
+    }
+
+    const product = freshVariant.product;
+    let freshPriceIRT: number;
+
+    if (product.pricingMode === "CURRENCY_BASED") {
+      const modifiers = freshVariant.attributeValues.map((av) => ({
+        modifierType: av.modifierType,
+        modifierValue: av.modifierValue,
+      }));
+
+      const result = calculateFinalPrice(
+        {
+          pricingMode: "CURRENCY_BASED",
+          basePrice: product.basePrice,
+          sourcePrice: product.sourcePrice,
+          priceBufferPercent: product.priceBufferPercent,
+        },
+        product.currency ? { currentRate: product.currency.currentRate } : null,
+        modifiers
+      );
+      freshPriceIRT = result.finalPriceIRT;
+    } else {
+      freshPriceIRT = product.basePrice + freshVariant.priceAdjustment;
+    }
+
+    const cartPrice = item.unitPrice;
+    if (cartPrice > 0) {
+      const changePercent = Math.abs(freshPriceIRT - cartPrice) / cartPrice * 100;
+      if (changePercent > pricingConfig.priceChangeThresholdPercent) {
+        throw ApiError.conflict(
+          `قیمت کالای «${item.productName}» تغییر کرده است (${changePercent.toFixed(1)}%). لطفاً سبد خرید را مجدداً بررسی کنید`
+        );
+      }
+    }
   }
 
   const address = await prisma.address.findUnique({ where: { id: input.addressId } });
@@ -171,14 +232,23 @@ export async function createOrder(userId: number, input: CreateOrderInput): Prom
         status: isFreightCollect || isFullyPaidNow ? "PROCESSING" : "PENDING_PAYMENT",
         paidAt: isFullyPaidNow ? new Date() : null,
         items: {
-          create: cart.items.map((item) => ({
-            variantId: item.variantId,
-            productName: item.productName,
-            variantAttributes: item.attributesLabel || null,
-            price: item.unitPrice,
-            quantity: item.quantity,
-            discountAmount: discountPerVariant.get(item.variantId) ?? 0,
-          })),
+          create: cart.items.map((item) => {
+            const freshVariant = variantMap.get(item.variantId);
+            const product = freshVariant?.product;
+            const isCurrencyBased = product?.pricingMode === "CURRENCY_BASED";
+            return {
+              variantId: item.variantId,
+              productName: item.productName,
+              variantAttributes: item.attributesLabel || null,
+              price: item.unitPrice,
+              quantity: item.quantity,
+              discountAmount: discountPerVariant.get(item.variantId) ?? 0,
+              finalPriceIRT: item.unitPrice,
+              pricingModeSnapshot: (product?.pricingMode as PricingMode) ?? "FIXED_IRT",
+              sourceCurrencyCode: isCurrencyBased ? (product?.currency as { code?: string })?.code ?? null : null,
+              appliedRate: isCurrencyBased ? ((product?.currency as { currentRate?: number })?.currentRate ?? null) : null,
+            };
+          }),
         },
         statusHistory: {
           create: { status: isFreightCollect || isFullyPaidNow ? "PROCESSING" : "PENDING_PAYMENT" },
@@ -339,11 +409,11 @@ export async function updateOrderStatusAdmin(
     if (wasDelivered) {
       const orderItems = await tx.orderItem.findMany({
         where: { orderId },
-        select: { productId: true, quantity: true },
+        select: { quantity: true, variant: { select: { productId: true } } },
       });
       for (const item of orderItems) {
         await tx.product.update({
-          where: { id: item.productId },
+          where: { id: item.variant.productId },
           data: { totalSold: { increment: item.quantity } },
         });
       }

@@ -28,6 +28,7 @@ router.get("/", validate(listProductsQuerySchema, "query"), productController.li
 router.get("/by-id/:id", optionalAuthenticate, productController.getByIdPublic);
 router.get("/:slug", optionalAuthenticate, productController.getBySlugPublic);
 
+router.post("/preview-price", ...manageOnly, productController.previewPrice);
 router.post("/", ...manageOnly, uploadProductImagesMiddleware(), validate(createProductSchema), productController.create);
 router.put("/:id", ...manageOnly, uploadProductImagesMiddleware(), validate(updateProductSchema), productController.update);
 

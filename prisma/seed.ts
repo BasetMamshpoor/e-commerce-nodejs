@@ -22,6 +22,7 @@ import {
   BannerPosition,
   OtpChannel,
   OtpPurpose,
+  PricingMode,
 } from "../src/generated/prisma";
 import * as bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -1471,9 +1472,38 @@ async function main() {
   // });
 
   // ============================================================
-  // 19. Settings
+  // 19. Currencies (ارزهای پشتیبانی‌شده)
+  // ============================================================
+  console.log("💱 ایجاد ارزها...");
+
+  const currencies = [
+    { code: "USD", name: "US Dollar", symbol: "$" },
+    { code: "EUR", name: "Euro", symbol: "€" },
+    { code: "AED", name: "UAE Dirham", symbol: "د.إ" },
+    { code: "CNY", name: "Chinese Yuan", symbol: "¥" },
+    { code: "TRY", name: "Turkish Lira", symbol: "₺" },
+    { code: "IQD", name: "Iraqi Dinar", symbol: "د.ع" },
+  ];
+
+  for (const c of currencies) {
+    await prisma.currency.upsert({
+      where: { code: c.code },
+      update: {},
+      create: {
+        code: c.code,
+        name: c.name,
+        symbol: c.symbol,
+        isActive: true,
+      },
+    });
+  }
+
+  // ============================================================
+  // 20. Settings
   // ============================================================
   console.log("⚙️ ایجاد تنظیمات...");
+
+  await prisma.setting.deleteMany();
 
   await prisma.setting.createMany({
     data: [

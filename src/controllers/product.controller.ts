@@ -5,6 +5,7 @@ import { paramInt } from "../utils/params";
 import * as productService from "../services/catalog/product.service";
 import * as variantService from "../services/catalog/product-variant.service";
 import * as queryService from "../services/catalog/product-query.service";
+import { ModifierType } from "../generated/prisma";
 
 export async function create(req: Request, res: Response) {
   // ادغام تصاویر آپلودشده با تصاویر ارسالی در body
@@ -103,6 +104,31 @@ export async function filters(req: Request, res: Response) {
   const categorySlug =
     typeof req.query.categorySlug === "string" ? req.query.categorySlug : undefined;
   const result = await queryService.getStorefrontFilters(categorySlug);
+  return ApiResponse.ok(res, result);
+}
+
+export async function previewPrice(req: Request, res: Response) {
+  const { calculateFinalPrice } = await import("../services/pricingEngine");
+
+  const {
+    pricingMode,
+    basePrice,
+    sourcePrice,
+    priceBufferPercent,
+    modifiers,
+  } = req.body;
+
+  const result = calculateFinalPrice(
+    {
+      pricingMode: pricingMode ?? "FIXED_IRT",
+      basePrice: basePrice ?? 0,
+      sourcePrice: sourcePrice ?? null,
+      priceBufferPercent: priceBufferPercent ?? null,
+    },
+    null,
+    (modifiers ?? []) as Array<{ modifierType: ModifierType; modifierValue: number }>
+  );
+
   return ApiResponse.ok(res, result);
 }
 

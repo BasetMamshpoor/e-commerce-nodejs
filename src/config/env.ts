@@ -57,6 +57,14 @@ const envSchema = z.object({
   JOB_CHECK_INTERVAL_MINUTES: z.coerce.number().int().positive().default(5),
   ORDER_PENDING_EXPIRY_MINUTES: z.coerce.number().int().positive().default(30),
   OTP_CLEANUP_RETENTION_HOURS: z.coerce.number().int().positive().default(24),
+
+  // --- نرخ ارز و قیمت‌گذاری ارزی ---
+  BRSAPI_KEY: z.string().optional().default(""),
+  NAVASAN_API_KEY: z.string().optional().default(""),
+  CURRENCY_UPDATE_THRESHOLD_PERCENT: z.coerce.number().nonnegative().default(2.5),
+  FORCE_SYNC_INTERVAL_HOURS: z.coerce.number().int().positive().default(12),
+  RATE_FETCH_INTERVAL_HOURS: z.coerce.number().int().positive().default(2),
+  PRICE_CHANGE_THRESHOLD_PERCENT: z.coerce.number().nonnegative().default(1),
 });
 
 const parsed = envSchema.safeParse(process.env);

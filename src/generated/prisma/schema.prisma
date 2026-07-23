@@ -38,6 +38,17 @@ enum ProductStatus {
   ARCHIVED
 }
 
+enum PricingMode {
+  FIXED_IRT
+  CURRENCY_BASED
+}
+
+enum ModifierType {
+  PERCENTAGE
+  FIXED_SOURCE_CURRENCY
+  FIXED_IRT
+}
+
 enum DiscountType {
   PERCENT
   FIXED
@@ -372,6 +383,45 @@ model Media {
 }
 
 // ============================================================================
+// Currency & Exchange Rates
+// ============================================================================
+
+model Currency {
+  id       String  @id @default(cuid())
+  code     String  @unique
+  name     String
+  symbol   String?
+  isActive Boolean @default(true)
+
+  currentRate     Float?
+  lastFetchedAt   DateTime?
+  lastAppliedRate Float?
+  lastAppliedAt   DateTime?
+
+  rateHistory ExchangeRateHistory[]
+  products    Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([code])
+}
+
+model ExchangeRateHistory {
+  id         String   @id @default(cuid())
+  currencyId String
+  currency   Currency @relation(fields: [currencyId], references: [id], onDelete: Cascade)
+
+  rate          Float
+  source        String
+  wasApplied    Boolean  @default(false)
+  changePercent Float?
+  fetchedAt     DateTime @default(now())
+
+  @@index([currencyId, fetchedAt])
+}
+
+// ============================================================================
 // Categories, Brands & Attributes
 // ============================================================================
 
@@ -479,6 +529,14 @@ model Product {
 
   basePrice Int @default(0)
 
+  pricingMode        PricingMode @default(FIXED_IRT)
+  currencyId         String?
+  currency           Currency?   @relation(fields: [currencyId], references: [id])
+  sourcePrice        Float?
+  priceBufferPercent Float?      @default(0)
+  currentPriceIRT    Int         @default(0)
+  priceUpdatedAt     DateTime?
+
   discountType      DiscountType?
   discountValue     Int?
   // فیلدهای denormalize شده — هر بار که تنوع‌های محصول (variants) تغییر
@@ -518,6 +576,8 @@ model Product {
   @@index([isFeatured])
   @@index([basePrice])
   @@index([isInStock])
+  @@index([currencyId])
+  @@index([currentPriceIRT])
 }
 
 // محصول می‌تواند در چند دسته‌بندی همزمان قرار بگیرد
@@ -571,6 +631,9 @@ model ProductVariantAttributeValue {
   variant          ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
   attributeValueId Int
   attributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id], onDelete: Cascade)
+
+  modifierType  ModifierType?
+  modifierValue Float?
 
   @@unique([variantId, attributeValueId])
 }
@@ -833,6 +896,11 @@ model OrderItem {
   price             Int // قیمت واحد در لحظه خرید
   quantity          Int
   discountAmount    Int     @default(0)
+
+  finalPriceIRT       Int         @default(0)
+  pricingModeSnapshot PricingMode @default(FIXED_IRT)
+  sourceCurrencyCode  String?
+  appliedRate         Float?
 
   returns OrderReturn[]
 

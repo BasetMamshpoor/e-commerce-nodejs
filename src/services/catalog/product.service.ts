@@ -3,7 +3,12 @@ import { ApiError } from "../../utils/ApiError";
 import { slugify, ensureUniqueSlug } from "../../utils/slug";
 import { serializeProduct, ProductLike } from "../../utils/serialize";
 import { CreateProductInput, UpdateProductInput, VariantInput } from "../../validations/product.validation";
-import { Prisma } from "../../generated/prisma";
+import { Prisma, PricingMode, ModifierType } from "../../generated/prisma";
+import { calculateFinalPrice } from "../pricingEngine";
+
+function extractIds(values: { attributeValueId: number }[]): number[] {
+  return values.map((v) => v.attributeValueId);
+}
 
 async function isSlugTaken(slug: string, excludeId?: number): Promise<boolean> {
   const existing = await prisma.product.findUnique({ where: { slug } });
@@ -36,13 +41,56 @@ async function validateVariantsInput(variants: VariantInput[], opts: { productId
     throw ApiError.conflict(`این SKU ها قبلاً استفاده شده‌اند: ${existingSkus.map((s) => s.sku).join(", ")}`);
   }
 
-  const combos = variants.map((v) => comboKey(v.attributeValueIds));
+  const combos = variants.map((v) => comboKey(extractIds(v.attributeValues)));
   if (new Set(combos).size !== combos.length) {
     throw ApiError.badRequest("دو تنوع کالا نمی‌توانند ترکیب یکسانی از ویژگی‌ها داشته باشند");
   }
 }
 
+async function validatePricingModeConstraints(
+  pricingMode: PricingMode,
+  basePrice: number,
+  currencyId: string | undefined | null,
+  sourcePrice: number | undefined | null,
+  variantAttributeValues: { attributeValueId: number; modifierType?: string | null; modifierValue?: number | null }[][]
+): Promise<void> {
+  if (pricingMode === "CURRENCY_BASED") {
+    if (!currencyId) {
+      throw ApiError.badRequest("برای محصولات با قیمت‌گذاری ارزی، currencyId الزامی است");
+    }
+    if (!sourcePrice && sourcePrice !== 0) {
+      throw ApiError.badRequest("برای محصولات با قیمت‌گذاری ارزی، sourcePrice الزامی است");
+    }
+    const currency = await prisma.currency.findUnique({ where: { id: currencyId } });
+    if (!currency || !currency.isActive) {
+      throw ApiError.badRequest("ارز انتخاب‌شده معتبر نیست یا غیرفعال است");
+    }
+  }
+
+  if (pricingMode === "FIXED_IRT") {
+    if (!basePrice && basePrice !== 0) {
+      throw ApiError.badRequest("برای محصولات با قیمت‌گذاری ثابت تومان، basePrice الزامی است");
+    }
+
+    for (const attrVals of variantAttributeValues) {
+      for (const av of attrVals) {
+        if (av.modifierType === "PERCENTAGE" || av.modifierType === "FIXED_SOURCE_CURRENCY") {
+          throw ApiError.badRequest(
+            `محصولات FIXED_IRT نمی‌توانند از modifierType «${av.modifierType}» استفاده کنند`
+          );
+        }
+      }
+    }
+  }
+}
+
 export async function recomputeProductAggregates(productId: number): Promise<void> {
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { basePrice: true, pricingMode: true, currentPriceIRT: true, sourcePrice: true, priceBufferPercent: true, currencyId: true },
+  });
+  if (!product) return;
+
   const variants = await prisma.productVariant.findMany({
     where: { productId, isActive: true },
   });
@@ -55,8 +103,19 @@ export async function recomputeProductAggregates(productId: number): Promise<voi
     return;
   }
 
-  const product = await prisma.product.findUnique({ where: { id: productId }, select: { basePrice: true } });
-  if (!product) return;
+  if (product.pricingMode === "CURRENCY_BASED") {
+    const isInStock = variants.some((v) => v.stock > 0);
+    await prisma.product.update({
+      where: { id: productId },
+      data: {
+        minPrice: product.currentPriceIRT,
+        maxPrice: product.currentPriceIRT,
+        isInStock,
+        hasActiveDiscount: false,
+      },
+    });
+    return;
+  }
 
   const prices = variants.map((v) => product.basePrice + v.priceAdjustment);
   const isInStock = variants.some((v) => v.stock > 0);
@@ -70,6 +129,55 @@ export async function recomputeProductAggregates(productId: number): Promise<voi
       hasActiveDiscount: false,
     },
   });
+}
+
+async function computeInitialCurrentPriceIRT(
+  pricingMode: PricingMode,
+  basePrice: number,
+  sourcePrice: number | null,
+  priceBufferPercent: number | null,
+  currency: { currentRate: number | null } | null,
+  modifiers: { modifierType: ModifierType | null; modifierValue: number | null }[]
+): Promise<number> {
+  if (pricingMode === "FIXED_IRT") {
+    return basePrice;
+  }
+
+  const result = calculateFinalPrice(
+    {
+      pricingMode,
+      basePrice,
+      sourcePrice: sourcePrice ?? null,
+      priceBufferPercent: priceBufferPercent ?? null,
+    },
+    currency,
+    modifiers
+  );
+
+  return result.finalPriceIRT;
+}
+
+function buildModifiersFromInput(attributeValues: { modifierType?: string | null; modifierValue?: number | null }[]): { modifierType: ModifierType | null; modifierValue: number | null }[] {
+  return attributeValues.map((av) => ({
+    modifierType: (av.modifierType as ModifierType) ?? null,
+    modifierValue: av.modifierValue ?? null,
+  }));
+}
+
+async function fetchDefaultVariantModifiers(productId: number): Promise<{ modifierType: ModifierType | null; modifierValue: number | null }[]> {
+  const defaultVariant = await prisma.productVariant.findFirst({
+    where: { productId, isDefault: true },
+    include: {
+      attributeValues: {
+        select: { modifierType: true, modifierValue: true },
+      },
+    },
+  });
+  if (!defaultVariant) return [];
+  return defaultVariant.attributeValues.map((av) => ({
+    modifierType: av.modifierType,
+    modifierValue: av.modifierValue,
+  }));
 }
 
 export async function createProduct(input: CreateProductInput, createdById?: number) {
@@ -86,12 +194,37 @@ export async function createProduct(input: CreateProductInput, createdById?: num
   await validateVariantsInput(input.variants);
   const variants = normalizeDefaultFlag(input.variants);
 
+  const allAttrValues = variants.map((v) => v.attributeValues);
+  const pricingMode = (input.pricingMode as PricingMode) ?? "FIXED_IRT";
+  await validatePricingModeConstraints(
+    pricingMode,
+    input.basePrice,
+    input.currencyId,
+    input.sourcePrice,
+    allAttrValues
+  );
+
   const slug = input.slug
     ? slugify(input.slug)
     : await ensureUniqueSlug(input.name, (c) => isSlugTaken(c));
   if (input.slug && (await isSlugTaken(slug))) {
     throw ApiError.conflict("این slug قبلاً استفاده شده است");
   }
+
+  const currency = input.currencyId
+    ? await prisma.currency.findUnique({ where: { id: input.currencyId }, select: { currentRate: true } })
+    : null;
+
+  const defaultModifiers = variants[0] ? buildModifiersFromInput(variants[0].attributeValues) : [];
+
+  const currentPriceIRT = await computeInitialCurrentPriceIRT(
+    pricingMode,
+    input.basePrice,
+    input.sourcePrice ?? null,
+    input.priceBufferPercent ?? null,
+    currency,
+    defaultModifiers
+  );
 
   const product = await prisma.product.create({
     data: {
@@ -101,6 +234,12 @@ export async function createProduct(input: CreateProductInput, createdById?: num
       shortDescription: input.shortDescription,
       description: input.description,
       basePrice: input.basePrice,
+      pricingMode,
+      currencyId: input.currencyId ?? null,
+      sourcePrice: input.sourcePrice ?? null,
+      priceBufferPercent: input.priceBufferPercent ?? null,
+      currentPriceIRT,
+      priceUpdatedAt: new Date(),
       discountType: input.discountType,
       discountValue: input.discountValue,
       status: input.status,
@@ -128,7 +267,11 @@ export async function createProduct(input: CreateProductInput, createdById?: num
           isDefault: v.isDefault,
           isActive: v.isActive,
           attributeValues: {
-            create: v.attributeValueIds.map((attributeValueId) => ({ attributeValueId })),
+            create: v.attributeValues.map((av) => ({
+              attributeValueId: av.attributeValueId,
+              modifierType: av.modifierType ?? null,
+              modifierValue: av.modifierValue ?? null,
+            })),
           },
         })),
       },
@@ -146,7 +289,15 @@ export async function createProduct(input: CreateProductInput, createdById?: num
 }
 
 export async function updateProduct(id: number, input: UpdateProductInput) {
-  const product = await prisma.product.findUnique({ where: { id } });
+  const product = await prisma.product.findUnique({
+    where: { id },
+    include: {
+      variants: {
+        where: { isDefault: true },
+        include: { attributeValues: true },
+      },
+    },
+  });
   if (!product) throw ApiError.notFound("محصول پیدا نشد");
 
   if (input.brandId) {
@@ -171,13 +322,80 @@ export async function updateProduct(id: number, input: UpdateProductInput) {
     }
   }
 
+  const pricingMode = (input.pricingMode as PricingMode | undefined) ?? product.pricingMode;
+  const basePrice = input.basePrice ?? product.basePrice;
+  const currencyId = input.currencyId !== undefined ? input.currencyId : (product.currencyId as string | null | undefined);
+  const sourcePrice = input.sourcePrice !== undefined ? input.sourcePrice : (product.sourcePrice as number | null | undefined);
+
+  const defaultVariantAttrValues = product.variants[0]?.attributeValues ?? [];
+
+  if (input.pricingMode || input.currencyId !== undefined || input.sourcePrice !== undefined) {
+    await validatePricingModeConstraints(
+      pricingMode as PricingMode,
+      basePrice,
+      currencyId,
+      sourcePrice,
+      [defaultVariantAttrValues.map((av) => ({
+        attributeValueId: av.attributeValueId,
+        modifierType: av.modifierType,
+        modifierValue: av.modifierValue,
+      }))]
+    );
+  }
+
+  let currentPriceIRT: number | undefined;
+  if (
+    input.pricingMode ||
+    input.currencyId !== undefined ||
+    input.sourcePrice !== undefined ||
+    input.basePrice !== undefined ||
+    input.priceBufferPercent !== undefined
+  ) {
+    const modifiers = defaultVariantAttrValues.map((av) => ({
+      modifierType: av.modifierType,
+      modifierValue: av.modifierValue,
+    }));
+    const currencyDb = currencyId
+      ? await prisma.currency.findUnique({ where: { id: currencyId }, select: { currentRate: true } })
+      : null;
+    currentPriceIRT = await computeInitialCurrentPriceIRT(
+      pricingMode as PricingMode,
+      basePrice,
+      sourcePrice ?? null,
+      input.priceBufferPercent !== undefined ? input.priceBufferPercent : (product.priceBufferPercent as number | null),
+      currencyDb,
+      modifiers
+    );
+  }
+
   const { categoryIds, displayAttributes, ...rest } = input;
 
-  return prisma.product.update({
+  const updateData: Record<string, unknown> = {
+    ...rest,
+    slug,
+  };
+
+  if (currentPriceIRT !== undefined) {
+    updateData.currentPriceIRT = currentPriceIRT;
+    updateData.priceUpdatedAt = new Date();
+  }
+
+  if (input.pricingMode) {
+    updateData.pricingMode = input.pricingMode;
+  }
+
+  if (input.currencyId !== undefined) {
+    updateData.currencyId = input.currencyId || null;
+  }
+
+  if (input.sourcePrice !== undefined) {
+    updateData.sourcePrice = input.sourcePrice;
+  }
+
+  const updated = await prisma.product.update({
     where: { id },
     data: {
-      ...rest,
-      slug,
+      ...updateData,
       ...(categoryIds
         ? { categories: { deleteMany: {}, create: categoryIds.map((categoryId) => ({ categoryId })) } }
         : {}),
@@ -194,6 +412,9 @@ export async function updateProduct(id: number, input: UpdateProductInput) {
         : {}),
     },
   });
+
+  await recomputeProductAggregates(id);
+  return getProductById(id);
 }
 
 export async function deleteProduct(id: number): Promise<void> {

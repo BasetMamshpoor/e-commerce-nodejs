@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+export const variantAttributeValueSchema = z.object({
+  attributeValueId: z.coerce.number().int().positive(),
+  modifierType: z.enum(["PERCENTAGE", "FIXED_SOURCE_CURRENCY", "FIXED_IRT"]).optional(),
+  modifierValue: z.coerce.number().optional(),
+});
+
 export const variantInputSchema = z.object({
   sku: z.string().trim().min(1).max(80),
   priceAdjustment: z.coerce.number().int().min(0).default(0),
@@ -7,7 +13,7 @@ export const variantInputSchema = z.object({
   weight: z.coerce.number().positive().optional(),
   isDefault: z.coerce.boolean().optional().default(false),
   isActive: z.coerce.boolean().optional().default(true),
-  attributeValueIds: z.array(z.coerce.number()).default([]),
+  attributeValues: z.array(variantAttributeValueSchema).default([]),
 });
 
 const imageInputSchema = z.object({
@@ -28,6 +34,10 @@ export const createProductSchema = z.object({
   shortDescription: z.string().max(500).optional(),
   description: z.string().optional(),
   basePrice: z.coerce.number().int().min(0).default(0),
+  pricingMode: z.enum(["FIXED_IRT", "CURRENCY_BASED"]).optional().default("FIXED_IRT"),
+  currencyId: z.string().optional(),
+  sourcePrice: z.coerce.number().nonnegative().optional(),
+  priceBufferPercent: z.coerce.number().nonnegative().optional().default(0),
   discountType: z.enum(["PERCENT", "FIXED"]).optional(),
   discountValue: z.coerce.number().int().positive().optional(),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional().default("DRAFT"),
@@ -48,6 +58,10 @@ export const updateProductSchema = z.object({
   shortDescription: z.string().max(500).optional(),
   description: z.string().optional(),
   basePrice: z.coerce.number().int().min(0).optional(),
+  pricingMode: z.enum(["FIXED_IRT", "CURRENCY_BASED"]).optional(),
+  currencyId: z.string().nullable().optional(),
+  sourcePrice: z.coerce.number().nonnegative().nullable().optional(),
+  priceBufferPercent: z.coerce.number().nonnegative().nullable().optional(),
   discountType: z.enum(["PERCENT", "FIXED"]).nullable().optional(),
   discountValue: z.coerce.number().int().positive().nullable().optional(),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional(),

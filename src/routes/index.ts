@@ -29,6 +29,7 @@ import newsletterRoutes from "./newsletter.routes";
 import searchRoutes from "./search.routes";
 import landingRoutes from "./landing.routes";
 import adminNotificationRoutes from "./admin-notification.routes";
+import currencyRoutes from "./currency.routes";
 
 const router = Router();
 
@@ -62,5 +63,6 @@ router.use("/newsletter", newsletterRoutes);
 router.use("/search", searchRoutes);
 router.use("/landing", landingRoutes);
 router.use("/admin/notifications", adminNotificationRoutes);
+router.use("/admin/currencies", currencyRoutes);
 
 export default router;

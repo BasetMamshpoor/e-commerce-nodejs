@@ -9,7 +9,14 @@ const CART_INCLUDE = {
     include: {
       variant: {
         include: {
-          product: { select: { id: true, name: true, slug: true, status: true, basePrice: true, discountType: true, discountValue: true } },
+          product: {
+            select: {
+              id: true, name: true, slug: true, status: true,
+              basePrice: true, discountType: true, discountValue: true,
+              pricingMode: true, currentPriceIRT: true, sourcePrice: true,
+              priceBufferPercent: true,
+            },
+          },
           attributeValues: {
             include: { attributeValue: { include: { attribute: true } } },
           },
@@ -67,7 +74,10 @@ function summarize(cart: Record<string, unknown> | null): CartSummary {
   const items = ((cart as { items: Array<Record<string, unknown>> }).items || []).map((item: Record<string, unknown>) => {
     const variant = item.variant as Record<string, unknown>;
     const product = variant.product as Record<string, unknown>;
-    const basePrice = product.basePrice as number;
+    const pricingMode = product.pricingMode as string;
+    const basePrice = pricingMode === "CURRENCY_BASED"
+      ? ((product.currentPriceIRT as number) ?? (product.basePrice as number))
+      : (product.basePrice as number);
     const priceAdjustment = variant.priceAdjustment as number;
     const discountType = product.discountType as string | null;
     const discountValue = product.discountValue as number | null;
@@ -262,8 +272,11 @@ export async function getCartLineItemsForDiscount(identity: CartIdentity): Promi
 
   return cart.items.map((item) => {
     const product = item.variant.product;
+    const baseForPrice = product.pricingMode === "CURRENCY_BASED"
+      ? product.currentPriceIRT
+      : product.basePrice;
     const price = computeProductEffectivePrice(
-      product.basePrice,
+      baseForPrice,
       item.variant.priceAdjustment,
       product.discountType,
       product.discountValue,

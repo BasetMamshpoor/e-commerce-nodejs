@@ -8,6 +8,10 @@ function comboKey(attributeValueIds: number[]): string {
   return [...attributeValueIds].sort().join("|");
 }
 
+function extractIds(attributeValues: { attributeValueId: number }[]): number[] {
+  return attributeValues.map((av) => av.attributeValueId);
+}
+
 async function assertSkuFree(sku: string, excludeVariantId?: number): Promise<void> {
   const existing = await prisma.productVariant.findUnique({ where: { sku } });
   if (existing && existing.id !== excludeVariantId) {
@@ -40,7 +44,7 @@ async function assertProductExists(productId: number): Promise<void> {
 export async function addVariant(productId: number, input: VariantInput) {
   await assertProductExists(productId);
   await assertSkuFree(input.sku);
-  await assertComboFree(productId, input.attributeValueIds);
+  await assertComboFree(productId, extractIds(input.attributeValues));
 
   if (input.isDefault) {
     await prisma.productVariant.updateMany({
@@ -59,7 +63,11 @@ export async function addVariant(productId: number, input: VariantInput) {
       isDefault: input.isDefault,
       isActive: input.isActive,
       attributeValues: {
-        create: input.attributeValueIds.map((attributeValueId) => ({ attributeValueId })),
+        create: input.attributeValues.map((av) => ({
+          attributeValueId: av.attributeValueId,
+          modifierType: av.modifierType ?? null,
+          modifierValue: av.modifierValue ?? null,
+        })),
       },
     },
   });
@@ -77,8 +85,8 @@ export async function updateVariant(productId: number, variantId: number, input:
   if (input.sku && input.sku !== variant.sku) {
     await assertSkuFree(input.sku, variantId);
   }
-  if (input.attributeValueIds) {
-    await assertComboFree(productId, input.attributeValueIds, variantId);
+  if (input.attributeValues) {
+    await assertComboFree(productId, extractIds(input.attributeValues), variantId);
   }
   if (input.isDefault) {
     await prisma.productVariant.updateMany({
@@ -87,17 +95,21 @@ export async function updateVariant(productId: number, variantId: number, input:
     });
   }
 
-  const { attributeValueIds, ...scalarInput } = input;
+  const { attributeValues, ...scalarInput } = input;
 
   const updated = await prisma.productVariant.update({
     where: { id: variantId },
     data: {
       ...scalarInput,
-      ...(attributeValueIds
+      ...(attributeValues
         ? {
             attributeValues: {
               deleteMany: {},
-              create: attributeValueIds.map((attributeValueId) => ({ attributeValueId })),
+              create: attributeValues.map((av) => ({
+                attributeValueId: av.attributeValueId,
+                modifierType: av.modifierType ?? null,
+                modifierValue: av.modifierValue ?? null,
+              })),
             },
           }
         : {}),

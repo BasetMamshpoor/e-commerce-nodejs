@@ -231,6 +231,30 @@ exports.Prisma.MediaScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.CurrencyScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  symbol: 'symbol',
+  isActive: 'isActive',
+  currentRate: 'currentRate',
+  lastFetchedAt: 'lastFetchedAt',
+  lastAppliedRate: 'lastAppliedRate',
+  lastAppliedAt: 'lastAppliedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ExchangeRateHistoryScalarFieldEnum = {
+  id: 'id',
+  currencyId: 'currencyId',
+  rate: 'rate',
+  source: 'source',
+  wasApplied: 'wasApplied',
+  changePercent: 'changePercent',
+  fetchedAt: 'fetchedAt'
+};
+
 exports.Prisma.CategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -298,6 +322,12 @@ exports.Prisma.ProductScalarFieldEnum = {
   isFeatured: 'isFeatured',
   viewCount: 'viewCount',
   basePrice: 'basePrice',
+  pricingMode: 'pricingMode',
+  currencyId: 'currencyId',
+  sourcePrice: 'sourcePrice',
+  priceBufferPercent: 'priceBufferPercent',
+  currentPriceIRT: 'currentPriceIRT',
+  priceUpdatedAt: 'priceUpdatedAt',
   discountType: 'discountType',
   discountValue: 'discountValue',
   minPrice: 'minPrice',
@@ -346,7 +376,9 @@ exports.Prisma.ProductVariantScalarFieldEnum = {
 exports.Prisma.ProductVariantAttributeValueScalarFieldEnum = {
   id: 'id',
   variantId: 'variantId',
-  attributeValueId: 'attributeValueId'
+  attributeValueId: 'attributeValueId',
+  modifierType: 'modifierType',
+  modifierValue: 'modifierValue'
 };
 
 exports.Prisma.ProductDisplayAttributeValueScalarFieldEnum = {
@@ -494,7 +526,11 @@ exports.Prisma.OrderItemScalarFieldEnum = {
   variantAttributes: 'variantAttributes',
   price: 'price',
   quantity: 'quantity',
-  discountAmount: 'discountAmount'
+  discountAmount: 'discountAmount',
+  finalPriceIRT: 'finalPriceIRT',
+  pricingModeSnapshot: 'pricingModeSnapshot',
+  sourceCurrencyCode: 'sourceCurrencyCode',
+  appliedRate: 'appliedRate'
 };
 
 exports.Prisma.OrderStatusHistoryScalarFieldEnum = {
@@ -807,9 +843,20 @@ exports.ProductStatus = exports.$Enums.ProductStatus = {
   ARCHIVED: 'ARCHIVED'
 };
 
+exports.PricingMode = exports.$Enums.PricingMode = {
+  FIXED_IRT: 'FIXED_IRT',
+  CURRENCY_BASED: 'CURRENCY_BASED'
+};
+
 exports.DiscountType = exports.$Enums.DiscountType = {
   PERCENT: 'PERCENT',
   FIXED: 'FIXED'
+};
+
+exports.ModifierType = exports.$Enums.ModifierType = {
+  PERCENTAGE: 'PERCENTAGE',
+  FIXED_SOURCE_CURRENCY: 'FIXED_SOURCE_CURRENCY',
+  FIXED_IRT: 'FIXED_IRT'
 };
 
 exports.ShippingPricingType = exports.$Enums.ShippingPricingType = {
@@ -933,6 +980,8 @@ exports.Prisma.ModelName = {
   BlockedIp: 'BlockedIp',
   OtpCode: 'OtpCode',
   Media: 'Media',
+  Currency: 'Currency',
+  ExchangeRateHistory: 'ExchangeRateHistory',
   Category: 'Category',
   Brand: 'Brand',
   Attribute: 'Attribute',
