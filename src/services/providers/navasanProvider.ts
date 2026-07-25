@@ -18,9 +18,9 @@ export interface RateItem {
 }
 
 const KEY_MAP: Record<string, string> = {
-  USD: "usd_usdt",
+  USD: "usd_sell",
   EUR: "eur",
-  AED: "aed_sell",
+  AED: "aed",
   CNY: "cny",
   TRY: "try",
   IQD: "iqd",

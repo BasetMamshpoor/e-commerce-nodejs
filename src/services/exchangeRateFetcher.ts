@@ -48,7 +48,7 @@ export async function shouldRecalculateCurrency(
 }
 
 export async function recalculateProductsForCurrency(
-  currencyId: string,
+  currencyId: number,
   newRate: number
 ): Promise<void> {
   const CHUNK_SIZE = 500;
@@ -181,7 +181,7 @@ export async function fetchAllRates(): Promise<void> {
 }
 
 async function recordRate(
-  currency: { id: string; lastAppliedRate: number | null; lastAppliedAt: Date | null },
+  currency: { id: number; lastAppliedRate: number | null; lastAppliedAt: Date | null },
   rate: number,
   source: string,
   now: Date

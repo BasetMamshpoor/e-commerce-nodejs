@@ -18137,17 +18137,19 @@ export namespace Prisma {
   }
 
   export type CurrencyAvgAggregateOutputType = {
+    id: number | null
     currentRate: number | null
     lastAppliedRate: number | null
   }
 
   export type CurrencySumAggregateOutputType = {
+    id: number | null
     currentRate: number | null
     lastAppliedRate: number | null
   }
 
   export type CurrencyMinAggregateOutputType = {
-    id: string | null
+    id: number | null
     code: string | null
     name: string | null
     symbol: string | null
@@ -18161,7 +18163,7 @@ export namespace Prisma {
   }
 
   export type CurrencyMaxAggregateOutputType = {
-    id: string | null
+    id: number | null
     code: string | null
     name: string | null
     symbol: string | null
@@ -18191,11 +18193,13 @@ export namespace Prisma {
 
 
   export type CurrencyAvgAggregateInputType = {
+    id?: true
     currentRate?: true
     lastAppliedRate?: true
   }
 
   export type CurrencySumAggregateInputType = {
+    id?: true
     currentRate?: true
     lastAppliedRate?: true
   }
@@ -18330,7 +18334,7 @@ export namespace Prisma {
   }
 
   export type CurrencyGroupByOutputType = {
-    id: string
+    id: number
     code: string
     name: string
     symbol: string | null
@@ -18437,7 +18441,7 @@ export namespace Prisma {
       products: Prisma.$ProductPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
-      id: string
+      id: number
       code: string
       name: string
       symbol: string | null
@@ -18873,7 +18877,7 @@ export namespace Prisma {
    * Fields of the Currency model
    */
   interface CurrencyFieldRefs {
-    readonly id: FieldRef<"Currency", 'String'>
+    readonly id: FieldRef<"Currency", 'Int'>
     readonly code: FieldRef<"Currency", 'String'>
     readonly name: FieldRef<"Currency", 'String'>
     readonly symbol: FieldRef<"Currency", 'String'>
@@ -19356,18 +19360,22 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryAvgAggregateOutputType = {
+    id: number | null
+    currencyId: number | null
     rate: number | null
     changePercent: number | null
   }
 
   export type ExchangeRateHistorySumAggregateOutputType = {
+    id: number | null
+    currencyId: number | null
     rate: number | null
     changePercent: number | null
   }
 
   export type ExchangeRateHistoryMinAggregateOutputType = {
-    id: string | null
-    currencyId: string | null
+    id: number | null
+    currencyId: number | null
     rate: number | null
     source: string | null
     wasApplied: boolean | null
@@ -19376,8 +19384,8 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryMaxAggregateOutputType = {
-    id: string | null
-    currencyId: string | null
+    id: number | null
+    currencyId: number | null
     rate: number | null
     source: string | null
     wasApplied: boolean | null
@@ -19398,11 +19406,15 @@ export namespace Prisma {
 
 
   export type ExchangeRateHistoryAvgAggregateInputType = {
+    id?: true
+    currencyId?: true
     rate?: true
     changePercent?: true
   }
 
   export type ExchangeRateHistorySumAggregateInputType = {
+    id?: true
+    currencyId?: true
     rate?: true
     changePercent?: true
   }
@@ -19525,8 +19537,8 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryGroupByOutputType = {
-    id: string
-    currencyId: string
+    id: number
+    currencyId: number
     rate: number
     source: string
     wasApplied: boolean
@@ -19613,8 +19625,8 @@ export namespace Prisma {
       currency: Prisma.$CurrencyPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
-      id: string
-      currencyId: string
+      id: number
+      currencyId: number
       rate: number
       source: string
       wasApplied: boolean
@@ -20044,8 +20056,8 @@ export namespace Prisma {
    * Fields of the ExchangeRateHistory model
    */
   interface ExchangeRateHistoryFieldRefs {
-    readonly id: FieldRef<"ExchangeRateHistory", 'String'>
-    readonly currencyId: FieldRef<"ExchangeRateHistory", 'String'>
+    readonly id: FieldRef<"ExchangeRateHistory", 'Int'>
+    readonly currencyId: FieldRef<"ExchangeRateHistory", 'Int'>
     readonly rate: FieldRef<"ExchangeRateHistory", 'Float'>
     readonly source: FieldRef<"ExchangeRateHistory", 'String'>
     readonly wasApplied: FieldRef<"ExchangeRateHistory", 'Boolean'>
@@ -26527,6 +26539,7 @@ export namespace Prisma {
     brandId: number | null
     viewCount: number | null
     basePrice: number | null
+    currencyId: number | null
     sourcePrice: number | null
     priceBufferPercent: number | null
     currentPriceIRT: number | null
@@ -26544,6 +26557,7 @@ export namespace Prisma {
     brandId: number | null
     viewCount: number | null
     basePrice: number | null
+    currencyId: number | null
     sourcePrice: number | null
     priceBufferPercent: number | null
     currentPriceIRT: number | null
@@ -26568,7 +26582,7 @@ export namespace Prisma {
     viewCount: number | null
     basePrice: number | null
     pricingMode: $Enums.PricingMode | null
-    currencyId: string | null
+    currencyId: number | null
     sourcePrice: number | null
     priceBufferPercent: number | null
     currentPriceIRT: number | null
@@ -26602,7 +26616,7 @@ export namespace Prisma {
     viewCount: number | null
     basePrice: number | null
     pricingMode: $Enums.PricingMode | null
-    currencyId: string | null
+    currencyId: number | null
     sourcePrice: number | null
     priceBufferPercent: number | null
     currentPriceIRT: number | null
@@ -26666,6 +26680,7 @@ export namespace Prisma {
     brandId?: true
     viewCount?: true
     basePrice?: true
+    currencyId?: true
     sourcePrice?: true
     priceBufferPercent?: true
     currentPriceIRT?: true
@@ -26683,6 +26698,7 @@ export namespace Prisma {
     brandId?: true
     viewCount?: true
     basePrice?: true
+    currencyId?: true
     sourcePrice?: true
     priceBufferPercent?: true
     currentPriceIRT?: true
@@ -26897,7 +26913,7 @@ export namespace Prisma {
     viewCount: number
     basePrice: number
     pricingMode: $Enums.PricingMode
-    currencyId: string | null
+    currencyId: number | null
     sourcePrice: number | null
     priceBufferPercent: number | null
     currentPriceIRT: number
@@ -27150,7 +27166,7 @@ export namespace Prisma {
       viewCount: number
       basePrice: number
       pricingMode: $Enums.PricingMode
-      currencyId: string | null
+      currencyId: number | null
       sourcePrice: number | null
       priceBufferPercent: number | null
       currentPriceIRT: number
@@ -27616,7 +27632,7 @@ export namespace Prisma {
     readonly viewCount: FieldRef<"Product", 'Int'>
     readonly basePrice: FieldRef<"Product", 'Int'>
     readonly pricingMode: FieldRef<"Product", 'PricingMode'>
-    readonly currencyId: FieldRef<"Product", 'String'>
+    readonly currencyId: FieldRef<"Product", 'Int'>
     readonly sourcePrice: FieldRef<"Product", 'Float'>
     readonly priceBufferPercent: FieldRef<"Product", 'Float'>
     readonly currentPriceIRT: FieldRef<"Product", 'Int'>
@@ -80357,7 +80373,7 @@ export namespace Prisma {
     AND?: CurrencyWhereInput | CurrencyWhereInput[]
     OR?: CurrencyWhereInput[]
     NOT?: CurrencyWhereInput | CurrencyWhereInput[]
-    id?: StringFilter<"Currency"> | string
+    id?: IntFilter<"Currency"> | number
     code?: StringFilter<"Currency"> | string
     name?: StringFilter<"Currency"> | string
     symbol?: StringNullableFilter<"Currency"> | string | null
@@ -80389,7 +80405,7 @@ export namespace Prisma {
   }
 
   export type CurrencyWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
+    id?: number
     code?: string
     AND?: CurrencyWhereInput | CurrencyWhereInput[]
     OR?: CurrencyWhereInput[]
@@ -80430,7 +80446,7 @@ export namespace Prisma {
     AND?: CurrencyScalarWhereWithAggregatesInput | CurrencyScalarWhereWithAggregatesInput[]
     OR?: CurrencyScalarWhereWithAggregatesInput[]
     NOT?: CurrencyScalarWhereWithAggregatesInput | CurrencyScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"Currency"> | string
+    id?: IntWithAggregatesFilter<"Currency"> | number
     code?: StringWithAggregatesFilter<"Currency"> | string
     name?: StringWithAggregatesFilter<"Currency"> | string
     symbol?: StringNullableWithAggregatesFilter<"Currency"> | string | null
@@ -80447,8 +80463,8 @@ export namespace Prisma {
     AND?: ExchangeRateHistoryWhereInput | ExchangeRateHistoryWhereInput[]
     OR?: ExchangeRateHistoryWhereInput[]
     NOT?: ExchangeRateHistoryWhereInput | ExchangeRateHistoryWhereInput[]
-    id?: StringFilter<"ExchangeRateHistory"> | string
-    currencyId?: StringFilter<"ExchangeRateHistory"> | string
+    id?: IntFilter<"ExchangeRateHistory"> | number
+    currencyId?: IntFilter<"ExchangeRateHistory"> | number
     rate?: FloatFilter<"ExchangeRateHistory"> | number
     source?: StringFilter<"ExchangeRateHistory"> | string
     wasApplied?: BoolFilter<"ExchangeRateHistory"> | boolean
@@ -80469,11 +80485,11 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
+    id?: number
     AND?: ExchangeRateHistoryWhereInput | ExchangeRateHistoryWhereInput[]
     OR?: ExchangeRateHistoryWhereInput[]
     NOT?: ExchangeRateHistoryWhereInput | ExchangeRateHistoryWhereInput[]
-    currencyId?: StringFilter<"ExchangeRateHistory"> | string
+    currencyId?: IntFilter<"ExchangeRateHistory"> | number
     rate?: FloatFilter<"ExchangeRateHistory"> | number
     source?: StringFilter<"ExchangeRateHistory"> | string
     wasApplied?: BoolFilter<"ExchangeRateHistory"> | boolean
@@ -80501,8 +80517,8 @@ export namespace Prisma {
     AND?: ExchangeRateHistoryScalarWhereWithAggregatesInput | ExchangeRateHistoryScalarWhereWithAggregatesInput[]
     OR?: ExchangeRateHistoryScalarWhereWithAggregatesInput[]
     NOT?: ExchangeRateHistoryScalarWhereWithAggregatesInput | ExchangeRateHistoryScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"ExchangeRateHistory"> | string
-    currencyId?: StringWithAggregatesFilter<"ExchangeRateHistory"> | string
+    id?: IntWithAggregatesFilter<"ExchangeRateHistory"> | number
+    currencyId?: IntWithAggregatesFilter<"ExchangeRateHistory"> | number
     rate?: FloatWithAggregatesFilter<"ExchangeRateHistory"> | number
     source?: StringWithAggregatesFilter<"ExchangeRateHistory"> | string
     wasApplied?: BoolWithAggregatesFilter<"ExchangeRateHistory"> | boolean
@@ -80922,7 +80938,7 @@ export namespace Prisma {
     viewCount?: IntFilter<"Product"> | number
     basePrice?: IntFilter<"Product"> | number
     pricingMode?: EnumPricingModeFilter<"Product"> | $Enums.PricingMode
-    currencyId?: StringNullableFilter<"Product"> | string | null
+    currencyId?: IntNullableFilter<"Product"> | number | null
     sourcePrice?: FloatNullableFilter<"Product"> | number | null
     priceBufferPercent?: FloatNullableFilter<"Product"> | number | null
     currentPriceIRT?: IntFilter<"Product"> | number
@@ -81017,7 +81033,7 @@ export namespace Prisma {
     viewCount?: IntFilter<"Product"> | number
     basePrice?: IntFilter<"Product"> | number
     pricingMode?: EnumPricingModeFilter<"Product"> | $Enums.PricingMode
-    currencyId?: StringNullableFilter<"Product"> | string | null
+    currencyId?: IntNullableFilter<"Product"> | number | null
     sourcePrice?: FloatNullableFilter<"Product"> | number | null
     priceBufferPercent?: FloatNullableFilter<"Product"> | number | null
     currentPriceIRT?: IntFilter<"Product"> | number
@@ -81106,7 +81122,7 @@ export namespace Prisma {
     viewCount?: IntWithAggregatesFilter<"Product"> | number
     basePrice?: IntWithAggregatesFilter<"Product"> | number
     pricingMode?: EnumPricingModeWithAggregatesFilter<"Product"> | $Enums.PricingMode
-    currencyId?: StringNullableWithAggregatesFilter<"Product"> | string | null
+    currencyId?: IntNullableWithAggregatesFilter<"Product"> | number | null
     sourcePrice?: FloatNullableWithAggregatesFilter<"Product"> | number | null
     priceBufferPercent?: FloatNullableWithAggregatesFilter<"Product"> | number | null
     currentPriceIRT?: IntWithAggregatesFilter<"Product"> | number
@@ -85058,7 +85074,6 @@ export namespace Prisma {
   }
 
   export type CurrencyCreateInput = {
-    id?: string
     code: string
     name: string
     symbol?: string | null
@@ -85074,7 +85089,7 @@ export namespace Prisma {
   }
 
   export type CurrencyUncheckedCreateInput = {
-    id?: string
+    id?: number
     code: string
     name: string
     symbol?: string | null
@@ -85090,7 +85105,6 @@ export namespace Prisma {
   }
 
   export type CurrencyUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
     code?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     symbol?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85106,7 +85120,7 @@ export namespace Prisma {
   }
 
   export type CurrencyUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
+    id?: IntFieldUpdateOperationsInput | number
     code?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     symbol?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85122,7 +85136,7 @@ export namespace Prisma {
   }
 
   export type CurrencyCreateManyInput = {
-    id?: string
+    id?: number
     code: string
     name: string
     symbol?: string | null
@@ -85136,7 +85150,6 @@ export namespace Prisma {
   }
 
   export type CurrencyUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
     code?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     symbol?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85150,7 +85163,7 @@ export namespace Prisma {
   }
 
   export type CurrencyUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
+    id?: IntFieldUpdateOperationsInput | number
     code?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     symbol?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85164,7 +85177,6 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryCreateInput = {
-    id?: string
     rate: number
     source: string
     wasApplied?: boolean
@@ -85174,8 +85186,8 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryUncheckedCreateInput = {
-    id?: string
-    currencyId: string
+    id?: number
+    currencyId: number
     rate: number
     source: string
     wasApplied?: boolean
@@ -85184,7 +85196,6 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
     rate?: FloatFieldUpdateOperationsInput | number
     source?: StringFieldUpdateOperationsInput | string
     wasApplied?: BoolFieldUpdateOperationsInput | boolean
@@ -85194,8 +85205,8 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    currencyId?: StringFieldUpdateOperationsInput | string
+    id?: IntFieldUpdateOperationsInput | number
+    currencyId?: IntFieldUpdateOperationsInput | number
     rate?: FloatFieldUpdateOperationsInput | number
     source?: StringFieldUpdateOperationsInput | string
     wasApplied?: BoolFieldUpdateOperationsInput | boolean
@@ -85204,8 +85215,8 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryCreateManyInput = {
-    id?: string
-    currencyId: string
+    id?: number
+    currencyId: number
     rate: number
     source: string
     wasApplied?: boolean
@@ -85214,7 +85225,6 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
     rate?: FloatFieldUpdateOperationsInput | number
     source?: StringFieldUpdateOperationsInput | string
     wasApplied?: BoolFieldUpdateOperationsInput | boolean
@@ -85223,8 +85233,8 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    currencyId?: StringFieldUpdateOperationsInput | string
+    id?: IntFieldUpdateOperationsInput | number
+    currencyId?: IntFieldUpdateOperationsInput | number
     rate?: FloatFieldUpdateOperationsInput | number
     source?: StringFieldUpdateOperationsInput | string
     wasApplied?: BoolFieldUpdateOperationsInput | boolean
@@ -85694,7 +85704,7 @@ export namespace Prisma {
     viewCount?: number
     basePrice?: number
     pricingMode?: $Enums.PricingMode
-    currencyId?: string | null
+    currencyId?: number | null
     sourcePrice?: number | null
     priceBufferPercent?: number | null
     currentPriceIRT?: number
@@ -85779,7 +85789,7 @@ export namespace Prisma {
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
     pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
-    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyId?: NullableIntFieldUpdateOperationsInput | number | null
     sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
     currentPriceIRT?: IntFieldUpdateOperationsInput | number
@@ -85822,7 +85832,7 @@ export namespace Prisma {
     viewCount?: number
     basePrice?: number
     pricingMode?: $Enums.PricingMode
-    currencyId?: string | null
+    currencyId?: number | null
     sourcePrice?: number | null
     priceBufferPercent?: number | null
     currentPriceIRT?: number
@@ -85888,7 +85898,7 @@ export namespace Prisma {
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
     pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
-    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyId?: NullableIntFieldUpdateOperationsInput | number | null
     sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
     currentPriceIRT?: IntFieldUpdateOperationsInput | number
@@ -89937,6 +89947,7 @@ export namespace Prisma {
   }
 
   export type CurrencyAvgOrderByAggregateInput = {
+    id?: SortOrder
     currentRate?: SortOrder
     lastAppliedRate?: SortOrder
   }
@@ -89970,6 +89981,7 @@ export namespace Prisma {
   }
 
   export type CurrencySumOrderByAggregateInput = {
+    id?: SortOrder
     currentRate?: SortOrder
     lastAppliedRate?: SortOrder
   }
@@ -90001,6 +90013,8 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryAvgOrderByAggregateInput = {
+    id?: SortOrder
+    currencyId?: SortOrder
     rate?: SortOrder
     changePercent?: SortOrder
   }
@@ -90026,6 +90040,8 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistorySumOrderByAggregateInput = {
+    id?: SortOrder
+    currencyId?: SortOrder
     rate?: SortOrder
     changePercent?: SortOrder
   }
@@ -90488,6 +90504,7 @@ export namespace Prisma {
     brandId?: SortOrder
     viewCount?: SortOrder
     basePrice?: SortOrder
+    currencyId?: SortOrder
     sourcePrice?: SortOrder
     priceBufferPercent?: SortOrder
     currentPriceIRT?: SortOrder
@@ -90573,6 +90590,7 @@ export namespace Prisma {
     brandId?: SortOrder
     viewCount?: SortOrder
     basePrice?: SortOrder
+    currencyId?: SortOrder
     sourcePrice?: SortOrder
     priceBufferPercent?: SortOrder
     currentPriceIRT?: SortOrder
@@ -99208,7 +99226,7 @@ export namespace Prisma {
     viewCount?: number
     basePrice?: number
     pricingMode?: $Enums.PricingMode
-    currencyId?: string | null
+    currencyId?: number | null
     sourcePrice?: number | null
     priceBufferPercent?: number | null
     currentPriceIRT?: number
@@ -99914,7 +99932,7 @@ export namespace Prisma {
     viewCount?: IntFilter<"Product"> | number
     basePrice?: IntFilter<"Product"> | number
     pricingMode?: EnumPricingModeFilter<"Product"> | $Enums.PricingMode
-    currencyId?: StringNullableFilter<"Product"> | string | null
+    currencyId?: IntNullableFilter<"Product"> | number | null
     sourcePrice?: FloatNullableFilter<"Product"> | number | null
     priceBufferPercent?: FloatNullableFilter<"Product"> | number | null
     currentPriceIRT?: IntFilter<"Product"> | number
@@ -101856,7 +101874,6 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryCreateWithoutCurrencyInput = {
-    id?: string
     rate: number
     source: string
     wasApplied?: boolean
@@ -101865,7 +101882,7 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryUncheckedCreateWithoutCurrencyInput = {
-    id?: string
+    id?: number
     rate: number
     source: string
     wasApplied?: boolean
@@ -101996,8 +102013,8 @@ export namespace Prisma {
     AND?: ExchangeRateHistoryScalarWhereInput | ExchangeRateHistoryScalarWhereInput[]
     OR?: ExchangeRateHistoryScalarWhereInput[]
     NOT?: ExchangeRateHistoryScalarWhereInput | ExchangeRateHistoryScalarWhereInput[]
-    id?: StringFilter<"ExchangeRateHistory"> | string
-    currencyId?: StringFilter<"ExchangeRateHistory"> | string
+    id?: IntFilter<"ExchangeRateHistory"> | number
+    currencyId?: IntFilter<"ExchangeRateHistory"> | number
     rate?: FloatFilter<"ExchangeRateHistory"> | number
     source?: StringFilter<"ExchangeRateHistory"> | string
     wasApplied?: BoolFilter<"ExchangeRateHistory"> | boolean
@@ -102022,7 +102039,6 @@ export namespace Prisma {
   }
 
   export type CurrencyCreateWithoutRateHistoryInput = {
-    id?: string
     code: string
     name: string
     symbol?: string | null
@@ -102037,7 +102053,7 @@ export namespace Prisma {
   }
 
   export type CurrencyUncheckedCreateWithoutRateHistoryInput = {
-    id?: string
+    id?: number
     code: string
     name: string
     symbol?: string | null
@@ -102068,7 +102084,6 @@ export namespace Prisma {
   }
 
   export type CurrencyUpdateWithoutRateHistoryInput = {
-    id?: StringFieldUpdateOperationsInput | string
     code?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     symbol?: NullableStringFieldUpdateOperationsInput | string | null
@@ -102083,7 +102098,7 @@ export namespace Prisma {
   }
 
   export type CurrencyUncheckedUpdateWithoutRateHistoryInput = {
-    id?: StringFieldUpdateOperationsInput | string
+    id?: IntFieldUpdateOperationsInput | number
     code?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     symbol?: NullableStringFieldUpdateOperationsInput | string | null
@@ -102626,7 +102641,7 @@ export namespace Prisma {
     viewCount?: number
     basePrice?: number
     pricingMode?: $Enums.PricingMode
-    currencyId?: string | null
+    currencyId?: number | null
     sourcePrice?: number | null
     priceBufferPercent?: number | null
     currentPriceIRT?: number
@@ -103192,7 +103207,6 @@ export namespace Prisma {
   }
 
   export type CurrencyCreateWithoutProductsInput = {
-    id?: string
     code: string
     name: string
     symbol?: string | null
@@ -103207,7 +103221,7 @@ export namespace Prisma {
   }
 
   export type CurrencyUncheckedCreateWithoutProductsInput = {
-    id?: string
+    id?: number
     code: string
     name: string
     symbol?: string | null
@@ -103536,7 +103550,6 @@ export namespace Prisma {
   }
 
   export type CurrencyUpdateWithoutProductsInput = {
-    id?: StringFieldUpdateOperationsInput | string
     code?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     symbol?: NullableStringFieldUpdateOperationsInput | string | null
@@ -103551,7 +103564,7 @@ export namespace Prisma {
   }
 
   export type CurrencyUncheckedUpdateWithoutProductsInput = {
-    id?: StringFieldUpdateOperationsInput | string
+    id?: IntFieldUpdateOperationsInput | number
     code?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     symbol?: NullableStringFieldUpdateOperationsInput | string | null
@@ -103875,7 +103888,7 @@ export namespace Prisma {
     viewCount?: number
     basePrice?: number
     pricingMode?: $Enums.PricingMode
-    currencyId?: string | null
+    currencyId?: number | null
     sourcePrice?: number | null
     priceBufferPercent?: number | null
     currentPriceIRT?: number
@@ -104018,7 +104031,7 @@ export namespace Prisma {
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
     pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
-    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyId?: NullableIntFieldUpdateOperationsInput | number | null
     sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
     currentPriceIRT?: IntFieldUpdateOperationsInput | number
@@ -104151,7 +104164,7 @@ export namespace Prisma {
     viewCount?: number
     basePrice?: number
     pricingMode?: $Enums.PricingMode
-    currencyId?: string | null
+    currencyId?: number | null
     sourcePrice?: number | null
     priceBufferPercent?: number | null
     currentPriceIRT?: number
@@ -104310,7 +104323,7 @@ export namespace Prisma {
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
     pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
-    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyId?: NullableIntFieldUpdateOperationsInput | number | null
     sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
     currentPriceIRT?: IntFieldUpdateOperationsInput | number
@@ -104459,7 +104472,7 @@ export namespace Prisma {
     viewCount?: number
     basePrice?: number
     pricingMode?: $Enums.PricingMode
-    currencyId?: string | null
+    currencyId?: number | null
     sourcePrice?: number | null
     priceBufferPercent?: number | null
     currentPriceIRT?: number
@@ -104645,7 +104658,7 @@ export namespace Prisma {
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
     pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
-    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyId?: NullableIntFieldUpdateOperationsInput | number | null
     sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
     currentPriceIRT?: IntFieldUpdateOperationsInput | number
@@ -104926,7 +104939,7 @@ export namespace Prisma {
     viewCount?: number
     basePrice?: number
     pricingMode?: $Enums.PricingMode
-    currencyId?: string | null
+    currencyId?: number | null
     sourcePrice?: number | null
     priceBufferPercent?: number | null
     currentPriceIRT?: number
@@ -105055,7 +105068,7 @@ export namespace Prisma {
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
     pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
-    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyId?: NullableIntFieldUpdateOperationsInput | number | null
     sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
     currentPriceIRT?: IntFieldUpdateOperationsInput | number
@@ -105254,7 +105267,7 @@ export namespace Prisma {
     viewCount?: number
     basePrice?: number
     pricingMode?: $Enums.PricingMode
-    currencyId?: string | null
+    currencyId?: number | null
     sourcePrice?: number | null
     priceBufferPercent?: number | null
     currentPriceIRT?: number
@@ -105439,7 +105452,7 @@ export namespace Prisma {
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
     pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
-    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyId?: NullableIntFieldUpdateOperationsInput | number | null
     sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
     currentPriceIRT?: IntFieldUpdateOperationsInput | number
@@ -106128,7 +106141,7 @@ export namespace Prisma {
     viewCount?: number
     basePrice?: number
     pricingMode?: $Enums.PricingMode
-    currencyId?: string | null
+    currencyId?: number | null
     sourcePrice?: number | null
     priceBufferPercent?: number | null
     currentPriceIRT?: number
@@ -106279,7 +106292,7 @@ export namespace Prisma {
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
     pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
-    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyId?: NullableIntFieldUpdateOperationsInput | number | null
     sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
     currentPriceIRT?: IntFieldUpdateOperationsInput | number
@@ -112210,7 +112223,7 @@ export namespace Prisma {
     viewCount?: number
     basePrice?: number
     pricingMode?: $Enums.PricingMode
-    currencyId?: string | null
+    currencyId?: number | null
     sourcePrice?: number | null
     priceBufferPercent?: number | null
     currentPriceIRT?: number
@@ -112361,7 +112374,7 @@ export namespace Prisma {
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
     pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
-    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyId?: NullableIntFieldUpdateOperationsInput | number | null
     sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
     currentPriceIRT?: IntFieldUpdateOperationsInput | number
@@ -112761,7 +112774,7 @@ export namespace Prisma {
     viewCount?: number
     basePrice?: number
     pricingMode?: $Enums.PricingMode
-    currencyId?: string | null
+    currencyId?: number | null
     sourcePrice?: number | null
     priceBufferPercent?: number | null
     currentPriceIRT?: number
@@ -112896,7 +112909,7 @@ export namespace Prisma {
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
     pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
-    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyId?: NullableIntFieldUpdateOperationsInput | number | null
     sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
     currentPriceIRT?: IntFieldUpdateOperationsInput | number
@@ -113688,7 +113701,7 @@ export namespace Prisma {
     viewCount?: number
     basePrice?: number
     pricingMode?: $Enums.PricingMode
-    currencyId?: string | null
+    currencyId?: number | null
     sourcePrice?: number | null
     priceBufferPercent?: number | null
     currentPriceIRT?: number
@@ -114342,7 +114355,7 @@ export namespace Prisma {
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
     pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
-    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyId?: NullableIntFieldUpdateOperationsInput | number | null
     sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
     currentPriceIRT?: IntFieldUpdateOperationsInput | number
@@ -114384,7 +114397,7 @@ export namespace Prisma {
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
     pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
-    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyId?: NullableIntFieldUpdateOperationsInput | number | null
     sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
     currentPriceIRT?: IntFieldUpdateOperationsInput | number
@@ -115191,7 +115204,7 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryCreateManyCurrencyInput = {
-    id?: string
+    id?: number
     rate: number
     source: string
     wasApplied?: boolean
@@ -115234,7 +115247,6 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryUpdateWithoutCurrencyInput = {
-    id?: StringFieldUpdateOperationsInput | string
     rate?: FloatFieldUpdateOperationsInput | number
     source?: StringFieldUpdateOperationsInput | string
     wasApplied?: BoolFieldUpdateOperationsInput | boolean
@@ -115243,7 +115255,7 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryUncheckedUpdateWithoutCurrencyInput = {
-    id?: StringFieldUpdateOperationsInput | string
+    id?: IntFieldUpdateOperationsInput | number
     rate?: FloatFieldUpdateOperationsInput | number
     source?: StringFieldUpdateOperationsInput | string
     wasApplied?: BoolFieldUpdateOperationsInput | boolean
@@ -115252,7 +115264,7 @@ export namespace Prisma {
   }
 
   export type ExchangeRateHistoryUncheckedUpdateManyWithoutCurrencyInput = {
-    id?: StringFieldUpdateOperationsInput | string
+    id?: IntFieldUpdateOperationsInput | number
     rate?: FloatFieldUpdateOperationsInput | number
     source?: StringFieldUpdateOperationsInput | string
     wasApplied?: BoolFieldUpdateOperationsInput | boolean
@@ -115516,7 +115528,7 @@ export namespace Prisma {
     viewCount?: number
     basePrice?: number
     pricingMode?: $Enums.PricingMode
-    currencyId?: string | null
+    currencyId?: number | null
     sourcePrice?: number | null
     priceBufferPercent?: number | null
     currentPriceIRT?: number
@@ -115591,7 +115603,7 @@ export namespace Prisma {
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
     pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
-    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyId?: NullableIntFieldUpdateOperationsInput | number | null
     sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
     currentPriceIRT?: IntFieldUpdateOperationsInput | number
@@ -115633,7 +115645,7 @@ export namespace Prisma {
     viewCount?: IntFieldUpdateOperationsInput | number
     basePrice?: IntFieldUpdateOperationsInput | number
     pricingMode?: EnumPricingModeFieldUpdateOperationsInput | $Enums.PricingMode
-    currencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyId?: NullableIntFieldUpdateOperationsInput | number | null
     sourcePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     priceBufferPercent?: NullableFloatFieldUpdateOperationsInput | number | null
     currentPriceIRT?: IntFieldUpdateOperationsInput | number

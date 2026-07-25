@@ -6,8 +6,15 @@ export async function listCurrencies() {
   return prisma.currency.findMany({ orderBy: { code: "asc" } });
 }
 
-export async function createCurrency(data: { code: string; name: string; symbol?: string }) {
-  const existing = await prisma.currency.findUnique({ where: { code: data.code } });
+export async function createCurrency(data: {
+  code: string;
+  name: string;
+  symbol?: string;
+  isActive?: boolean;
+}) {
+  const existing = await prisma.currency.findUnique({
+    where: { code: data.code },
+  });
   if (existing) throw ApiError.conflict("این ارز قبلاً ثبت شده است");
 
   return prisma.currency.create({
@@ -15,14 +22,14 @@ export async function createCurrency(data: { code: string; name: string; symbol?
       code: data.code,
       name: data.name,
       symbol: data.symbol,
-      isActive: true,
+      isActive: data.isActive,
     },
   });
 }
 
 export async function updateCurrency(
-  id: string,
-  data: { isActive?: boolean; currentRate?: number }
+  id: number,
+  data: { isActive?: boolean; currentRate?: number },
 ) {
   const currency = await prisma.currency.findUnique({ where: { id } });
   if (!currency) throw ApiError.notFound("ارز پیدا نشد");
@@ -35,7 +42,10 @@ export async function updateCurrency(
     updateData.lastAppliedAt = new Date();
   }
 
-  const updated = await prisma.currency.update({ where: { id }, data: updateData });
+  const updated = await prisma.currency.update({
+    where: { id },
+    data: updateData,
+  });
 
   if (data.currentRate !== undefined) {
     await recalculateProductsForCurrency(id, data.currentRate);

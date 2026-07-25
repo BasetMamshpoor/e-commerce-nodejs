@@ -50,7 +50,7 @@ async function validateVariantsInput(variants: VariantInput[], opts: { productId
 async function validatePricingModeConstraints(
   pricingMode: PricingMode,
   basePrice: number,
-  currencyId: string | undefined | null,
+  currencyId: number | undefined | null,
   sourcePrice: number | undefined | null,
   variantAttributeValues: { attributeValueId: number; modifierType?: string | null; modifierValue?: number | null }[][]
 ): Promise<void> {
@@ -324,7 +324,7 @@ export async function updateProduct(id: number, input: UpdateProductInput) {
 
   const pricingMode = (input.pricingMode as PricingMode | undefined) ?? product.pricingMode;
   const basePrice = input.basePrice ?? product.basePrice;
-  const currencyId = input.currencyId !== undefined ? input.currencyId : (product.currencyId as string | null | undefined);
+  const currencyId = input.currencyId !== undefined ? input.currencyId : (product.currencyId as number | null | undefined);
   const sourcePrice = input.sourcePrice !== undefined ? input.sourcePrice : (product.sourcePrice as number | null | undefined);
 
   const defaultVariantAttrValues = product.variants[0]?.attributeValues ?? [];

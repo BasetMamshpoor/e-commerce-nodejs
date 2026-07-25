@@ -1,4 +1,4 @@
-﻿-- CreateEnum
+-- CreateEnum
 CREATE TYPE "PricingMode" AS ENUM ('FIXED_IRT', 'CURRENCY_BASED');
 
 -- CreateEnum

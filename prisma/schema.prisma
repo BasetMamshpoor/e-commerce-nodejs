@@ -387,7 +387,7 @@ model Media {
 // ============================================================================
 
 model Currency {
-  id          String   @id @default(cuid())
+  id          Int      @id @default(autoincrement())
   code        String   @unique
   name        String
   symbol      String?
@@ -408,8 +408,8 @@ model Currency {
 }
 
 model ExchangeRateHistory {
-  id          String   @id @default(cuid())
-  currencyId  String
+  id          Int      @id @default(autoincrement())
+  currencyId  Int
   currency    Currency @relation(fields: [currencyId], references: [id], onDelete: Cascade)
 
   rate          Float
@@ -530,7 +530,7 @@ model Product {
   basePrice Int @default(0)
 
   pricingMode       PricingMode @default(FIXED_IRT)
-  currencyId        String?
+  currencyId        Int?
   currency          Currency?   @relation(fields: [currencyId], references: [id])
   sourcePrice       Float?
   priceBufferPercent Float?     @default(0)

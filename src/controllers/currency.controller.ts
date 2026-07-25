@@ -13,6 +13,6 @@ export async function create(req: Request, res: Response) {
 }
 
 export async function update(req: Request, res: Response) {
-  const currency = await currencyService.updateCurrency(req.params.id as string, req.body);
+  const currency = await currencyService.updateCurrency(Number(req.params.id), req.body);
   return ApiResponse.ok(res, currency, "ارز به‌روزرسانی شد");
 }

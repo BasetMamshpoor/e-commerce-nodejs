@@ -68,7 +68,7 @@ Modifier types:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | String | cuid, auto-generated |
+| `id` | Int | auto-increment |
 | `code` | String (unique) | Currency code (e.g. USD, EUR, AED) |
 | `name` | String | Display name (e.g. "US Dollar") |
 | `symbol` | String? | Currency symbol (e.g. $, €) |
@@ -84,8 +84,8 @@ Modifier types:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | String | cuid, auto-generated |
-| `currencyId` | String | FK to Currency |
+| `id` | Int | auto-increment |
+| `currencyId` | Int | FK to Currency |
 | `rate` | Float | The recorded rate |
 | `source` | String | Provider name (`brsapi`, `navasan`, or `manual`) |
 | `wasApplied` | Boolean | Whether the rate triggered a product price update |
