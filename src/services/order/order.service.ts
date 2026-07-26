@@ -19,7 +19,8 @@ import {
   AdminUpdateOrderStatusInput,
 } from "../../validations/order.validation";
 import { Order, OrderStatus, PricingMode } from "../../generated/prisma";
-import { calculateFinalPrice } from "../pricingEngine";
+import { calculateVariantPrice } from "../pricingEngine";
+import { computeProductEffectivePrice } from "../../utils/pricing";
 
 // ----------------------------------------------------------------------------
 // سفارش‌ها — آیتم ۸، ۹، ۱۰. این فایل مسئول «ساخت سفارش از سبد خرید» و
@@ -81,28 +82,31 @@ export async function createOrder(userId: number, input: CreateOrderInput): Prom
     }
 
     const product = freshVariant.product;
-    let freshPriceIRT: number;
 
-    if (product.pricingMode === "CURRENCY_BASED") {
-      const modifiers = freshVariant.attributeValues.map((av) => ({
-        modifierType: av.modifierType,
-        modifierValue: av.modifierValue,
-      }));
+    // قیمت واقعی «همین لحظه» را دقیقاً با همان مسیر محاسباتی سبد خرید
+    // می‌سازیم (priceAdjustment + modifierValue های ویژگی‌ها + تخفیف
+    // محصول)، وگرنه چون item.unitPrice (قیمت سبد) شامل تخفیف است ولی
+    // freshPriceIRT قبلاً بدون تخفیف محاسبه می‌شد، همیشه به‌اشتباه به نظر
+    // می‌رسید قیمت «تغییر کرده».
+    const freshOriginalPrice = calculateVariantPrice(
+      {
+        pricingMode: product.pricingMode,
+        basePrice: product.basePrice,
+        sourcePrice: product.sourcePrice,
+        priceBufferPercent: product.priceBufferPercent,
+      },
+      product.currency ? { currentRate: product.currency.currentRate } : null,
+      { priceAdjustment: freshVariant.priceAdjustment, attributeValues: freshVariant.attributeValues }
+    ).finalPriceIRT;
 
-      const result = calculateFinalPrice(
-        {
-          pricingMode: "CURRENCY_BASED",
-          basePrice: product.basePrice,
-          sourcePrice: product.sourcePrice,
-          priceBufferPercent: product.priceBufferPercent,
-        },
-        product.currency ? { currentRate: product.currency.currentRate } : null,
-        modifiers
-      );
-      freshPriceIRT = result.finalPriceIRT;
-    } else {
-      freshPriceIRT = product.basePrice + freshVariant.priceAdjustment;
-    }
+    const freshPriceIRT = computeProductEffectivePrice(
+      freshOriginalPrice,
+      0,
+      product.discountType,
+      product.discountValue,
+      null,
+      null
+    ).unitPrice;
 
     const cartPrice = item.unitPrice;
     if (cartPrice > 0) {

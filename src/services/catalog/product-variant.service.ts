@@ -3,22 +3,16 @@ import { ApiError } from "../../utils/ApiError";
 import { VariantInput } from "../../validations/product.validation";
 import { recomputeProductAggregates } from "./product.service";
 import { Prisma } from "../../generated/prisma";
-
-function comboKey(attributeValueIds: number[]): string {
-  return [...attributeValueIds].sort().join("|");
-}
+import { buildComboKey } from "../../utils/variantCombo";
 
 function extractIds(attributeValues: { attributeValueId: number }[]): number[] {
   return attributeValues.map((av) => av.attributeValueId);
 }
 
-async function assertSkuFree(sku: string, excludeVariantId?: number): Promise<void> {
-  const existing = await prisma.productVariant.findUnique({ where: { sku } });
-  if (existing && existing.id !== excludeVariantId) {
-    throw ApiError.conflict("این SKU قبلاً استفاده شده است");
-  }
-}
-
+// این تابع صرفاً برای پیام خطای فوری و کاربرپسند است (قبل از رفتن به
+// دیتابیس). ضامنِ واقعیِ جلوگیری از ترکیب تکراری، محدودیت یکتای سطح
+// دیتابیس روی (productId, comboKey) است — چون این تابع خودش در برابر دو
+// درخواست هم‌زمان (race condition) ایمن نیست.
 async function assertComboFree(productId: number, attributeValueIds: number[], excludeVariantId?: number): Promise<void> {
   if (attributeValueIds.length === 0) return;
 
@@ -27,12 +21,29 @@ async function assertComboFree(productId: number, attributeValueIds: number[], e
     include: { attributeValues: true },
   });
 
-  const targetKey = comboKey(attributeValueIds);
+  const targetKey = buildComboKey(attributeValueIds);
   const conflict = siblings.some(
-    (s) => comboKey(s.attributeValues.map((a) => a.attributeValueId)) === targetKey
+    (s) => buildComboKey(s.attributeValues.map((a) => a.attributeValueId)) === targetKey
   );
   if (conflict) {
     throw ApiError.conflict("تنوعی با همین ترکیب ویژگی‌ها از قبل برای این محصول وجود دارد");
+  }
+}
+
+// اگر با وجودِ بررسیِ بالا، دو درخواست هم‌زمان از آن رد شده باشند، دیتابیس
+// خودش دومی را با خطای P2002 روی @@unique([productId, comboKey]) رد
+// می‌کند؛ این تابع آن خطا را به همان پیام کاربرپسند تبدیل می‌کند.
+function rethrowComboConflict(err: unknown): never {
+  if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+    throw ApiError.conflict("تنوعی با همین ترکیب ویژگی‌ها از قبل برای این محصول وجود دارد");
+  }
+  throw err;
+}
+
+async function assertSkuFree(sku: string, excludeVariantId?: number): Promise<void> {
+  const existing = await prisma.productVariant.findUnique({ where: { sku } });
+  if (existing && existing.id !== excludeVariantId) {
+    throw ApiError.conflict("این SKU قبلاً استفاده شده است");
   }
 }
 
@@ -44,7 +55,8 @@ async function assertProductExists(productId: number): Promise<void> {
 export async function addVariant(productId: number, input: VariantInput) {
   await assertProductExists(productId);
   await assertSkuFree(input.sku);
-  await assertComboFree(productId, extractIds(input.attributeValues));
+  const attributeValueIds = extractIds(input.attributeValues);
+  await assertComboFree(productId, attributeValueIds);
 
   if (input.isDefault) {
     await prisma.productVariant.updateMany({
@@ -53,27 +65,32 @@ export async function addVariant(productId: number, input: VariantInput) {
     });
   }
 
-  const variant = await prisma.productVariant.create({
-    data: {
-      productId,
-      sku: input.sku,
-      priceAdjustment: input.priceAdjustment,
-      stock: input.stock,
-      weight: input.weight,
-      isDefault: input.isDefault,
-      isActive: input.isActive,
-      attributeValues: {
-        create: input.attributeValues.map((av) => ({
-          attributeValueId: av.attributeValueId,
-          modifierType: av.modifierType ?? null,
-          modifierValue: av.modifierValue ?? null,
-        })),
+  try {
+    const variant = await prisma.productVariant.create({
+      data: {
+        productId,
+        sku: input.sku,
+        priceAdjustment: input.priceAdjustment,
+        stock: input.stock,
+        weight: input.weight,
+        isDefault: input.isDefault,
+        isActive: input.isActive,
+        comboKey: buildComboKey(attributeValueIds),
+        attributeValues: {
+          create: input.attributeValues.map((av) => ({
+            attributeValueId: av.attributeValueId,
+            modifierType: av.modifierType ?? null,
+            modifierValue: av.modifierValue ?? null,
+          })),
+        },
       },
-    },
-  });
+    });
 
-  await recomputeProductAggregates(productId);
-  return variant;
+    await recomputeProductAggregates(productId);
+    return variant;
+  } catch (err) {
+    rethrowComboConflict(err);
+  }
 }
 
 export async function updateVariant(productId: number, variantId: number, input: Partial<VariantInput>) {
@@ -97,27 +114,32 @@ export async function updateVariant(productId: number, variantId: number, input:
 
   const { attributeValues, ...scalarInput } = input;
 
-  const updated = await prisma.productVariant.update({
-    where: { id: variantId },
-    data: {
-      ...scalarInput,
-      ...(attributeValues
-        ? {
-            attributeValues: {
-              deleteMany: {},
-              create: attributeValues.map((av) => ({
-                attributeValueId: av.attributeValueId,
-                modifierType: av.modifierType ?? null,
-                modifierValue: av.modifierValue ?? null,
-              })),
-            },
-          }
-        : {}),
-    },
-  });
+  try {
+    const updated = await prisma.productVariant.update({
+      where: { id: variantId },
+      data: {
+        ...scalarInput,
+        ...(attributeValues
+          ? {
+              comboKey: buildComboKey(extractIds(attributeValues)),
+              attributeValues: {
+                deleteMany: {},
+                create: attributeValues.map((av) => ({
+                  attributeValueId: av.attributeValueId,
+                  modifierType: av.modifierType ?? null,
+                  modifierValue: av.modifierValue ?? null,
+                })),
+              },
+            }
+          : {}),
+      },
+    });
 
-  await recomputeProductAggregates(productId);
-  return updated;
+    await recomputeProductAggregates(productId);
+    return updated;
+  } catch (err) {
+    rethrowComboConflict(err);
+  }
 }
 
 export async function deleteVariant(productId: number, variantId: number): Promise<void> {

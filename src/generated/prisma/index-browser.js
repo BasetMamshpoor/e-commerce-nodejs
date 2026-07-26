@@ -369,6 +369,7 @@ exports.Prisma.ProductVariantScalarFieldEnum = {
   weight: 'weight',
   isDefault: 'isDefault',
   isActive: 'isActive',
+  comboKey: 'comboKey',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

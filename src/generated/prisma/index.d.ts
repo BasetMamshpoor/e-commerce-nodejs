@@ -30562,6 +30562,7 @@ export namespace Prisma {
     weight: number | null
     isDefault: boolean | null
     isActive: boolean | null
+    comboKey: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -30575,6 +30576,7 @@ export namespace Prisma {
     weight: number | null
     isDefault: boolean | null
     isActive: boolean | null
+    comboKey: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -30588,6 +30590,7 @@ export namespace Prisma {
     weight: number
     isDefault: number
     isActive: number
+    comboKey: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -30619,6 +30622,7 @@ export namespace Prisma {
     weight?: true
     isDefault?: true
     isActive?: true
+    comboKey?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -30632,6 +30636,7 @@ export namespace Prisma {
     weight?: true
     isDefault?: true
     isActive?: true
+    comboKey?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -30645,6 +30650,7 @@ export namespace Prisma {
     weight?: true
     isDefault?: true
     isActive?: true
+    comboKey?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -30745,6 +30751,7 @@ export namespace Prisma {
     weight: number | null
     isDefault: boolean
     isActive: boolean
+    comboKey: string
     createdAt: Date
     updatedAt: Date
     _count: ProductVariantCountAggregateOutputType | null
@@ -30777,6 +30784,7 @@ export namespace Prisma {
     weight?: boolean
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     product?: boolean | ProductDefaultArgs<ExtArgs>
@@ -30795,6 +30803,7 @@ export namespace Prisma {
     weight?: boolean
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     product?: boolean | ProductDefaultArgs<ExtArgs>
@@ -30809,6 +30818,7 @@ export namespace Prisma {
     weight?: boolean
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     product?: boolean | ProductDefaultArgs<ExtArgs>
@@ -30823,11 +30833,12 @@ export namespace Prisma {
     weight?: boolean
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ProductVariantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "productId" | "sku" | "priceAdjustment" | "stock" | "weight" | "isDefault" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["productVariant"]>
+  export type ProductVariantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "productId" | "sku" | "priceAdjustment" | "stock" | "weight" | "isDefault" | "isActive" | "comboKey" | "createdAt" | "updatedAt", ExtArgs["result"]["productVariant"]>
   export type ProductVariantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     product?: boolean | ProductDefaultArgs<ExtArgs>
     attributeValues?: boolean | ProductVariant$attributeValuesArgs<ExtArgs>
@@ -30859,6 +30870,7 @@ export namespace Prisma {
       weight: number | null
       isDefault: boolean
       isActive: boolean
+      comboKey: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["productVariant"]>
@@ -31296,6 +31308,7 @@ export namespace Prisma {
     readonly weight: FieldRef<"ProductVariant", 'Float'>
     readonly isDefault: FieldRef<"ProductVariant", 'Boolean'>
     readonly isActive: FieldRef<"ProductVariant", 'Boolean'>
+    readonly comboKey: FieldRef<"ProductVariant", 'String'>
     readonly createdAt: FieldRef<"ProductVariant", 'DateTime'>
     readonly updatedAt: FieldRef<"ProductVariant", 'DateTime'>
   }
@@ -78565,6 +78578,7 @@ export namespace Prisma {
     weight: 'weight',
     isDefault: 'isDefault',
     isActive: 'isActive',
+    comboKey: 'comboKey',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -81268,6 +81282,7 @@ export namespace Prisma {
     weight?: FloatNullableFilter<"ProductVariant"> | number | null
     isDefault?: BoolFilter<"ProductVariant"> | boolean
     isActive?: BoolFilter<"ProductVariant"> | boolean
+    comboKey?: StringFilter<"ProductVariant"> | string
     createdAt?: DateTimeFilter<"ProductVariant"> | Date | string
     updatedAt?: DateTimeFilter<"ProductVariant"> | Date | string
     product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
@@ -81285,6 +81300,7 @@ export namespace Prisma {
     weight?: SortOrderInput | SortOrder
     isDefault?: SortOrder
     isActive?: SortOrder
+    comboKey?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     product?: ProductOrderByWithRelationInput
@@ -81296,6 +81312,7 @@ export namespace Prisma {
   export type ProductVariantWhereUniqueInput = Prisma.AtLeast<{
     id?: number
     sku?: string
+    productId_comboKey?: ProductVariantProductIdComboKeyCompoundUniqueInput
     AND?: ProductVariantWhereInput | ProductVariantWhereInput[]
     OR?: ProductVariantWhereInput[]
     NOT?: ProductVariantWhereInput | ProductVariantWhereInput[]
@@ -81305,13 +81322,14 @@ export namespace Prisma {
     weight?: FloatNullableFilter<"ProductVariant"> | number | null
     isDefault?: BoolFilter<"ProductVariant"> | boolean
     isActive?: BoolFilter<"ProductVariant"> | boolean
+    comboKey?: StringFilter<"ProductVariant"> | string
     createdAt?: DateTimeFilter<"ProductVariant"> | Date | string
     updatedAt?: DateTimeFilter<"ProductVariant"> | Date | string
     product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
     attributeValues?: ProductVariantAttributeValueListRelationFilter
     cartItems?: CartItemListRelationFilter
     orderItems?: OrderItemListRelationFilter
-  }, "id" | "sku">
+  }, "id" | "sku" | "productId_comboKey">
 
   export type ProductVariantOrderByWithAggregationInput = {
     id?: SortOrder
@@ -81322,6 +81340,7 @@ export namespace Prisma {
     weight?: SortOrderInput | SortOrder
     isDefault?: SortOrder
     isActive?: SortOrder
+    comboKey?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ProductVariantCountOrderByAggregateInput
@@ -81343,6 +81362,7 @@ export namespace Prisma {
     weight?: FloatNullableWithAggregatesFilter<"ProductVariant"> | number | null
     isDefault?: BoolWithAggregatesFilter<"ProductVariant"> | boolean
     isActive?: BoolWithAggregatesFilter<"ProductVariant"> | boolean
+    comboKey?: StringWithAggregatesFilter<"ProductVariant"> | string
     createdAt?: DateTimeWithAggregatesFilter<"ProductVariant"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ProductVariant"> | Date | string
   }
@@ -86017,6 +86037,7 @@ export namespace Prisma {
     weight?: number | null
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     product: ProductCreateNestedOneWithoutVariantsInput
@@ -86034,6 +86055,7 @@ export namespace Prisma {
     weight?: number | null
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     attributeValues?: ProductVariantAttributeValueUncheckedCreateNestedManyWithoutVariantInput
@@ -86048,6 +86070,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    comboKey?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
@@ -86065,6 +86088,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    comboKey?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attributeValues?: ProductVariantAttributeValueUncheckedUpdateManyWithoutVariantNestedInput
@@ -86081,6 +86105,7 @@ export namespace Prisma {
     weight?: number | null
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -86092,6 +86117,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    comboKey?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -86105,6 +86131,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    comboKey?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -90736,6 +90763,11 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type ProductVariantProductIdComboKeyCompoundUniqueInput = {
+    productId: number
+    comboKey: string
+  }
+
   export type ProductVariantCountOrderByAggregateInput = {
     id?: SortOrder
     productId?: SortOrder
@@ -90745,6 +90777,7 @@ export namespace Prisma {
     weight?: SortOrder
     isDefault?: SortOrder
     isActive?: SortOrder
+    comboKey?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -90766,6 +90799,7 @@ export namespace Prisma {
     weight?: SortOrder
     isDefault?: SortOrder
     isActive?: SortOrder
+    comboKey?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -90779,6 +90813,7 @@ export namespace Prisma {
     weight?: SortOrder
     isDefault?: SortOrder
     isActive?: SortOrder
+    comboKey?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -103346,6 +103381,7 @@ export namespace Prisma {
     weight?: number | null
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     attributeValues?: ProductVariantAttributeValueCreateNestedManyWithoutVariantInput
@@ -103361,6 +103397,7 @@ export namespace Prisma {
     weight?: number | null
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     attributeValues?: ProductVariantAttributeValueUncheckedCreateNestedManyWithoutVariantInput
@@ -103708,6 +103745,7 @@ export namespace Prisma {
     weight?: FloatNullableFilter<"ProductVariant"> | number | null
     isDefault?: BoolFilter<"ProductVariant"> | boolean
     isActive?: BoolFilter<"ProductVariant"> | boolean
+    comboKey?: StringFilter<"ProductVariant"> | string
     createdAt?: DateTimeFilter<"ProductVariant"> | Date | string
     updatedAt?: DateTimeFilter<"ProductVariant"> | Date | string
   }
@@ -104773,6 +104811,7 @@ export namespace Prisma {
     weight?: number | null
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     product: ProductCreateNestedOneWithoutVariantsInput
@@ -104789,6 +104828,7 @@ export namespace Prisma {
     weight?: number | null
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     cartItems?: CartItemUncheckedCreateNestedManyWithoutVariantInput
@@ -104838,6 +104878,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    comboKey?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
@@ -104854,6 +104895,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    comboKey?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cartItems?: CartItemUncheckedUpdateManyWithoutVariantNestedInput
@@ -105716,6 +105758,7 @@ export namespace Prisma {
     weight?: number | null
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     product: ProductCreateNestedOneWithoutVariantsInput
@@ -105732,6 +105775,7 @@ export namespace Prisma {
     weight?: number | null
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     attributeValues?: ProductVariantAttributeValueUncheckedCreateNestedManyWithoutVariantInput
@@ -105787,6 +105831,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    comboKey?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
@@ -105803,6 +105848,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    comboKey?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attributeValues?: ProductVariantAttributeValueUncheckedUpdateManyWithoutVariantNestedInput
@@ -108712,6 +108758,7 @@ export namespace Prisma {
     weight?: number | null
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     product: ProductCreateNestedOneWithoutVariantsInput
@@ -108728,6 +108775,7 @@ export namespace Prisma {
     weight?: number | null
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     attributeValues?: ProductVariantAttributeValueUncheckedCreateNestedManyWithoutVariantInput
@@ -108862,6 +108910,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    comboKey?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
@@ -108878,6 +108927,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    comboKey?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attributeValues?: ProductVariantAttributeValueUncheckedUpdateManyWithoutVariantNestedInput
@@ -115779,6 +115829,7 @@ export namespace Prisma {
     weight?: number | null
     isDefault?: boolean
     isActive?: boolean
+    comboKey?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -115838,6 +115889,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    comboKey?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attributeValues?: ProductVariantAttributeValueUpdateManyWithoutVariantNestedInput
@@ -115853,6 +115905,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    comboKey?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attributeValues?: ProductVariantAttributeValueUncheckedUpdateManyWithoutVariantNestedInput
@@ -115868,6 +115921,7 @@ export namespace Prisma {
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    comboKey?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

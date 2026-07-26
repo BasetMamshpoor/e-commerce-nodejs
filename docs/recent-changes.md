@@ -209,3 +209,99 @@ Currently, these values are stored but not auto-calculated. A future enhancement
 1. Read `weight` from each `ProductVariant` (to be added)
 2. Calculate `distance` from the customer's address via a live shipping API
 3. Call `calculateShippingCost()` automatically
+
+---
+
+## 8. Product Variant Pricing Fix — priceAdjustment + Attribute Modifiers Now Combined
+
+**No schema change.** This is a bugfix in how variant prices were calculated and exposed to the
+API — several places were silently ignoring the per-attribute-value price modifiers
+(`modifierType`/`modifierValue` on each `ProductVariantAttributeValue`) and only used the flat
+`ProductVariant.priceAdjustment` field instead. This meant setting a price modifier on a color/size
+(e.g. "XL costs 20,000 Toman more") had **no effect** on the price shown in the cart or on
+product listing pages, and for currency-based products it could cause the cart price and the
+order price to disagree.
+
+Both `priceAdjustment` and every attribute value's `modifierType`/`modifierValue` are now combined
+in a single calculation used everywhere (cart, order price re-verification, product min/max price,
+product detail API). Nothing about how you *send* data changed — the fix is entirely on read/
+calculation paths. Two things changed in API **responses** that the frontend should pick up:
+
+### 5.1. `variants[].attributeValues[]` now includes the modifier fields
+
+Previously the product detail endpoints (`GET /api/products/:id`, `GET /api/products/slug/:slug`,
+admin product endpoints) stripped `modifierType`/`modifierValue` from each attribute value before
+sending it to the frontend. They are now included:
+
+```json
+{
+  "variants": [
+    {
+      "id": 12,
+      "sku": "SHIRT-XL-RED",
+      "priceAdjustment": 5000,
+      "stock": 8,
+      "finalPrice": 125000,
+      "attributeValues": [
+        {
+          "id": 4,
+          "value": "XL",
+          "colorHex": null,
+          "order": 1,
+          "attribute": { "id": 2, "name": "سایز", "slug": "size", "inputType": "SELECT" },
+          "modifierType": "FIXED_IRT",
+          "modifierValue": 20000
+        }
+      ]
+    }
+  ]
+}
+```
+
+### 5.2. New `variants[].finalPrice` field
+
+Every variant in a product detail response now includes a computed `finalPrice` (Int, Toman) —
+the fully-resolved price for that exact combination (`basePrice`/`currentPriceIRT` +
+`priceAdjustment` + every attribute value's modifier, converted through the product's currency
+rate when relevant). **The frontend should use `finalPrice` directly to show the price for a
+selected combination, instead of computing it itself** (e.g. instead of `basePrice +
+priceAdjustment`, which was the old — and incorrect — approach once modifiers are involved).
+Note `finalPrice` does not include the product-level discount (`discountType`/`discountValue`);
+that is applied the same way as before, on top of this value.
+
+### Nothing else in the request/response shape changed
+
+Creating/updating variants (`POST/PUT /api/admin/products/:id/variants`) is unchanged — you already
+send `modifierType`/`modifierValue` per attribute value there; that data is now actually used
+everywhere it's supposed to be.
+
+---
+
+## 9. PERCENTAGE Modifier Now Allowed for FIXED_IRT (Rial) Products
+
+Per product decision: a Rial-priced (`FIXED_IRT`) product can now have a variant attribute value
+with `modifierType: "PERCENTAGE"` — e.g. "size XL costs 10% more than the base price." Previously
+this was rejected with a 400 error; it's now calculated as `basePrice + FIXED_IRT modifiers +
+basePrice × (sum of PERCENTAGE modifiers / 100)`.
+
+No request/response shape changed — this only affects which `modifierType` values are accepted
+for `FIXED_IRT` products when creating/updating a variant's attribute values, and how the final
+price is computed (see section 5 above for `finalPrice`). `FIXED_SOURCE_CURRENCY` is still rejected
+for `FIXED_IRT` products (a Rial product has no source currency to reference).
+
+## 10. Duplicate Variant Combination Now Rejected at the Database Level (Schema Change)
+
+**This requires a migration.** A new column `ProductVariant.comboKey` was added, with a unique
+constraint on `(productId, comboKey)`. `comboKey` is the sorted, comma-joined list of a variant's
+attribute value IDs (e.g. `"3,7"`), computed and set automatically by the backend — nothing new to
+send from the frontend.
+
+Why: the previous duplicate-combination check only happened in application code (read, then
+write), so two simultaneous "add variant" requests with the same attribute combination could both
+slip through and create two variants with the identical combination. The database now rejects the
+second one outright (`409 Conflict` — "تنوعی با همین ترکیب ویژگی‌ها از قبل برای این محصول وجود
+دارد"), the same error message as before, just now guaranteed instead of best-effort.
+
+No API request/response shape changed. `POST/PUT /api/admin/products/:id/variants` behave exactly
+as documented; the only visible difference is that the 409 conflict is now impossible to bypass
+via a race condition.

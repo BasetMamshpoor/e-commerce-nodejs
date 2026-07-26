@@ -4,7 +4,8 @@ import { slugify, ensureUniqueSlug } from "../../utils/slug";
 import { serializeProduct, ProductLike } from "../../utils/serialize";
 import { CreateProductInput, UpdateProductInput, VariantInput } from "../../validations/product.validation";
 import { Prisma, PricingMode, ModifierType } from "../../generated/prisma";
-import { calculateFinalPrice } from "../pricingEngine";
+import { calculateFinalPrice, calculateVariantPrice } from "../pricingEngine";
+import { buildComboKey } from "../../utils/variantCombo";
 
 function extractIds(values: { attributeValueId: number }[]): number[] {
   return values.map((v) => v.attributeValueId);
@@ -23,10 +24,6 @@ function normalizeDefaultFlag(variants: VariantInput[]): VariantInput[] {
   }));
 }
 
-function comboKey(attributeValueIds: number[]): string {
-  return [...attributeValueIds].sort().join("|");
-}
-
 async function validateVariantsInput(variants: VariantInput[], opts: { productId?: number } = {}): Promise<void> {
   const skus = variants.map((v) => v.sku);
   if (new Set(skus).size !== skus.length) {
@@ -41,7 +38,7 @@ async function validateVariantsInput(variants: VariantInput[], opts: { productId
     throw ApiError.conflict(`این SKU ها قبلاً استفاده شده‌اند: ${existingSkus.map((s) => s.sku).join(", ")}`);
   }
 
-  const combos = variants.map((v) => comboKey(extractIds(v.attributeValues)));
+  const combos = variants.map((v) => buildComboKey(extractIds(v.attributeValues)));
   if (new Set(combos).size !== combos.length) {
     throw ApiError.badRequest("دو تنوع کالا نمی‌توانند ترکیب یکسانی از ویژگی‌ها داشته باشند");
   }
@@ -74,7 +71,7 @@ async function validatePricingModeConstraints(
 
     for (const attrVals of variantAttributeValues) {
       for (const av of attrVals) {
-        if (av.modifierType === "PERCENTAGE" || av.modifierType === "FIXED_SOURCE_CURRENCY") {
+        if (av.modifierType === "FIXED_SOURCE_CURRENCY") {
           throw ApiError.badRequest(
             `محصولات FIXED_IRT نمی‌توانند از modifierType «${av.modifierType}» استفاده کنند`
           );
@@ -87,12 +84,17 @@ async function validatePricingModeConstraints(
 export async function recomputeProductAggregates(productId: number): Promise<void> {
   const product = await prisma.product.findUnique({
     where: { id: productId },
-    select: { basePrice: true, pricingMode: true, currentPriceIRT: true, sourcePrice: true, priceBufferPercent: true, currencyId: true },
+    select: {
+      basePrice: true, pricingMode: true, currentPriceIRT: true, sourcePrice: true,
+      priceBufferPercent: true, currencyId: true,
+      currency: { select: { currentRate: true } },
+    },
   });
   if (!product) return;
 
   const variants = await prisma.productVariant.findMany({
     where: { productId, isActive: true },
+    include: { attributeValues: { select: { modifierType: true, modifierValue: true } } },
   });
 
   if (variants.length === 0) {
@@ -103,21 +105,25 @@ export async function recomputeProductAggregates(productId: number): Promise<voi
     return;
   }
 
-  if (product.pricingMode === "CURRENCY_BASED") {
-    const isInStock = variants.some((v) => v.stock > 0);
-    await prisma.product.update({
-      where: { id: productId },
-      data: {
-        minPrice: product.currentPriceIRT,
-        maxPrice: product.currentPriceIRT,
-        isInStock,
-        hasActiveDiscount: false,
+  // قیمت واقعی هر تنوع را با درنظرگرفتن هم priceAdjustment و هم
+  // modifierValue های ویژگی‌های همان تنوع محاسبه می‌کنیم — نه فقط
+  // priceAdjustment (که باعث می‌شد تنوع‌های با مدیفایر ویژگی، در بازه‌ی
+  // قیمتی محصول (minPrice/maxPrice) اصلاً دیده نشوند).
+  const prices = variants.map((v) =>
+    calculateVariantPrice(
+      {
+        pricingMode: product.pricingMode,
+        basePrice: product.basePrice,
+        sourcePrice: product.sourcePrice,
+        priceBufferPercent: product.priceBufferPercent,
       },
-    });
-    return;
-  }
-
-  const prices = variants.map((v) => product.basePrice + v.priceAdjustment);
+      product.currency,
+      {
+        priceAdjustment: v.priceAdjustment,
+        attributeValues: v.attributeValues,
+      }
+    ).finalPriceIRT
+  );
   const isInStock = variants.some((v) => v.stock > 0);
 
   await prisma.product.update({
@@ -266,6 +272,7 @@ export async function createProduct(input: CreateProductInput, createdById?: num
           weight: v.weight,
           isDefault: v.isDefault,
           isActive: v.isActive,
+          comboKey: buildComboKey(v.attributeValues.map((av) => av.attributeValueId)),
           attributeValues: {
             create: v.attributeValues.map((av) => ({
               attributeValueId: av.attributeValueId,
@@ -435,6 +442,7 @@ const PRODUCT_DETAIL_INCLUDE = {
   brand: true,
   images: { orderBy: { order: "asc" as const }, include: { media: true } },
   categories: { include: { category: true } },
+  currency: { select: { code: true, symbol: true, currentRate: true } },
   variants: {
     include: {
       attributeValues: { include: { attributeValue: { include: { attribute: true } } } },
@@ -442,6 +450,38 @@ const PRODUCT_DETAIL_INCLUDE = {
   },
   displayAttributeValues: { include: { attribute: true } },
 } satisfies Prisma.ProductInclude;
+
+// قیمت نهایی هر تنوع (finalPrice، پیش از تخفیف محصول) را مستقیماً روی
+// خودش محاسبه و اضافه می‌کند — تا فرانت مجبور نباشد فرمول قیمت‌گذاری
+// (priceAdjustment + modifierValue های ویژگی‌ها + تبدیل ارز) را خودش
+// دوباره پیاده‌سازی کند و به‌جایش دقیقاً همین عددی را نشان دهد که در سبد
+// خرید/سفارش هم استفاده می‌شود.
+function attachVariantPrices(product: Record<string, unknown>): Record<string, unknown> {
+  const variants = product.variants as Array<Record<string, unknown>> | undefined;
+  if (!variants) return product;
+
+  const pricingInput = {
+    pricingMode: product.pricingMode as "FIXED_IRT" | "CURRENCY_BASED",
+    basePrice: product.basePrice as number,
+    sourcePrice: product.sourcePrice as number | null,
+    priceBufferPercent: product.priceBufferPercent as number | null,
+  };
+  const currency = (product.currency as { currentRate: number | null } | null) ?? null;
+
+  return {
+    ...product,
+    variants: variants.map((v) => ({
+      ...v,
+      finalPrice: calculateVariantPrice(pricingInput, currency, {
+        priceAdjustment: v.priceAdjustment as number,
+        attributeValues: (v.attributeValues as Array<Record<string, unknown>>).map((av) => ({
+          modifierType: (av.modifierType ?? null) as never,
+          modifierValue: (av.modifierValue ?? null) as number | null,
+        })),
+      }).finalPriceIRT,
+    })),
+  };
+}
 
 export async function getProductBySlugPublic(slug: string, userId?: number) {
   const product = await prisma.product.findUnique({
@@ -453,7 +493,7 @@ export async function getProductBySlugPublic(slug: string, userId?: number) {
     throw ApiError.notFound("محصول پیدا نشد");
   }
 
-  const serialized = serializeProduct(product) as Record<string, unknown>;
+  const serialized = serializeProduct(attachVariantPrices(product)) as Record<string, unknown>;
 
   await trackProductView(product.id as number);
 
@@ -486,7 +526,7 @@ export async function getProductById(id: number) {
   }) as unknown as (Record<string, unknown> & ProductLike) | null;
 
   if (!product) throw ApiError.notFound("محصول پیدا نشد");
-  return serializeProduct(product);
+  return serializeProduct(attachVariantPrices(product));
 }
 
 export async function getProductByIdPublic(id: number, userId?: number) {
@@ -499,7 +539,7 @@ export async function getProductByIdPublic(id: number, userId?: number) {
     throw ApiError.notFound("محصول پیدا نشد");
   }
 
-  const serialized = serializeProduct(product) as Record<string, unknown>;
+  const serialized = serializeProduct(attachVariantPrices(product)) as Record<string, unknown>;
 
   await trackProductView(id);
 

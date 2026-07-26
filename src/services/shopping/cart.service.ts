@@ -3,6 +3,7 @@ import { ApiError } from "../../utils/ApiError";
 import { CartIdentity } from "../../utils/cartIdentity";
 import { computeProductEffectivePrice } from "../../utils/pricing";
 import { Prisma } from "../../generated/prisma";
+import { calculateVariantPrice } from "../pricingEngine";
 
 const CART_INCLUDE = {
   items: {
@@ -15,6 +16,7 @@ const CART_INCLUDE = {
               basePrice: true, discountType: true, discountValue: true,
               pricingMode: true, currentPriceIRT: true, sourcePrice: true,
               priceBufferPercent: true,
+              currency: { select: { currentRate: true } },
             },
           },
           attributeValues: {
@@ -25,6 +27,33 @@ const CART_INCLUDE = {
     },
   },
 } satisfies Prisma.CartInclude;
+
+// قیمت «پایه‌ی قبل از تخفیف» یک تنوع مشخص از یک محصول را با در نظر گرفتن
+// هم priceAdjustment و هم modifierValue های هر مقدار ویژگی محاسبه می‌کند
+// (از همان مسیر محاسباتی که هنگام ثبت سفارش استفاده می‌شود — تا قیمت سبد
+// خرید هرگز با قیمت واقعی سفارش فرق نکند).
+function computeVariantOriginalPrice(
+  product: Record<string, unknown>,
+  variant: Record<string, unknown>
+): number {
+  const result = calculateVariantPrice(
+    {
+      pricingMode: product.pricingMode as "FIXED_IRT" | "CURRENCY_BASED",
+      basePrice: product.basePrice as number,
+      sourcePrice: product.sourcePrice as number | null,
+      priceBufferPercent: product.priceBufferPercent as number | null,
+    },
+    (product.currency as { currentRate: number | null } | null) ?? null,
+    {
+      priceAdjustment: variant.priceAdjustment as number,
+      attributeValues: (variant.attributeValues as Array<Record<string, unknown>>).map((av) => ({
+        modifierType: (av.modifierType ?? null) as never,
+        modifierValue: (av.modifierValue ?? null) as number | null,
+      })),
+    }
+  );
+  return result.finalPriceIRT;
+}
 
 function whereForIdentity(identity: CartIdentity) {
   return "userId" in identity ? { userId: identity.userId } : { guestToken: identity.guestToken };
@@ -74,17 +103,13 @@ function summarize(cart: Record<string, unknown> | null): CartSummary {
   const items = ((cart as { items: Array<Record<string, unknown>> }).items || []).map((item: Record<string, unknown>) => {
     const variant = item.variant as Record<string, unknown>;
     const product = variant.product as Record<string, unknown>;
-    const pricingMode = product.pricingMode as string;
-    const basePrice = pricingMode === "CURRENCY_BASED"
-      ? ((product.currentPriceIRT as number) ?? (product.basePrice as number))
-      : (product.basePrice as number);
-    const priceAdjustment = variant.priceAdjustment as number;
     const discountType = product.discountType as string | null;
     const discountValue = product.discountValue as number | null;
 
+    const originalPrice = computeVariantOriginalPrice(product, variant);
     const price = computeProductEffectivePrice(
-      basePrice,
-      priceAdjustment,
+      originalPrice,
+      0,
       discountType as "PERCENT" | "FIXED" | null,
       discountValue,
       null,
@@ -258,9 +283,15 @@ export async function getCartLineItemsForDiscount(identity: CartIdentity): Promi
           variant: {
             include: {
               product: {
-                include: { categories: { select: { categoryId: true } } },
-                select: { id: true, basePrice: true, discountType: true, discountValue: true, categories: true },
+                select: {
+                  id: true, basePrice: true, discountType: true, discountValue: true,
+                  pricingMode: true, currentPriceIRT: true, sourcePrice: true,
+                  priceBufferPercent: true,
+                  currency: { select: { currentRate: true } },
+                  categories: { select: { categoryId: true } },
+                },
               },
+              attributeValues: true,
             },
           },
         },
@@ -272,12 +303,10 @@ export async function getCartLineItemsForDiscount(identity: CartIdentity): Promi
 
   return cart.items.map((item) => {
     const product = item.variant.product;
-    const baseForPrice = product.pricingMode === "CURRENCY_BASED"
-      ? product.currentPriceIRT
-      : product.basePrice;
+    const originalPrice = computeVariantOriginalPrice(product, item.variant);
     const price = computeProductEffectivePrice(
-      baseForPrice,
-      item.variant.priceAdjustment,
+      originalPrice,
+      0,
       product.discountType,
       product.discountValue,
       null,

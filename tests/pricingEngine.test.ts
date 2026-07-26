@@ -1,4 +1,4 @@
-import { calculateFinalPrice, ProductPricingInput, CurrencyRateInput, AttributeValueModifier } from "../src/services/pricingEngine";
+import { calculateFinalPrice, calculateVariantPrice, ProductPricingInput, CurrencyRateInput, AttributeValueModifier } from "../src/services/pricingEngine";
 
 describe("pricingEngine calculateFinalPrice", () => {
   describe("FIXED_IRT products", () => {
@@ -46,13 +46,24 @@ describe("pricingEngine calculateFinalPrice", () => {
       expect(result.fixedIrtAdjustments).toBe(25000);
     });
 
-    it("throws on invalid modifier type for FIXED_IRT product", () => {
+    it("applies PERCENTAGE modifier on basePrice for FIXED_IRT product (e.g. an XL size costs 10% more)", () => {
       const mods: AttributeValueModifier[] = [
         { modifierType: "PERCENTAGE", modifierValue: 10 },
       ];
-      expect(() => calculateFinalPrice(fixedProduct, null, mods)).toThrow(
-        "Invalid modifier type PERCENTAGE for FIXED_IRT product"
-      );
+      const result = calculateFinalPrice(fixedProduct, null, mods);
+      // 500,000 + 500,000*10% = 550,000
+      expect(result.finalPriceIRT).toBe(550000);
+    });
+
+    it("combines PERCENTAGE and FIXED_IRT modifiers together for FIXED_IRT product", () => {
+      const mods: AttributeValueModifier[] = [
+        { modifierType: "PERCENTAGE", modifierValue: 10 },
+        { modifierType: "FIXED_IRT", modifierValue: 20000 },
+      ];
+      const result = calculateFinalPrice(fixedProduct, null, mods);
+      // 500,000 + 500,000*10% + 20,000 = 570,000
+      expect(result.finalPriceIRT).toBe(570000);
+      expect(result.fixedIrtAdjustments).toBe(20000);
     });
 
     it("throws on FIXED_SOURCE_CURRENCY modifier for FIXED_IRT product", () => {
@@ -185,5 +196,77 @@ describe("pricingEngine calculateFinalPrice", () => {
       expect(result.finalPriceIRT).toBe(0);
       expect(result.rateUsed).toBe(0);
     });
+  });
+});
+
+// ----------------------------------------------------------------------------
+// calculateVariantPrice: قبلاً priceAdjustment (فیلد روی خودِ ProductVariant)
+// و modifierType/modifierValue (فیلد روی هر مقدار ویژگی تنوع) در دو مسیر
+// جدا و ناهماهنگ محاسبه می‌شدند — این تست‌ها تضمین می‌کنند که هر دو با هم و
+// در یک محاسبه‌ی واحد اعمال می‌شوند.
+// ----------------------------------------------------------------------------
+describe("pricingEngine calculateVariantPrice", () => {
+  it("برای محصول FIXED_IRT هم priceAdjustment و هم مدیفایر ویژگی را با هم جمع می‌زند", () => {
+    const product: ProductPricingInput = {
+      pricingMode: "FIXED_IRT",
+      basePrice: 100000,
+      sourcePrice: null,
+      priceBufferPercent: null,
+    };
+    const result = calculateVariantPrice(product, null, {
+      priceAdjustment: 5000,
+      attributeValues: [{ modifierType: "FIXED_IRT", modifierValue: 20000 }],
+    });
+    expect(result.finalPriceIRT).toBe(125000);
+  });
+
+  it("وقتی priceAdjustment صفر باشد، فقط مدیفایر ویژگی اثر می‌گذارد", () => {
+    const product: ProductPricingInput = {
+      pricingMode: "FIXED_IRT",
+      basePrice: 100000,
+      sourcePrice: null,
+      priceBufferPercent: null,
+    };
+    const result = calculateVariantPrice(product, null, {
+      priceAdjustment: 0,
+      attributeValues: [{ modifierType: "FIXED_IRT", modifierValue: -10000 }],
+    });
+    expect(result.finalPriceIRT).toBe(90000);
+  });
+
+  it("برای محصول CURRENCY_BASED، priceAdjustment به‌عنوان تعدیل تومانی بعد از تبدیل ارز اضافه می‌شود", () => {
+    const product: ProductPricingInput = {
+      pricingMode: "CURRENCY_BASED",
+      basePrice: 0,
+      sourcePrice: 10,
+      priceBufferPercent: 0,
+    };
+    const currency: CurrencyRateInput = { currentRate: 100000 };
+    const result = calculateVariantPrice(product, currency, {
+      priceAdjustment: 5000,
+      attributeValues: [{ modifierType: "PERCENTAGE", modifierValue: 10 }],
+    });
+    // sourceAmount = 10 + 10*10% = 11 -> convertedIRT = 1,100,000 + priceAdjustment 5,000
+    expect(result.finalPriceIRT).toBe(1_105_000);
+  });
+
+  it("دو تنوع با مدیفایرهای متفاوت باید قیمت نهایی متفاوتی داشته باشند (رگرسیون باگ min/max ثابت)", () => {
+    const product: ProductPricingInput = {
+      pricingMode: "FIXED_IRT",
+      basePrice: 200000,
+      sourcePrice: null,
+      priceBufferPercent: null,
+    };
+    const cheap = calculateVariantPrice(product, null, {
+      priceAdjustment: 0,
+      attributeValues: [],
+    });
+    const expensive = calculateVariantPrice(product, null, {
+      priceAdjustment: 0,
+      attributeValues: [{ modifierType: "FIXED_IRT", modifierValue: 30000 }],
+    });
+    expect(cheap.finalPriceIRT).toBe(200000);
+    expect(expensive.finalPriceIRT).toBe(230000);
+    expect(cheap.finalPriceIRT).not.toBe(expensive.finalPriceIRT);
   });
 });

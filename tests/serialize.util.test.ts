@@ -16,7 +16,7 @@ describe("utils/serialize", () => {
     expect(result.isMain).toBe(true);
   });
 
-  it("serializeVariantAttributeValue ساختار junction را به AttributeValue تخت تبدیل می‌کند", () => {
+  it("serializeVariantAttributeValue ساختار junction را به AttributeValue تخت تبدیل می‌کند و modifierType/modifierValue را هم برمی‌گرداند", () => {
     const result = serializeVariantAttributeValue({
       attributeValue: {
         id: 1,
@@ -32,7 +32,25 @@ describe("utils/serialize", () => {
       colorHex: "#FFFFFF",
       order: 0,
       attribute: { id: 1, name: "رنگ", slug: "color", inputType: "COLOR" },
+      modifierType: null,
+      modifierValue: null,
     });
+  });
+
+  it("serializeVariantAttributeValue وقتی modifierType/modifierValue روی junction ست شده باشد آن‌ها را برمی‌گرداند", () => {
+    const result = serializeVariantAttributeValue({
+      modifierType: "FIXED_IRT",
+      modifierValue: 50000,
+      attributeValue: {
+        id: 2,
+        value: "XL",
+        colorHex: null,
+        order: 1,
+        attribute: { id: 2, name: "سایز", slug: "size", inputType: "SELECT" },
+      },
+    });
+    expect(result.modifierType).toBe("FIXED_IRT");
+    expect(result.modifierValue).toBe(50000);
   });
 
   it("serializeProduct دسته‌بندی‌ها را از حالت junction به آرایه‌ی تخت Category[] تبدیل می‌کند", () => {

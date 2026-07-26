@@ -615,6 +615,16 @@ model ProductVariant {
   isDefault       Boolean @default(false)
   isActive        Boolean @default(true)
 
+  // شناسه‌ی ترکیبِ مقادیر ویژگی این تنوع (مثلاً "3,7" برای رنگ=3 و سایز=7)،
+  // به‌صورت شناسه‌های مرتب‌شده و جداشده با کاما — برای تنوع بدون هیچ ویژگی
+  // (محصول ساده/تک‌تنوعی) مقدار رشته‌ی خالی "" است.
+  // این فیلد توسط اپلیکیشن هنگام ساخت/ویرایش تنوع محاسبه و ست می‌شود، نه
+  // توسط دیتابیس. هدف از @@unique زیر این است که حتی در برخورد دو درخواست
+  // هم‌زمانِ ساخت یک ترکیب تکراری، خودِ دیتابیس دومی را با خطا رد کند —
+  // قبلاً این بررسی فقط در کد و به‌صورت read-then-write بود که در برابر
+  // درخواست‌های هم‌زمان ایمن نبود.
+  comboKey String @default("")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -622,6 +632,7 @@ model ProductVariant {
   cartItems       CartItem[]
   orderItems      OrderItem[]
 
+  @@unique([productId, comboKey])
   @@index([productId])
 }
 

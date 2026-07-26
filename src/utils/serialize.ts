@@ -29,6 +29,8 @@ export function serializeProductImage(img: ProductImageLike) {
 }
 
 interface AttributeValueJunctionLike {
+  modifierType?: string | null;
+  modifierValue?: number | null;
   attributeValue: {
     id: number;
     value: string;
@@ -46,6 +48,11 @@ export function serializeVariantAttributeValue(junction: AttributeValueJunctionL
     colorHex: attributeValue.colorHex,
     order: attributeValue.order,
     attribute: attributeValue.attribute,
+    // اثر این مقدار ویژگی روی قیمت همین تنوع (اگر تعریف شده باشد) —
+    // قبلاً این دو فیلد هنگام ارسال به فرانت حذف می‌شدند و فرانت هیچ‌راهی
+    // برای فهمیدن یا نمایش تعدیل قیمت هر ترکیب نداشت.
+    modifierType: junction.modifierType ?? null,
+    modifierValue: junction.modifierValue ?? null,
   };
 }
 
