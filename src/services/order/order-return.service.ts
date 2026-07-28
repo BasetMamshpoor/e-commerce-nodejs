@@ -4,6 +4,7 @@ import { parsePagination, buildPaginationMeta } from "../../utils/pagination";
 import { notifyUser } from "../notification/notification.service";
 import { ReturnOrderInput, AdminUpdateReturnInput } from "../../validations/order.validation";
 import { OrderReturn, Prisma } from "../../generated/prisma";
+import { assertMediaOwnedByUser } from "../../utils/mediaOwnership";
 
 export async function requestReturn(
   userId: number,
@@ -23,6 +24,15 @@ export async function requestReturn(
   if (input.orderItemId && !order.items.some((i) => i.id === input.orderItemId)) {
     throw ApiError.badRequest("آیتم سفارش انتخاب‌شده در این سفارش پیدا نشد");
   }
+
+  // imageMediaIds یا از میدل‌ور آپلود مولتی‌پارت می‌آید (همیشه با همین
+  // userId ساخته شده) یا مستقیماً در بدنه‌ی JSON فرستاده شده — در حالت
+  // دوم باید مطمئن شویم این رسانه‌ها واقعاً موجودند و متعلق به همین کاربرند.
+  await assertMediaOwnedByUser(
+    input.imageMediaIds,
+    userId,
+    "برخی از تصاویر پیوست معتبر نیستند یا متعلق به شما نیستند"
+  );
 
   const orderReturn = await prisma.$transaction(async (tx) => {
     const created = await tx.orderReturn.create({

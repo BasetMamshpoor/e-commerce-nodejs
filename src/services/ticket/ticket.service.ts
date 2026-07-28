@@ -10,6 +10,7 @@ import {
   AdminListTicketsQuery,
 } from "../../validations/ticket.validation";
 import { Ticket, Role } from "../../generated/prisma";
+import { assertMediaOwnedByUser } from "../../utils/mediaOwnership";
 
 // ----------------------------------------------------------------------------
 // سیستم تیکتینگ — آیتم ۱۳.
@@ -38,6 +39,8 @@ export async function createTicket(userId: number, input: CreateTicketInput): Pr
     });
     if (!department) throw ApiError.badRequest("بخش پشتیبانی انتخاب‌شده معتبر نیست");
   }
+
+  await assertMediaOwnedByUser(input.attachmentMediaIds ?? [], userId);
 
   return prisma.ticket.create({
     data: {
@@ -74,6 +77,8 @@ export async function addMessage(
   if (!isStaff && ticket.userId !== senderId) {
     throw ApiError.notFound("تیکت پیدا نشد");
   }
+
+  await assertMediaOwnedByUser(input.attachmentMediaIds ?? [], senderId);
 
   await prisma.ticketMessage.create({
     data: {

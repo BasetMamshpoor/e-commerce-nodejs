@@ -5,6 +5,7 @@ const pricingTypeSchema = z.enum(["FIXED", "WEIGHT_DISTANCE"]);
 const shippingCompanyBase = z.object({
   name: z.string().trim().min(2).max(150),
   logoUrl: z.string().optional(),
+  logoMediaId: z.coerce.number().int().positive().nullable().optional(),
   description: z.string().max(500).optional(),
   pricingType: pricingTypeSchema.optional().default("FIXED"),
   baseCost: z.coerce.number().int().nonnegative().default(0),

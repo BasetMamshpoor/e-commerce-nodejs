@@ -2,6 +2,7 @@ import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import { slugify, ensureUniqueSlug } from "../../utils/slug";
 import { CreateBrandInput, UpdateBrandInput } from "../../validations/brand.validation";
+import { syncUrlWithMediaId } from "../../utils/mediaSync";
 
 async function isSlugTaken(slug: string, excludeId?: number): Promise<boolean> {
   const existing = await prisma.brand.findUnique({ where: { slug } });
@@ -17,12 +18,15 @@ export async function createBrand(input: CreateBrandInput) {
     throw ApiError.conflict("این slug قبلاً استفاده شده است");
   }
 
+  const synced = syncUrlWithMediaId(input, "logoMediaId", "logoUrl");
+
   return prisma.brand.create({
     data: {
       name: input.name,
       slug,
       description: input.description,
-      logoUrl: input.logoUrl,
+      logoUrl: synced.logoUrl,
+      logoMediaId: synced.logoMediaId,
       isActive: input.isActive ?? true,
       metaTitle: input.metaTitle,
       metaDescription: input.metaDescription,
@@ -44,7 +48,7 @@ export async function updateBrand(id: number, input: UpdateBrandInput) {
 
   return prisma.brand.update({
     where: { id },
-    data: { ...input, slug },
+    data: { ...syncUrlWithMediaId(input, "logoMediaId", "logoUrl"), slug },
   });
 }
 

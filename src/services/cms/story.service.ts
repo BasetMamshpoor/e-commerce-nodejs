@@ -1,28 +1,34 @@
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import { parsePagination, buildPaginationMeta } from "../../utils/pagination";
+import { CreateStoryInput, UpdateStoryInput } from "../../validations/story.validation";
+import { syncUrlWithMediaId } from "../../utils/mediaSync";
 
-export async function createStory(input: { title: string; coverImageMediaId: number; coverImageUrl: string; videoUrl?: string; videoMediaId?: number; expiresAt: Date; order?: number; productIds?: number[] }) {
+export async function createStory(input: CreateStoryInput) {
+  const { productIds, ...rest } = syncUrlWithMediaId(
+    syncUrlWithMediaId(input, "coverImageMediaId", "coverImageUrl"),
+    "videoMediaId",
+    "videoUrl"
+  );
   return prisma.story.create({
     data: {
-      title: input.title,
-      coverImageMediaId: input.coverImageMediaId,
-      coverImageUrl:input.coverImageUrl,
-      videoUrl: input.videoUrl,
-      videoMediaId: input.videoMediaId,
-      expiresAt: input.expiresAt,
-      order: input.order ?? 0,
-      products: input.productIds?.length ? { create: input.productIds.map((productId) => ({ productId })) } : undefined,
+      ...rest,
+      order: rest.order ?? 0,
+      products: productIds?.length ? { create: productIds.map((productId) => ({ productId })) } : undefined,
     },
     include: { products: { include: { product: { select: { id: true, name: true, slug: true } } } } },
   });
 }
 
-export async function updateStory(id: number, input: Partial<{  productIds: number[] }>) {
+export async function updateStory(id: number, input: UpdateStoryInput) {
   const story = await prisma.story.findUnique({ where: { id } });
   if (!story) throw ApiError.notFound("استوری پیدا نشد");
 
-  const { productIds, ...rest } = input;
+  const { productIds, ...rest } = syncUrlWithMediaId(
+    syncUrlWithMediaId(input, "coverImageMediaId", "coverImageUrl"),
+    "videoMediaId",
+    "videoUrl"
+  );
 
   await prisma.story.update({ where: { id }, data: rest });
 

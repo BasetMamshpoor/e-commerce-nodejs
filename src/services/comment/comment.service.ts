@@ -11,6 +11,7 @@ import {
 } from "../../validations/comment.validation";
 import { Comment, CommentableType, Prisma } from "../../generated/prisma";
 import { recomputeProductRating } from "../catalog/product.service";
+import { assertMediaOwnedByUser } from "../../utils/mediaOwnership";
 
 export interface CommentTreeNode extends Comment {
   replies: CommentTreeNode[];
@@ -143,6 +144,16 @@ export async function createComment(
       throw ApiError.badRequest("دیدگاه والد پیدا نشد");
     }
   }
+
+  // uploadedMediaIds یا از میدل‌ور آپلود مولتی‌پارت می‌آید (که همیشه با
+  // همین userId ساخته شده) یا مستقیماً در بدنه‌ی JSON (attachmentMediaIds)
+  // فرستاده شده — در حالت دوم باید تأیید کنیم این رسانه‌ها واقعاً موجودند
+  // و متعلق به همین کاربرند.
+  await assertMediaOwnedByUser(
+    uploadedMediaIds,
+    userId,
+    "برخی از فایل‌های پیوست معتبر نیستند یا متعلق به شما نیستند"
+  );
 
   const created = await prisma.comment.create({
     data: {

@@ -2,15 +2,16 @@ import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import { CreateBannerInput, UpdateBannerInput } from "../../validations/cms.validation";
 import { Banner, BannerPosition } from "../../generated/prisma";
+import { syncUrlWithMediaId } from "../../utils/mediaSync";
 
 export async function createBanner(input: CreateBannerInput): Promise<Banner> {
-  return prisma.banner.create({ data: input });
+  return prisma.banner.create({ data: syncUrlWithMediaId(input, "mediaId", "imageUrl") });
 }
 
 export async function updateBanner(id: number, input: UpdateBannerInput): Promise<Banner> {
   const banner = await prisma.banner.findUnique({ where: { id } });
   if (!banner) throw ApiError.notFound("بنر پیدا نشد");
-  return prisma.banner.update({ where: { id }, data: input });
+  return prisma.banner.update({ where: { id }, data: syncUrlWithMediaId(input, "mediaId", "imageUrl") });
 }
 
 export async function deleteBanner(id: number): Promise<void> {

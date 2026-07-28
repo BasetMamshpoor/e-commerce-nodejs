@@ -5,7 +5,7 @@ const isoDate = z.coerce.date();
 export const createBannerSchema = z.object({
   title: z.string().trim().max(150).optional(),
   imageUrl: z.string().optional(),
-  mediaId: z.coerce.number().int().positive().optional(),
+  mediaId: z.coerce.number().int().positive().nullable().optional(),
   link: z.string().optional(),
   position: z.enum(["HOME_MAIN", "HOME_MIDDLE", "CATEGORY_TOP", "SIDEBAR"]),
   order: z.coerce.number().int().optional().default(0),
@@ -18,7 +18,7 @@ export const updateBannerSchema = createBannerSchema.partial();
 export const createPopupSchema = z.object({
   title: z.string().trim().min(1).max(150),
   content: z.string().max(2000).optional(),
-  mediaId: z.coerce.number().int().positive().optional(),
+  mediaId: z.coerce.number().int().positive().nullable().optional(),
   mediaUrl: z.string().optional(),
   link: z.string().optional(),
   isActive: z.coerce.boolean().optional().default(true),

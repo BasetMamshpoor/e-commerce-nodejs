@@ -5,6 +5,7 @@ export const createBrandSchema = z.object({
   slug: z.string().trim().min(2).max(160).optional(),
   description: z.string().max(2000).optional(),
   logoUrl: z.string().optional(),
+  logoMediaId: z.coerce.number().int().positive().nullable().optional(),
   isActive: z.coerce.boolean().optional().default(true),
   metaTitle: z.string().max(160).optional(),
   metaDescription: z.string().max(300).optional(),

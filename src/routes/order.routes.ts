@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as orderController from "../controllers/order.controller";
 import { validate } from "../middlewares/validate";
+import { uploadReturnImagesMiddleware } from "../services/media/upload-helper";
 import { authenticate, authorize } from "../middlewares/auth.middleware";
 import {
   createOrderSchema,
@@ -49,7 +50,7 @@ router.post("/", authorize("CUSTOMER"), validate(createOrderSchema), orderContro
 router.get("/:id", orderController.getMine);
 
 router.post("/:id/cancel", validate(cancelOrderSchema), orderController.cancel);
-router.post("/:id/return", validate(returnOrderSchema), orderController.requestReturn);
+router.post("/:id/return", uploadReturnImagesMiddleware(), validate(returnOrderSchema), orderController.requestReturn);
 
 router.post(
   "/:id/payment/initiate",

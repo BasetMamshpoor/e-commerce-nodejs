@@ -20,13 +20,12 @@ export async function listForProduct(req: Request, res: Response) {
 }
 
 export async function createForProduct(req: Request, res: Response) {
-  const uploadedMediaIds: number[] = (req as unknown as Record<string, number[] | undefined>).uploadedMediaIds ?? [];
   const comment = await commentService.createComment(
     userId(req),
     "PRODUCT",
     paramInt(req.params.productId),
     req.body,
-    uploadedMediaIds
+    req.body.attachmentMediaIds ?? []
   );
   return ApiResponse.created(res, comment, "دیدگاه شما ثبت شد و پس از بررسی نمایش داده می‌شود");
 }
@@ -42,13 +41,12 @@ export async function listForBlogPost(req: Request, res: Response) {
 }
 
 export async function createForBlogPost(req: Request, res: Response) {
-  const uploadedMediaIds: number[] = (req as unknown as Record<string, number[] | undefined>).uploadedMediaIds ?? [];
   const comment = await commentService.createComment(
     userId(req),
     "BLOG_POST",
     paramInt(req.params.postId),
     req.body,
-    uploadedMediaIds
+    req.body.attachmentMediaIds ?? []
   );
   return ApiResponse.created(res, comment, "دیدگاه شما ثبت شد و پس از بررسی نمایش داده می‌شود");
 }

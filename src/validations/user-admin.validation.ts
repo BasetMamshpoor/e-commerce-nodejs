@@ -19,7 +19,8 @@ export const updateUserRoleSchema = z.object({
 export const adjustUserWalletSchema = z.object({
   amount: z.coerce.number().int().refine((value) => value !== 0, {
     message: "مبلغ باید غیر صفر باشد",
-  })
+  }),
+  description: z.string().trim().max(500).optional(),
 });
 
 export type AdminListUsersQuery = z.infer<typeof adminListUsersQuerySchema>;

@@ -5,6 +5,7 @@ export const createCategorySchema = z.object({
   slug: z.string().trim().min(2).max(160).optional(),
   description: z.string().max(2000).optional(),
   imageUrl: z.string().optional(),
+  imageMediaId: z.coerce.number().int().positive().nullable().optional(),
   parentId: z.coerce.number().int().optional(),
   order: z.coerce.number().int().optional().default(0),
   isActive: z.coerce.boolean().optional().default(true),

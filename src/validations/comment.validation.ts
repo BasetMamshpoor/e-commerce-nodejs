@@ -1,15 +1,21 @@
 import { z } from "zod";
 
-export const createCommentSchema = z
-  .object({
-    content: z.string().trim().min(1).max(2000),
-    parentId: z.coerce.number().int().optional(),
-    rating: z.coerce.number().int().min(1).max(5).optional(),
-  })
-  .refine((d) => !d.parentId || d.rating === undefined, {
+const createCommentBaseSchema = z.object({
+  content: z.string().trim().min(1).max(2000),
+  parentId: z.coerce.number().int().optional(),
+  rating: z.coerce.number().int().min(1).max(5).optional(),
+  // اگر فرانت‌اند به‌جای multipart، فایل‌ها را قبلاً به /media آپلود کرده و
+  // فقط شناسه‌ی رسانه‌ها را می‌فرستد
+  attachmentMediaIds: z.array(z.coerce.number().int().positive()).optional().default([]),
+});
+
+export const createCommentSchema = createCommentBaseSchema.refine(
+  (d) => !d.parentId || d.rating === undefined,
+  {
     message: "امتیاز (rating) فقط برای دیدگاه اصلی (نه پاسخ) معنا دارد",
     path: ["rating"],
-  });
+  }
+);
 
 export const updateCommentSchema = z.object({
   content: z.string().trim().min(1).max(2000),

@@ -7,7 +7,7 @@ export const listNotificationsQuerySchema = z.object({
 });
 
 export const broadcastNotificationSchema = z.object({
-  userIds: z.array(z.string()).optional(),
+  userIds: z.array(z.coerce.number().int().positive()).optional(),
   type: z.enum(["ORDER", "SYSTEM", "TICKET", "PROMOTION", "WALLET", "COMMENT"]),
   title: z.string().trim().min(1).max(150),
   message: z.string().trim().min(1).max(1000),

@@ -3,6 +3,7 @@ import { ApiError } from "../../utils/ApiError";
 import { slugify, ensureUniqueSlug } from "../../utils/slug";
 import { CreateCategoryInput, UpdateCategoryInput } from "../../validations/category.validation";
 import { Prisma } from "../../generated/prisma";
+import { syncUrlWithMediaId } from "../../utils/mediaSync";
 
 export interface CategoryTreeNode {
   id: number;
@@ -48,12 +49,15 @@ export async function createCategory(input: CreateCategoryInput) {
     throw ApiError.conflict("این slug قبلاً استفاده شده است");
   }
 
+  const synced = syncUrlWithMediaId(input, "imageMediaId", "imageUrl");
+
   return prisma.category.create({
     data: {
       name: input.name,
       slug,
       description: input.description,
-      imageUrl: input.imageUrl,
+      imageUrl: synced.imageUrl,
+      imageMediaId: synced.imageMediaId,
       parentId: input.parentId,
       order: input.order ?? 0,
       isActive: input.isActive ?? true,
@@ -82,7 +86,7 @@ export async function updateCategory(id: number, input: UpdateCategoryInput) {
 
   return prisma.category.update({
     where: { id },
-    data: { ...input, slug },
+    data: { ...syncUrlWithMediaId(input, "imageMediaId", "imageUrl"), slug },
   });
 }
 

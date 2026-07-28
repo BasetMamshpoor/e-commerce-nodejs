@@ -305,3 +305,54 @@ second one outright (`409 Conflict` — "تنوعی با همین ترکیب و�
 No API request/response shape changed. `POST/PUT /api/admin/products/:id/variants` behave exactly
 as documented; the only visible difference is that the 409 conflict is now impossible to bypass
 via a race condition.
+
+---
+
+## 11. Fixes From Frontend Audit (7 items) + One Extra Security Fix Found During Review
+
+Per the frontend team's backend audit, the following are fixed. No response shape changed for any
+of these except where noted.
+
+**11.1 — Removing an image now actually clears it.** `mediaId` / `coverImageMediaId` /
+`videoMediaId` / `logoMediaId` / `imageMediaId` now accept `null` (previously only accepted a
+positive integer or being omitted — sending `null` was coerced to `0` and rejected with a 400).
+Sending `null` for the mediaId field also clears the paired URL field (`imageUrl`/`logoUrl`/
+`coverImageUrl`/`mediaUrl`) automatically, so the frontend doesn't need to send both.
+
+Also found while fixing this: **`Brand`, `Category`, and `ShippingCompany` didn't have a
+`logoMediaId`/`imageMediaId` field in their validation schemas at all** (not just non-nullable —
+completely absent, silently stripped by Zod). Linking a logo/image from the media library to a
+brand, category, or shipping company didn't work at all before this fix; only a raw `logoUrl`/
+`imageUrl` string was accepted. This is now fixed the same way as the others.
+
+**11.2 — Order return images.** `POST /orders/:id/return` now also accepts `multipart/form-data`
+with up to 5 files under the field name `images`, uploaded and linked automatically (same pattern
+as ticket attachments) — no need to upload to `/media` first anymore. Sending `imageMediaIds` in
+a plain JSON body still works as before.
+
+**11.3 — `PUT /api/admin/currencies/:id` now accepts `name`.**
+
+**11.4 — `userIds` in `POST /api/admin/notifications/broadcast`** is now validated as an array of
+numbers (was `string[]`, which never matched what the service expected).
+
+**11.5 — `description` in `POST /api/admin/users/:id/wallet/adjust`** is no longer silently
+dropped.
+
+**11.6 — Comment attachments.** `attachmentMediaIds` (array of already-uploaded media IDs) is now
+accepted directly in the comment JSON body — no multipart required. Multipart upload (field name
+`attachments`, same as tickets) also still works and merges into the same field.
+
+**11.7 — No backend change needed** (frontend-only OTP length issue, already resolved on that side).
+
+### Extra fix found while implementing 11.6 (security)
+
+Accepting `attachmentMediaIds`/`imageMediaIds` directly in a JSON body (11.2 and 11.6) opened a
+gap: nothing verified that the referenced media actually belonged to the requesting user. A user
+could have attached **any** existing media ID — including another user's private upload, or a
+completely unrelated file — to their own comment or return request. The exact same gap already
+existed in the ticket system (`POST /support/tickets`, ticket replies), which predates this audit
+and wasn't part of the reported list, but shares the same root cause, so it's fixed too:
+attachment/return media IDs sent directly (not via file upload) are now checked against
+`Media.uploadedById` before being linked, and rejected with `400` if any ID doesn't belong to the
+requesting user. This is enforced in the backend only — no frontend change needed unless your
+integration relied on attaching someone else's media (it shouldn't have).

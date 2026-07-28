@@ -116,7 +116,7 @@ export async function updateUserRole(userId: number, input: UpdateUserRoleInput)
   return publicUser(updated);
 }
 
-export async function adjustUserWallet(userId: number, amount: number, description: string) {
+export async function adjustUserWallet(userId: number, amount: number, description?: string) {
   const wallet = await prisma.wallet.upsert({
     where: { userId },
     create: { userId, balance: 0 },

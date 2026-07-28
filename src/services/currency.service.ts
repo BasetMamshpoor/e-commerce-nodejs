@@ -29,12 +29,13 @@ export async function createCurrency(data: {
 
 export async function updateCurrency(
   id: number,
-  data: { isActive?: boolean; currentRate?: number },
+  data: { name?: string; isActive?: boolean; currentRate?: number },
 ) {
   const currency = await prisma.currency.findUnique({ where: { id } });
   if (!currency) throw ApiError.notFound("ارز پیدا نشد");
 
   const updateData: Record<string, unknown> = {};
+  if (data.name !== undefined) updateData.name = data.name;
   if (data.isActive !== undefined) updateData.isActive = data.isActive;
   if (data.currentRate !== undefined) {
     updateData.currentRate = data.currentRate;

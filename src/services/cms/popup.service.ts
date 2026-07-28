@@ -2,15 +2,16 @@ import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import { CreatePopupInput, UpdatePopupInput } from "../../validations/cms.validation";
 import { Popup } from "../../generated/prisma";
+import { syncUrlWithMediaId } from "../../utils/mediaSync";
 
 export async function createPopup(input: CreatePopupInput): Promise<Popup> {
-  return prisma.popup.create({ data: input });
+  return prisma.popup.create({ data: syncUrlWithMediaId(input, "mediaId", "mediaUrl") });
 }
 
 export async function updatePopup(id: number, input: UpdatePopupInput): Promise<Popup> {
   const popup = await prisma.popup.findUnique({ where: { id } });
   if (!popup) throw ApiError.notFound("پاپ‌آپ پیدا نشد");
-  return prisma.popup.update({ where: { id }, data: input });
+  return prisma.popup.update({ where: { id }, data: syncUrlWithMediaId(input, "mediaId", "mediaUrl") });
 }
 
 export async function deletePopup(id: number): Promise<void> {

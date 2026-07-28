@@ -4,16 +4,17 @@ import {
   CreateShippingCompanyInput,
   UpdateShippingCompanyInput,
 } from "../../validations/shipping.validation";
+import { syncUrlWithMediaId } from "../../utils/mediaSync";
 
 export async function createShippingCompany(input: CreateShippingCompanyInput) {
-  return prisma.shippingCompany.create({ data: input });
+  return prisma.shippingCompany.create({ data: syncUrlWithMediaId(input, "logoMediaId", "logoUrl") });
 }
 
 export async function updateShippingCompany(id: number, input: UpdateShippingCompanyInput) {
   const company = await prisma.shippingCompany.findUnique({ where: { id } });
   if (!company) throw ApiError.notFound("شرکت ارسال پیدا نشد");
 
-  return prisma.shippingCompany.update({ where: { id }, data: input });
+  return prisma.shippingCompany.update({ where: { id }, data: syncUrlWithMediaId(input, "logoMediaId", "logoUrl") });
 }
 
 export async function deleteShippingCompany(id: number): Promise<void> {

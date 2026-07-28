@@ -9,6 +9,7 @@ import {
   AdminListBlogPostsQuery,
 } from "../../validations/blog.validation";
 import { BlogPost, BlogCategory, BlogPostProduct, Product } from "../../generated/prisma";
+import { syncUrlWithMediaId } from "../../utils/mediaSync";
 
 type PostWithRelations = BlogPost & {
   category: BlogCategory | null;
@@ -36,14 +37,16 @@ export async function createBlogPost(authorId: number | undefined, input: Create
     throw ApiError.conflict("این slug قبلاً استفاده شده است");
   }
 
+  const synced = syncUrlWithMediaId(input, "coverImageMediaId", "coverImageUrl");
+
   return prisma.blogPost.create({
     data: {
       title: input.title,
       slug,
       excerpt: input.excerpt,
       content: input.content,
-      coverImageMediaId: input.coverImageMediaId,
-      coverImageUrl:input.coverImageUrl,
+      coverImageMediaId: synced.coverImageMediaId,
+      coverImageUrl: synced.coverImageUrl,
       categoryId: input.categoryId,
       status: input.status,
       metaTitle: input.metaTitle,
@@ -78,7 +81,7 @@ export async function updateBlogPost(id: number, input: UpdateBlogPostInput) {
   // اولین بار که وضعیت به PUBLISHED تغییر می‌کند، publishedAt ست می‌شود
   const becomingPublished = input.status === "PUBLISHED" && post.status !== "PUBLISHED";
 
-  const { productIds, ...postData } = input;
+  const { productIds, ...postData } = syncUrlWithMediaId(input, "coverImageMediaId", "coverImageUrl");
 
   const updated = (await prisma.blogPost.update({
     where: { id },

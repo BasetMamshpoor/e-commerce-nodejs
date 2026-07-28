@@ -13,6 +13,7 @@ const createCurrencySchema = z.object({
 });
 
 const updateCurrencySchema = z.object({
+  name: z.string().trim().min(1).max(100).optional(),
   isActive: z.coerce.boolean().optional(),
   currentRate: z.coerce.number().nonnegative().optional(),
 });

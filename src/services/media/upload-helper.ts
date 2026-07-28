@@ -22,6 +22,7 @@ import {
   uploadShippingLogo,
   uploadTicketAttachments,
   uploadCommentAttachments,
+  uploadReturnImages,
 } from "../../middlewares/upload.middleware";
 
 type UploadFieldConfig = {
@@ -321,6 +322,39 @@ export function uploadTicketAttachmentsMiddleware() {
   };
 }
 
+/**
+ * آپلود عکس‌های مرجوعی سفارش — فایل‌ها تبدیل به رکورد Media می‌شوند و ID
+ * آن‌ها به آرایه‌ی imageMediaIds در req.body اضافه می‌شود (همان فیلدی که
+ * returnOrderSchema انتظار دارد)، تا فرانت مجبور نباشد اول به /media آپلود
+ * کند و بعد imageMediaIds را جدا بفرستد.
+ */
+export function uploadReturnImagesMiddleware() {
+  const uploader = uploadReturnImages.array("images", 5);
+
+  return async (req: Request, _res: Response, next: NextFunction) => {
+    uploader(req, _res, async (err: unknown) => {
+      if (err) return next(err);
+      if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+        return next();
+      }
+
+      try {
+        const results = await Promise.all(
+          req.files.map((f) => saveFileToMedia(f, "returns", req.user?.id)),
+        );
+        const newIds = results.map((r) => r.id);
+        const existingIds: number[] = Array.isArray(req.body.imageMediaIds)
+          ? req.body.imageMediaIds.map((x: string | number) => Number(x))
+          : [];
+        req.body.imageMediaIds = [...existingIds, ...newIds];
+        next();
+      } catch (error) {
+        next(error);
+      }
+    });
+  };
+}
+
 export function uploadCommentAttachmentsMiddleware() {
   const uploader = uploadCommentAttachments.array("attachments", 5);
 
@@ -334,8 +368,11 @@ export function uploadCommentAttachmentsMiddleware() {
         const results = await Promise.all(
           req.files.map((f) => saveFileToMedia(f, "comments", req.user?.id)),
         );
-        (req as unknown as Record<string, unknown>).uploadedMediaIds =
-          results.map((r) => r.id);
+        const newIds = results.map((r) => r.id);
+        const existingIds: number[] = Array.isArray(req.body.attachmentMediaIds)
+          ? req.body.attachmentMediaIds.map((x: string | number) => Number(x))
+          : [];
+        req.body.attachmentMediaIds = [...existingIds, ...newIds];
         next();
       } catch (error) {
         next(error);
