@@ -415,10 +415,16 @@ changes, discount changes, price recalculation jobs) and getting invalidation wr
 showing customers a stale price or an out-of-stock item as available — worth doing as its own
 focused, carefully-reviewed task rather than folding into this one.
 
-### Bug noticed in passing (not fixed, flagged for review)
+### Bug found and fixed: exchange-rate refresh was collapsing product price ranges
 
 While tracing every place that writes `Currency.currentRate`, `recalculateProductsForCurrency` in
-`src/services/exchangeRateFetcher.ts` sets each affected product's `minPrice`/`maxPrice` to the
-same single recalculated value, the same simplification that was fixed for variant-level pricing in
-a previous task (see section 8) — worth a follow-up look if you want it addressed together with the
-next pricing pass.
+`src/services/exchangeRateFetcher.ts` was setting every affected product's `minPrice`/`maxPrice` to
+the single price of its default variant — the same simplification fixed for variant-level pricing
+in a previous task (see section 8), reintroduced here. In practice: every time the exchange-rate
+refresh job ran (or an admin manually edited a rate), the price *range* shown for every
+currency-based product with per-variant modifiers would silently collapse back to one flat number,
+undoing the correct min/max tracking. Fixed by having this job reuse the same
+`recomputeProductAggregates` used everywhere else, so `currentPriceIRT` (a representative
+default-variant price) is still computed here directly, but `minPrice`/`maxPrice` now always
+reflect every active variant's own modifiers, consistently, no matter what triggered the
+recalculation. Covered by `tests/currency-recalc.test.ts`.

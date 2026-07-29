@@ -4,6 +4,7 @@ import { calculateFinalPrice } from "./pricingEngine";
 import * as brsapiProvider from "./providers/brsapiProvider";
 import * as navasanProvider from "./providers/navasanProvider";
 import { invalidateCache } from "../lib/cache";
+import { recomputeProductAggregates } from "./catalog/product.service";
 
 const REQUIRED_CODES = new Set(["USD", "EUR", "AED", "CNY", "TRY", "IQD"]);
 
@@ -100,12 +101,20 @@ export async function recalculateProductsForCurrency(
       await prisma.product.update({
         where: { id: product.id },
         data: {
+          // currentPriceIRT یک قیمت «نمایندهٔ» محصول است (بر اساس تنوع
+          // پیش‌فرض) و همچنان همین‌جا محاسبه می‌شود.
           currentPriceIRT: result.finalPriceIRT,
           priceUpdatedAt: new Date(),
-          minPrice: result.finalPriceIRT,
-          maxPrice: result.finalPriceIRT,
         },
       });
+
+      // ⚠️ قبلاً اینجا minPrice/maxPrice هم به همین یک مقدار (نتیجهٔ تنوع
+      // پیش‌فرض) ست می‌شد — یعنی هر بار نرخ ارز آپدیت می‌شد، بازه‌ی
+      // قیمتی واقعی محصول (که recomputeProductAggregates با احتساب
+      // مدیفایر تک‌تک تنوع‌ها درست حساب می‌کند) دوباره به یک عدد واحد
+      // برمی‌گشت. حالا با فراخوانی همان تابع، این مقدار درست نگه داشته
+      // می‌شود.
+      await recomputeProductAggregates(product.id);
     }
 
     skip += CHUNK_SIZE;
