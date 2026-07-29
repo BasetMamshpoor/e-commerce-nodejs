@@ -3,6 +3,7 @@ import { pricingConfig } from "../config/pricing.config";
 import { calculateFinalPrice } from "./pricingEngine";
 import * as brsapiProvider from "./providers/brsapiProvider";
 import * as navasanProvider from "./providers/navasanProvider";
+import { invalidateCache } from "../lib/cache";
 
 const REQUIRED_CODES = new Set(["USD", "EUR", "AED", "CNY", "TRY", "IQD"]);
 
@@ -117,6 +118,7 @@ export async function recalculateProductsForCurrency(
       lastAppliedAt: new Date(),
     },
   });
+  await invalidateCache("currencies");
 
   await prisma.exchangeRateHistory.updateMany({
     where: {
@@ -213,6 +215,7 @@ async function recordRate(
       lastFetchedAt: now,
     },
   });
+  await invalidateCache("currencies");
 
   const shouldRecalc = await shouldRecalculateCurrency(currency, rate, now);
   if (shouldRecalc) {

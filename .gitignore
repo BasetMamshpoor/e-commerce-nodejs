@@ -13,6 +13,6 @@ uploads
 opencode.json
 opencode2.json
 postman.json
-/.idea
 /src/generated/prisma
 /update-claude
+.*

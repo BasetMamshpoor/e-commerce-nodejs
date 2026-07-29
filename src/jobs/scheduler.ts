@@ -4,6 +4,7 @@ import { runCleanupOtpJob } from "./cleanup-otp.job";
 import { runRefreshDiscountAggregatesJob } from "./refresh-discount-aggregates.job";
 import { runAutoCloseTicketsJob } from "./auto-close-tickets.job";
 import { runCurrencyRateFetchJob } from "./currency-rate-fetch.job";
+import { withLock } from "../lib/distributedLock";
 
 // ----------------------------------------------------------------------------
 // یک scheduler ساده‌ی مبتنی بر setInterval (بدون پکیج اضافه مثل node-cron،
@@ -11,10 +12,11 @@ import { runCurrencyRateFetchJob } from "./currency-rate-fetch.job";
 // پیچیده). اگر بعداً به جدول‌بندی دقیق‌تر (مثلاً «هر روز ساعت ۳ بامداد»)
 // نیاز داشتید، می‌توانید node-cron را اضافه و همین لیست jobs را به آن وصل کنید.
 //
-// ⚠️ این scheduler فقط برای یک اینستنس از سرور طراحی شده. اگر پروژه را
-// روی چند instance (horizontal scale) دیپلوی کردید، باید یک قفل توزیع‌شده
-// (مثلاً advisory lock پستگرس یا Redis) اضافه کنید تا هر جاب فقط روی یک
-// instance اجرا شود، وگرنه همان کار چند بار تکرار می‌شود.
+// هر جاب قبل از اجرا یک قفل توزیع‌شده‌ی Redis می‌گیرد (withLock) تا اگر
+// پروژه روی چند instance اجرا شود، هر جاب فقط روی یکی از آن‌ها در هر بازه
+// اجرا شود؛ TTL قفل کمی کمتر از فاصله‌ی بین اجراهاست تا اگر جابی طولانی
+// یا معلق شد، قفل خودش منقضی شود و اجرای بعدی مسدود نماند. اگر Redis در
+// دسترس نباشد، withLock مستقیم اجرا می‌کند (رفتار قبلیِ تک‌اینستنس).
 // ----------------------------------------------------------------------------
 
 interface Job {
@@ -31,9 +33,12 @@ const jobs: Job[] = [
 ];
 
 async function runAllJobs(): Promise<void> {
+  // ۹۰٪ فاصله‌ی بین اجراها، تا قفل قبل از دور بعدی خودش آزاد شود
+  const lockTtlMs = Math.floor(env.JOB_CHECK_INTERVAL_MINUTES * 60 * 1000 * 0.9);
+
   for (const job of jobs) {
     try {
-      await job.run();
+      await withLock(`job:${job.name}`, lockTtlMs, job.run);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(`[jobs] خطا در اجرای job «${job.name}»:`, err);

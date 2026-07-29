@@ -356,3 +356,69 @@ attachment/return media IDs sent directly (not via file upload) are now checked 
 `Media.uploadedById` before being linked, and rejected with `400` if any ID doesn't belong to the
 requesting user. This is enforced in the backend only — no frontend change needed unless your
 integration relied on attaching someone else's media (it shouldn't have).
+
+---
+
+## 12. Redis Added to the Project (Infrastructure — No API Shape Changes)
+
+Redis is now used across the backend as shared infrastructure. **This is a backend-only,
+operational change — no frontend/API request or response shape changed.** Documented here mainly
+so the frontend/ops team knows what now depends on Redis being available.
+
+No `prisma.schema` change, no migration needed for this task.
+
+### What uses Redis now
+
+1. **Rate limiting** (`src/middlewares/rateLimiter.ts`) — the global API limiter and the strict
+   auth limiter (login, OTP endpoints) now share their counters through Redis instead of an
+   in-process `Map`. This matters if the API is ever run as more than one instance: previously each
+   instance had its own counter (so the real limit was effectively `max × instance count`); now
+   it's a true shared limit.
+2. **Background job locking** (`src/jobs/scheduler.ts`) — each cron job (stale-order expiry, OTP
+   cleanup, discount aggregate refresh, auto-close tickets, currency rate fetch) takes a Redis lock
+   before running, so if the API is ever scaled to multiple instances, a job can't run twice in the
+   same window.
+3. **Login lockout fast-path** (`src/services/auth/login-guard.service.ts`) — the "is this account
+   temporarily locked?" check now reads a Redis counter instead of a `COUNT()` query against the
+   `LoginAttempt` table on every login attempt. The `LoginAttempt` table itself is untouched — every
+   attempt is still recorded there for admin visibility.
+4. **OTP resend cooldown fast-path** (`src/services/otp/otp.service.ts`) — same idea for "please
+   wait N seconds before requesting another code."
+5. **Caching** (`src/lib/cache.ts`) — a small generic cache helper, applied so far to:
+   - Category tree (`GET` category endpoints) — cached 5 minutes, but invalidated immediately on
+     any category create/update/delete, so admin changes show up right away regardless of the TTL.
+   - Currency list (`GET /api/admin/currencies`) — cached 60 seconds, invalidated on manual rate
+     edits. The scheduled rate-fetch job also invalidates it, but a 60s TTL is kept as a safety net
+     since that job writes to the database directly.
+
+### Resilience — Redis going down does not take the API down
+
+Every one of the above has a fallback: if Redis is unreachable (or `REDIS_ENABLED=false`), rate
+limiting falls back to the previous in-memory behavior, job locking just runs directly
+(today's single-instance behavior), login/OTP checks fall back to their original database queries,
+and caching is simply skipped (data is fetched fresh every time). Nothing throws or 500s because
+Redis is missing — the app degrades gracefully to "how it worked before this change," just slower
+under multi-instance/high-load conditions.
+
+### New environment variables
+
+```
+REDIS_URL=redis://127.0.0.1:6379
+REDIS_ENABLED=true
+```
+
+### Next phase (not done yet — flagged for a future task, on purpose)
+
+Caching the product listing/search endpoint (filters, pagination, price range) was intentionally
+**not** done in this pass. It touches many more write paths (product create/update/delete, stock
+changes, discount changes, price recalculation jobs) and getting invalidation wrong there risks
+showing customers a stale price or an out-of-stock item as available — worth doing as its own
+focused, carefully-reviewed task rather than folding into this one.
+
+### Bug noticed in passing (not fixed, flagged for review)
+
+While tracing every place that writes `Currency.currentRate`, `recalculateProductsForCurrency` in
+`src/services/exchangeRateFetcher.ts` sets each affected product's `minPrice`/`maxPrice` to the
+same single recalculated value, the same simplification that was fixed for variant-level pricing in
+a previous task (see section 8) — worth a follow-up look if you want it addressed together with the
+next pricing pass.

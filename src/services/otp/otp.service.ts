@@ -5,6 +5,7 @@ import { generateNumericOtp, normalizeIdentifier, detectIdentifierChannel } from
 import { MockSmsProvider } from "./providers/mock-sms.provider";
 import { EmailOtpProvider } from "./providers/email.provider";
 import { OtpPurpose, OtpChannel } from "../../generated/prisma";
+import { redis, isRedisReady } from "../../lib/redis";
 
 const smsProvider = new MockSmsProvider();
 const emailProvider = new EmailOtpProvider();
@@ -30,18 +31,30 @@ export interface IssueOtpResult {
   devCode?: string;
 }
 
-export async function issueOtp(params: {
-  identifier: string;
-  purpose: OtpPurpose;
-  userId?: number;
-}): Promise<IssueOtpResult> {
-  const channel: OtpChannel =
-    detectIdentifierChannel(params.identifier) === "SMS" ? "SMS" : "EMAIL";
-  const identifier = normalizeIdentifier(params.identifier);
+// جلوگیری از ارسال درخواست‌های پیاپی (resend cooldown).
+// عمداً از GET (نه SET...NX) برای چک استفاده می‌شود، و کلید cooldown را
+// فقط بعد از ساخت موفق ردیف OTP ست می‌کنیم (startResendCooldown) — دقیقاً
+// مثل رفتار قبلیِ مبتنی بر createdAt جدول otpCode: اگر ساخت/ارسال OTP با
+// خطا مواجه شود، cooldown شروع نشده و کاربر می‌تواند بلافاصله دوباره
+// تلاش کند. اگر به‌جایش از SET...NX در همان لحظه‌ی چک استفاده می‌کردیم،
+// یک خطای بعدی (مثلاً قطعی provider پیامک) کاربر را برای کل مدت cooldown
+// قفل می‌کرد بدون اینکه واقعاً کدی ارسال شده باشد.
+async function assertNotInCooldown(identifier: string, purpose: OtpPurpose): Promise<void> {
+  if (redis && isRedisReady()) {
+    try {
+      const ttl = await redis.ttl(`otpcooldown:${purpose}:${identifier}`);
+      if (ttl > 0) {
+        throw ApiError.tooMany(`لطفاً ${ttl} ثانیه صبر کنید و دوباره تلاش کنید`);
+      }
+      return;
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      // خطای اتصال Redis وسط کار — به مسیر دیتابیس برگرد
+    }
+  }
 
-  // جلوگیری از ارسال درخواست‌های پیاپی (resend cooldown)
   const lastOtp = await prisma.otpCode.findFirst({
-    where: { identifier, purpose: params.purpose },
+    where: { identifier, purpose },
     orderBy: { createdAt: "desc" },
   });
 
@@ -53,6 +66,23 @@ export async function issueOtp(params: {
       );
     }
   }
+}
+
+async function startResendCooldown(identifier: string, purpose: OtpPurpose): Promise<void> {
+  if (!redis || !isRedisReady()) return;
+  await redis.set(`otpcooldown:${purpose}:${identifier}`, "1", "EX", env.OTP_RESEND_COOLDOWN_SECONDS).catch(() => {});
+}
+
+export async function issueOtp(params: {
+  identifier: string;
+  purpose: OtpPurpose;
+  userId?: number;
+}): Promise<IssueOtpResult> {
+  const channel: OtpChannel =
+    detectIdentifierChannel(params.identifier) === "SMS" ? "SMS" : "EMAIL";
+  const identifier = normalizeIdentifier(params.identifier);
+
+  await assertNotInCooldown(identifier, params.purpose);
 
   const code = generateNumericOtp();
   const expiresAt = new Date(Date.now() + env.OTP_EXPIRES_IN_MINUTES * 60 * 1000);
@@ -67,6 +97,8 @@ export async function issueOtp(params: {
       userId: params.userId,
     },
   });
+
+  await startResendCooldown(identifier, params.purpose);
 
   const provider = channel === "SMS" ? smsProvider : emailProvider;
   await provider.send({

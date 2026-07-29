@@ -4,6 +4,7 @@ import { slugify, ensureUniqueSlug } from "../../utils/slug";
 import { CreateCategoryInput, UpdateCategoryInput } from "../../validations/category.validation";
 import { Prisma } from "../../generated/prisma";
 import { syncUrlWithMediaId } from "../../utils/mediaSync";
+import { getOrSetCache, invalidateCache } from "../../lib/cache";
 
 export interface CategoryTreeNode {
   id: number;
@@ -51,7 +52,7 @@ export async function createCategory(input: CreateCategoryInput) {
 
   const synced = syncUrlWithMediaId(input, "imageMediaId", "imageUrl");
 
-  return prisma.category.create({
+  const created = await prisma.category.create({
     data: {
       name: input.name,
       slug,
@@ -66,6 +67,8 @@ export async function createCategory(input: CreateCategoryInput) {
       canonicalUrl: input.canonicalUrl,
     },
   });
+  await invalidateCache("category-tree");
+  return created;
 }
 
 export async function updateCategory(id: number, input: UpdateCategoryInput) {
@@ -84,10 +87,12 @@ export async function updateCategory(id: number, input: UpdateCategoryInput) {
     }
   }
 
-  return prisma.category.update({
+  const updated = await prisma.category.update({
     where: { id },
     data: { ...syncUrlWithMediaId(input, "imageMediaId", "imageUrl"), slug },
   });
+  await invalidateCache("category-tree");
+  return updated;
 }
 
 export async function deleteCategory(id: number): Promise<void> {
@@ -100,6 +105,7 @@ export async function deleteCategory(id: number): Promise<void> {
   }
 
   await prisma.category.delete({ where: { id } });
+  await invalidateCache("category-tree");
 }
 
 export async function getCategoryById(id: number) {
@@ -122,12 +128,14 @@ export async function listCategoriesFlat(includeInactive: boolean) {
 }
 
 export async function getCategoryTree(includeInactive: boolean): Promise<CategoryTreeNode[]> {
-  const all = await prisma.category.findMany({
-    where: includeInactive ? {} : { isActive: true },
-    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-  });
+  return getOrSetCache(`category-tree:${includeInactive}`, 300, async () => {
+    const all = await prisma.category.findMany({
+      where: includeInactive ? {} : { isActive: true },
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+    });
 
-  return buildTree(all, null) as unknown as CategoryTreeNode[];
+    return buildTree(all, null) as unknown as CategoryTreeNode[];
+  });
 }
 
 function buildTree<T extends { id: number; parentId: number | null }>(

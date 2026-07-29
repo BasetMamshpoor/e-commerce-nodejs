@@ -65,6 +65,12 @@ const envSchema = z.object({
   FORCE_SYNC_INTERVAL_HOURS: z.coerce.number().int().positive().default(12),
   RATE_FETCH_INTERVAL_HOURS: z.coerce.number().int().positive().default(2),
   PRICE_CHANGE_THRESHOLD_PERCENT: z.coerce.number().nonnegative().default(1),
+
+  // --- Redis (زیرساخت مشترک: rate limiter، قفل جاب‌ها، کش، کوتاه‌کردن فشار روی دیتابیس) ---
+  REDIS_URL: z.string().default("redis://127.0.0.1:6379"),
+  // اگر false باشد، اپ بدون Redis هم بالا می‌آید (rate limiter/قفل جاب به‌صورت
+  // in-memory fallback می‌کنند) — برای محیط dev محلی بدون Redis مفید است.
+  REDIS_ENABLED: z.coerce.boolean().default(true),
 });
 
 const parsed = envSchema.safeParse(process.env);
