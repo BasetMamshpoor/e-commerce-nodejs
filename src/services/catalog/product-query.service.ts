@@ -4,6 +4,32 @@ import { parsePagination, buildPaginationMeta } from "../../utils/pagination";
 import { getDescendantCategoryIds } from "./category.service";
 import { ListProductsQuery, AdminListProductsQuery } from "../../validations/product.validation";
 import { Prisma } from "../../generated/prisma";
+import { getOrSetCache } from "../../lib/cache";
+
+// ----------------------------------------------------------------------------
+// کش برای صفحه‌ی «لیست/جستجوی محصولات» فروشگاه (نه پنل ادمین).
+//
+// چرا فقط TTL کوتاه (بدون invalidation دقیق روی هر تغییر)؟ چون این endpoint
+// (برخلاف درخت دسته‌بندی) به تقریباً هر نوع تغییری در سیستم حساس است:
+// موجودی (با ثبت سفارش)، قیمت (با تغییر تنوع یا نرخ ارز)، تخفیف فعال
+// (با فعال/غیرفعال‌شدن کد تخفیف)، وضعیت انتشار محصول، و غیره. این
+// مسیرهای نوشتاری آن‌قدر پراکنده‌اند که invalidate کردن دقیق برایشان
+// پرریسک است — یک مسیر فراموش‌شده یعنی داده‌ی قدیمی برای مدت نامعلوم.
+//
+// به‌جایش یک TTL کوتاه (۳۰ ثانیه) به‌عنوان مرز بالای staleness استفاده
+// می‌شود: بدترین حالت این است که یک محصول تا ۳۰ ثانیه با قیمت/موجودیِ
+// یک لحظه‌ی قبل در لیست دیده شود — و این فقط صفحه‌ی «مرور/جستجو» را
+// تحت‌تأثیر قرار می‌دهد؛ صفحه‌ی جزئیات محصول و مسیر پرداخت (که واقعاً
+// روی آن‌ها پول رد و بدل می‌شود) اصلاً کش نمی‌شوند و همیشه لحظه‌ای و
+// دقیق‌اند.
+function buildListCacheKey(prefix: string, query: Record<string, unknown>): string {
+  const sortedEntries = Object.entries(query)
+    .filter(([, v]) => v !== undefined)
+    .sort(([a], [b]) => a.localeCompare(b));
+  return `${prefix}:${JSON.stringify(sortedEntries)}`;
+}
+
+const LISTING_CACHE_TTL_SECONDS = 30;
 
 const LIST_INCLUDE = {
   brand: true,
@@ -97,25 +123,31 @@ async function buildCommonConditions(query: ListProductsQuery): Promise<Prisma.P
 }
 
 export async function listProductsStorefront(query: ListProductsQuery) {
-  const pagination = parsePagination({ page: query.page, limit: query.limit });
-  const AND = await buildCommonConditions(query);
-  AND.push({ status: "PUBLISHED" });
+  return getOrSetCache(
+    buildListCacheKey("product-list", query as unknown as Record<string, unknown>),
+    LISTING_CACHE_TTL_SECONDS,
+    async () => {
+      const pagination = parsePagination({ page: query.page, limit: query.limit });
+      const AND = await buildCommonConditions(query);
+      AND.push({ status: "PUBLISHED" });
 
-  const where: Prisma.ProductWhereInput = { AND };
-  const orderBy = buildSortOrder(query.sort);
+      const where: Prisma.ProductWhereInput = { AND };
+      const orderBy = buildSortOrder(query.sort);
 
-  const [items, total] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      orderBy,
-      skip: pagination.skip,
-      take: pagination.take,
-      include: LIST_INCLUDE,
-    }),
-    prisma.product.count({ where }),
-  ]);
+      const [items, total] = await Promise.all([
+        prisma.product.findMany({
+          where,
+          orderBy,
+          skip: pagination.skip,
+          take: pagination.take,
+          include: LIST_INCLUDE,
+        }),
+        prisma.product.count({ where }),
+      ]);
 
-  return { items, meta: buildPaginationMeta(total, pagination) };
+      return { items, meta: buildPaginationMeta(total, pagination) };
+    }
+  );
 }
 
 export async function listProductsAdmin(query: AdminListProductsQuery) {
@@ -141,55 +173,61 @@ export async function listProductsAdmin(query: AdminListProductsQuery) {
 }
 
 export async function getStorefrontFilters(categorySlug?: string) {
-  let categoryIds: number[] | undefined;
+  return getOrSetCache(
+    `product-filters:${categorySlug ?? "__all__"}`,
+    LISTING_CACHE_TTL_SECONDS,
+    async () => {
+      let categoryIds: number[] | undefined;
 
-  if (categorySlug) {
-    const category = await prisma.category.findUnique({ where: { slug: categorySlug } });
-    if (!category) throw ApiError.notFound("دسته‌بندی پیدا نشد");
-    categoryIds = await getDescendantCategoryIds(category.id);
-  }
+      if (categorySlug) {
+        const category = await prisma.category.findUnique({ where: { slug: categorySlug } });
+        if (!category) throw ApiError.notFound("دسته‌بندی پیدا نشد");
+        categoryIds = await getDescendantCategoryIds(category.id);
+      }
 
-  const productWhere: Prisma.ProductWhereInput = {
-    status: "PUBLISHED",
-    ...(categoryIds ? { categories: { some: { categoryId: { in: categoryIds } } } } : {}),
-  };
+      const productWhere: Prisma.ProductWhereInput = {
+        status: "PUBLISHED",
+        ...(categoryIds ? { categories: { some: { categoryId: { in: categoryIds } } } } : {}),
+      };
 
-  const [brands, priceAgg] = await Promise.all([
-    prisma.brand.findMany({
-      where: { isActive: true, products: { some: productWhere } },
-      orderBy: { name: "asc" },
-    }),
-    prisma.product.aggregate({
-      where: productWhere,
-      _min: { minPrice: true },
-      _max: { maxPrice: true },
-    }),
-  ]);
+      const [brands, priceAgg] = await Promise.all([
+        prisma.brand.findMany({
+          where: { isActive: true, products: { some: productWhere } },
+          orderBy: { name: "asc" },
+        }),
+        prisma.product.aggregate({
+          where: productWhere,
+          _min: { minPrice: true },
+          _max: { maxPrice: true },
+        }),
+      ]);
 
-  let attributes: Awaited<ReturnType<typeof prisma.attribute.findMany>>;
+      let attributes: Awaited<ReturnType<typeof prisma.attribute.findMany>>;
 
-  if (categoryIds) {
-    const links = await prisma.categoryAttribute.findMany({
-      where: { categoryId: { in: categoryIds } },
-      include: { attribute: { include: { values: true } } },
-    });
+      if (categoryIds) {
+        const links = await prisma.categoryAttribute.findMany({
+          where: { categoryId: { in: categoryIds } },
+          include: { attribute: { include: { values: true } } },
+        });
 
-    const unique = new Map<number, Awaited<ReturnType<typeof prisma.attribute.findMany>>[number]>();
-    for (const link of links) unique.set(link.attribute.id, link.attribute);
-    attributes = Array.from(unique.values());
-  } else {
-    attributes = await prisma.attribute.findMany({
-      where: { isFilterable: true },
-      include: { values: true },
-    });
-  }
+        const unique = new Map<number, Awaited<ReturnType<typeof prisma.attribute.findMany>>[number]>();
+        for (const link of links) unique.set(link.attribute.id, link.attribute);
+        attributes = Array.from(unique.values());
+      } else {
+        attributes = await prisma.attribute.findMany({
+          where: { isFilterable: true },
+          include: { values: true },
+        });
+      }
 
-  return {
-    brands,
-    priceRange: {
-      min: priceAgg._min.minPrice ?? 0,
-      max: priceAgg._max.maxPrice ?? 0,
-    },
-    attributes,
-  };
+      return {
+        brands,
+        priceRange: {
+          min: priceAgg._min.minPrice ?? 0,
+          max: priceAgg._max.maxPrice ?? 0,
+        },
+        attributes,
+      };
+    }
+  );
 }

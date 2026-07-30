@@ -6,6 +6,7 @@ import { CreateProductInput, UpdateProductInput, VariantInput } from "../../vali
 import { Prisma, PricingMode, ModifierType } from "../../generated/prisma";
 import { calculateFinalPrice, calculateVariantPrice } from "../pricingEngine";
 import { buildComboKey } from "../../utils/variantCombo";
+import { getOrSetCache } from "../../lib/cache";
 
 function extractIds(values: { attributeValueId: number }[]): number[] {
   return values.map((v) => v.attributeValueId);
@@ -483,38 +484,69 @@ function attachVariantPrices(product: Record<string, unknown>): Record<string, u
   };
 }
 
+// ----------------------------------------------------------------------------
+// چرا اینجا هم کش شد (با TTL کوتاه ۱۵ ثانیه‌ای):
+// روزهایی مثل Black Friday که ادمین یک تخفیف بزرگ می‌گذارد، بیشترین حجم
+// ترافیک روی همین صفحه‌ی «جزئیات محصول» متمرکز می‌شود (کاربرها همه‌شان
+// مشغول مرور و مقایسه‌ی محصولات‌اند، نه لزوماً در حال پرداخت). بدون کش،
+// یعنی همان محصولِ پرتخفیف را هزاران کاربر هم‌زمان می‌بینند و هرکدام یک
+// کوئری کامل (محصول + تنوع‌ها + محصولات مرتبط + پست‌های وبلاگ مرتبط) به
+// دیتابیس می‌زنند — دقیقاً همان لحظه‌ای که دیتابیس بیشترین فشار را (هم از
+// این صفحه، هم از سفارش‌های واقعی) تحمل می‌کند.
+// با ۱۵ ثانیه TTL، این جمعیت به یک کوئری هر ۱۵ ثانیه به‌ازای هر محصول
+// کاهش پیدا می‌کند — بدون این‌که مثل صفحه‌ی لیست (۳۰ ثانیه) خیلی بی‌دقت
+// شود، چون همین صفحه قیمت/تخفیف/موجودی را مستقیم به کاربر نشان می‌دهد.
+// نکته‌ی مهم: view-count و وضعیت «آیا در لیست علاقه‌مندی‌هاست؟» عمداً
+// بیرون از کش مانده‌اند (شخصی و/یا نیازمند شمارش دقیق‌اند)، فقط خودِ
+// داده‌ی محصول کش می‌شود.
+// ----------------------------------------------------------------------------
+async function fetchProductDetailCached(
+  where: { slug: string } | { id: number },
+  requirePublished: boolean
+): Promise<{ productId: number; serialized: Record<string, unknown> }> {
+  const cacheKey = "slug" in where ? `product-detail:slug:${where.slug}` : `product-detail:id:${where.id}`;
+
+  return getOrSetCache(cacheKey, 15, async () => {
+    const product = (await prisma.product.findUnique({
+      where,
+      include: PRODUCT_DETAIL_INCLUDE,
+    })) as unknown as (Record<string, unknown> & ProductLike) | null;
+
+    if (!product || (requirePublished && product.status !== "PUBLISHED")) {
+      throw ApiError.notFound("محصول پیدا نشد");
+    }
+
+    const serialized = serializeProduct(attachVariantPrices(product)) as Record<string, unknown>;
+    const productId = product.id as number;
+
+    const [relatedProducts, alsoBoughtProducts, relatedBlogPosts] = await Promise.all([
+      getRelatedProducts(productId),
+      getAlsoBoughtProducts(productId),
+      getRelatedBlogPosts(productId),
+    ]);
+
+    serialized.relatedProducts = relatedProducts;
+    serialized.alsoBoughtProducts = alsoBoughtProducts;
+    serialized.relatedBlogPosts = relatedBlogPosts;
+
+    return { productId, serialized };
+  });
+}
+
 export async function getProductBySlugPublic(slug: string, userId?: number) {
-  const product = await prisma.product.findUnique({
-    where: { slug },
-    include: PRODUCT_DETAIL_INCLUDE,
-  }) as unknown as (Record<string, unknown> & ProductLike) | null;
+  const { productId, serialized: cached } = await fetchProductDetailCached({ slug }, true);
+  const serialized = { ...cached };
 
-  if (!product || product.status !== "PUBLISHED") {
-    throw ApiError.notFound("محصول پیدا نشد");
-  }
-
-  const serialized = serializeProduct(attachVariantPrices(product)) as Record<string, unknown>;
-
-  await trackProductView(product.id as number);
+  await trackProductView(productId);
 
   if (userId) {
     const wishlistItem = await prisma.wishlist.findUnique({
-      where: { userId_productId: { userId, productId: product.id as number } },
+      where: { userId_productId: { userId, productId } },
     });
     serialized.isWish = !!wishlistItem;
   } else {
     serialized.isWish = false;
   }
-
-  const [relatedProducts, alsoBoughtProducts, relatedBlogPosts] = await Promise.all([
-    getRelatedProducts(product.id as number),
-    getAlsoBoughtProducts(product.id as number),
-    getRelatedBlogPosts(product.id as number),
-  ]);
-
-  serialized.relatedProducts = relatedProducts;
-  serialized.alsoBoughtProducts = alsoBoughtProducts;
-  serialized.relatedBlogPosts = relatedBlogPosts;
 
   return serialized;
 }
@@ -530,22 +562,14 @@ export async function getProductById(id: number) {
 }
 
 export async function getProductByIdPublic(id: number, userId?: number) {
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: PRODUCT_DETAIL_INCLUDE,
-  }) as unknown as (Record<string, unknown> & ProductLike) | null;
+  const { productId, serialized: cached } = await fetchProductDetailCached({ id }, true);
+  const serialized = { ...cached };
 
-  if (!product || product.status !== "PUBLISHED") {
-    throw ApiError.notFound("محصول پیدا نشد");
-  }
-
-  const serialized = serializeProduct(attachVariantPrices(product)) as Record<string, unknown>;
-
-  await trackProductView(id);
+  await trackProductView(productId);
 
   if (userId) {
     const wishlistItem = await prisma.wishlist.findUnique({
-      where: { userId_productId: { userId, productId: id } },
+      where: { userId_productId: { userId, productId } },
     });
     serialized.isWish = !!wishlistItem;
   } else {

@@ -3,6 +3,7 @@ import { ApiError } from "../../utils/ApiError";
 import { slugify, ensureUniqueSlug } from "../../utils/slug";
 import { CreateBrandInput, UpdateBrandInput } from "../../validations/brand.validation";
 import { syncUrlWithMediaId } from "../../utils/mediaSync";
+import { getOrSetCache, invalidateCache } from "../../lib/cache";
 
 async function isSlugTaken(slug: string, excludeId?: number): Promise<boolean> {
   const existing = await prisma.brand.findUnique({ where: { slug } });
@@ -20,7 +21,7 @@ export async function createBrand(input: CreateBrandInput) {
 
   const synced = syncUrlWithMediaId(input, "logoMediaId", "logoUrl");
 
-  return prisma.brand.create({
+  const created = await prisma.brand.create({
     data: {
       name: input.name,
       slug,
@@ -32,6 +33,8 @@ export async function createBrand(input: CreateBrandInput) {
       metaDescription: input.metaDescription,
     },
   });
+  await invalidateCache("brand");
+  return created;
 }
 
 export async function updateBrand(id: number, input: UpdateBrandInput) {
@@ -46,10 +49,12 @@ export async function updateBrand(id: number, input: UpdateBrandInput) {
     }
   }
 
-  return prisma.brand.update({
+  const updated = await prisma.brand.update({
     where: { id },
     data: { ...syncUrlWithMediaId(input, "logoMediaId", "logoUrl"), slug },
   });
+  await invalidateCache("brand");
+  return updated;
 }
 
 export async function deleteBrand(id: number): Promise<void> {
@@ -62,6 +67,7 @@ export async function deleteBrand(id: number): Promise<void> {
   }
 
   await prisma.brand.delete({ where: { id } });
+  await invalidateCache("brand");
 }
 
 export async function getBrandById(id: number) {
@@ -71,14 +77,18 @@ export async function getBrandById(id: number) {
 }
 
 export async function getBrandBySlug(slug: string) {
-  const brand = await prisma.brand.findUnique({ where: { slug } });
-  if (!brand) throw ApiError.notFound("برند پیدا نشد");
-  return brand;
+  return getOrSetCache(`brand:slug:${slug}`, 300, async () => {
+    const brand = await prisma.brand.findUnique({ where: { slug } });
+    if (!brand) throw ApiError.notFound("برند پیدا نشد");
+    return brand;
+  });
 }
 
 export async function listBrands(includeInactive: boolean) {
-  return prisma.brand.findMany({
-    where: includeInactive ? {} : { isActive: true },
-    orderBy: { name: "asc" },
-  });
+  return getOrSetCache(`brand-list:${includeInactive}`, 300, () =>
+    prisma.brand.findMany({
+      where: includeInactive ? {} : { isActive: true },
+      orderBy: { name: "asc" },
+    })
+  );
 }

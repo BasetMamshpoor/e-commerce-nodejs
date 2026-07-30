@@ -2,6 +2,7 @@ import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import { UpsertSettingInput } from "../../validations/settings.validation";
 import { Setting } from "../../generated/prisma";
+import { getOrSetCache, invalidateCache } from "../../lib/cache";
 
 // ----------------------------------------------------------------------------
 // تنظیمات سراسری سایت به‌صورت کلید-مقدار (نام فروشگاه، شبکه‌های اجتماعی،
@@ -27,10 +28,12 @@ function parseValue(setting: Setting): unknown {
 }
 
 export async function getPublicSettings(): Promise<Record<string, unknown>> {
-  const settings = await prisma.setting.findMany();
-  const result: Record<string, unknown> = {};
-  for (const s of settings) result[s.key] = parseValue(s);
-  return result;
+  return getOrSetCache("public-settings", 300, async () => {
+    const settings = await prisma.setting.findMany();
+    const result: Record<string, unknown> = {};
+    for (const s of settings) result[s.key] = parseValue(s);
+    return result;
+  });
 }
 
 export async function listSettingsAdmin(): Promise<Setting[]> {
@@ -49,15 +52,18 @@ export async function upsertSetting(key: string, input: UpsertSettingInput): Pro
     throw ApiError.badRequest("مقدار عددی نامعتبر است");
   }
 
-  return prisma.setting.upsert({
+  const result = await prisma.setting.upsert({
     where: { key },
     create: { key, value: input.value, type: input.type },
     update: { value: input.value, type: input.type },
   });
+  await invalidateCache("public-settings");
+  return result;
 }
 
 export async function deleteSetting(key: string): Promise<void> {
   const setting = await prisma.setting.findUnique({ where: { key } });
   if (!setting) throw ApiError.notFound("تنظیمات پیدا نشد");
   await prisma.setting.delete({ where: { key } });
+  await invalidateCache("public-settings");
 }

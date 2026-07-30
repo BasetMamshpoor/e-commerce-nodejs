@@ -1,6 +1,24 @@
 import { prisma } from "../../lib/prisma";
+import { getOrSetCache } from "../../lib/cache";
 
+// ----------------------------------------------------------------------------
+// این تابع صفحه‌ی اصلی (لندینگ) را می‌سازد — پرترافیک‌ترین endpoint کل
+// سایت، چون هر بازدیدکننده (چه خریدار، چه فقط در حال مرور) اول از همه
+// همین را می‌بیند. دقیقاً همان چیزی که در روزهای تخفیف بزرگ (مثل Black
+// Friday) بیشترین فشار را به دیتابیس می‌آورد، چون این یک تابع تنها ۱۰+
+// کوئری هم‌زمان اجرا می‌کند.
+//
+// چون منابع این صفحه (بنر، پاپ‌آپ، استوری، دسته‌بندی، وبلاگ، برند، و
+// چندین لیست محصول) خیلی پراکنده و مسیرهای نوشتاری‌شان مستقل از هم‌اند،
+// از همان الگوی «TTL کوتاه بدون invalidation دقیق» استفاده شده (مثل کش
+// لیست محصولات) — نه یک ترکیب invalidation برای ده‌ها مسیر نوشتاری
+// مختلف که نگه‌داری‌اش مدام باگ می‌سازد.
+// ----------------------------------------------------------------------------
 export async function getLandingPageData() {
+  return getOrSetCache("landing-page", 30, () => buildLandingPageData());
+}
+
+async function buildLandingPageData() {
   const now = new Date();
 
   const [banners, popups, stories, categories, latestBlogPosts, brands, featuredProducts, topSellingProducts, topRatedProducts, flashSales] = await Promise.all([

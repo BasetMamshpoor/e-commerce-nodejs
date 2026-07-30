@@ -10,6 +10,7 @@ import {
 } from "../../validations/blog.validation";
 import { BlogPost, BlogCategory, BlogPostProduct, Product } from "../../generated/prisma";
 import { syncUrlWithMediaId } from "../../utils/mediaSync";
+import { getOrSetCache, invalidateCache } from "../../lib/cache";
 
 type PostWithRelations = BlogPost & {
   category: BlogCategory | null;
@@ -39,7 +40,7 @@ export async function createBlogPost(authorId: number | undefined, input: Create
 
   const synced = syncUrlWithMediaId(input, "coverImageMediaId", "coverImageUrl");
 
-  return prisma.blogPost.create({
+  const created = await prisma.blogPost.create({
     data: {
       title: input.title,
       slug,
@@ -60,7 +61,9 @@ export async function createBlogPost(authorId: number | undefined, input: Create
         : undefined,
     },
     include: DETAIL_INCLUDE,
-  }) as Promise<PostWithRelations>;
+  }) as PostWithRelations;
+  await invalidateCache("blog-post-list");
+  return created;
 }
 
 export async function updateBlogPost(id: number, input: UpdateBlogPostInput) {
@@ -89,6 +92,10 @@ export async function updateBlogPost(id: number, input: UpdateBlogPostInput) {
     include: DETAIL_INCLUDE,
   })) as PostWithRelations;
 
+  await invalidateCache("blog-post-list");
+  await invalidateCache(`blog-post:slug:${post.slug}`);
+  if (slug && slug !== post.slug) await invalidateCache(`blog-post:slug:${slug}`);
+
   if (productIds !== undefined) {
     await prisma.blogPostProduct.deleteMany({ where: { blogPostId: id } });
     if (productIds.length) {
@@ -110,17 +117,24 @@ export async function deleteBlogPost(id: number): Promise<void> {
   const post = await prisma.blogPost.findUnique({ where: { id } });
   if (!post) throw ApiError.notFound("پست وبلاگ پیدا نشد");
   await prisma.blogPost.delete({ where: { id } });
+  await invalidateCache("blog-post-list");
+  await invalidateCache(`blog-post:slug:${post.slug}`);
   // کامنت‌های این پست (پلی‌مورفیک، بدون FK واقعی) به‌صورت خودکار حذف نمی‌شوند؛
   // عمداً نگه‌داشته می‌شوند مگر با ابزار پاک‌سازی جدا حذف شوند.
 }
 
 export async function getBlogPostBySlugPublic(slug: string) {
-  const post = (await prisma.blogPost.findUnique({
-    where: { slug },
-    include: DETAIL_INCLUDE,
-  })) as PostWithRelations | null;
-  if (!post || post.status !== "PUBLISHED") throw ApiError.notFound("پست وبلاگ پیدا نشد");
+  const post = await getOrSetCache(`blog-post:slug:${slug}`, 60, async () => {
+    const found = (await prisma.blogPost.findUnique({
+      where: { slug },
+      include: DETAIL_INCLUDE,
+    })) as PostWithRelations | null;
+    if (!found || found.status !== "PUBLISHED") throw ApiError.notFound("پست وبلاگ پیدا نشد");
+    return found;
+  });
 
+  // شمارش بازدید همیشه باید واقعی اتفاق بیفتد، حتی وقتی خودِ محتوای پست
+  // از کش آمده — برای همین این عملیات هرگز داخل getOrSetCache نیست.
   await prisma.blogPost.update({ where: { id: post.id }, data: { viewCount: { increment: 1 } } });
 
   return post;
@@ -152,32 +166,38 @@ async function buildWhere(query: ListBlogPostsQuery) {
 }
 
 export async function listBlogPostsPublic(query: ListBlogPostsQuery) {
-  const pagination = parsePagination({ page: query.page, limit: query.limit });
-  const where = { ...(await buildWhere(query)), status: "PUBLISHED" as const };
+  const cacheKey = `blog-post-list:${JSON.stringify(
+    Object.entries(query).filter(([, v]) => v !== undefined).sort(([a], [b]) => a.localeCompare(b))
+  )}`;
 
-  const [items, total] = await Promise.all([
-    prisma.blogPost.findMany({
-      where,
-      orderBy: { publishedAt: "desc" },
-      skip: pagination.skip,
-      take: pagination.take,
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        excerpt: true,
-        coverImageUrl: true,
-        publishedAt: true,
-        viewCount:true,
-      },
-    }),
-    prisma.blogPost.count({ where }),
-  ]);
+  return getOrSetCache(cacheKey, 60, async () => {
+    const pagination = parsePagination({ page: query.page, limit: query.limit });
+    const where = { ...(await buildWhere(query)), status: "PUBLISHED" as const };
 
-  return {
-    items: items as unknown as PostWithRelations[],
-    meta: buildPaginationMeta(total, pagination),
-  };
+    const [items, total] = await Promise.all([
+      prisma.blogPost.findMany({
+        where,
+        orderBy: { publishedAt: "desc" },
+        skip: pagination.skip,
+        take: pagination.take,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          coverImageUrl: true,
+          publishedAt: true,
+          viewCount:true,
+        },
+      }),
+      prisma.blogPost.count({ where }),
+    ]);
+
+    return {
+      items: items as unknown as PostWithRelations[],
+      meta: buildPaginationMeta(total, pagination),
+    };
+  });
 }
 
 export async function listBlogPostsAdmin(query: AdminListBlogPostsQuery) {

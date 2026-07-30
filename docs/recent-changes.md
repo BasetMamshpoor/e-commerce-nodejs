@@ -428,3 +428,101 @@ undoing the correct min/max tracking. Fixed by having this job reuse the same
 default-variant price) is still computed here directly, but `minPrice`/`maxPrice` now always
 reflect every active variant's own modifiers, consistently, no matter what triggered the
 recalculation. Covered by `tests/currency-recalc.test.ts`.
+
+---
+
+## 13. Product Listing/Search Now Cached (Phase 7 of the Redis rollout)
+
+**No API request/response shape changed.** `GET` product listing/search (storefront only — not the
+admin listing) and the filter-sidebar endpoint (brands, price range, filterable attributes) are now
+cached for **30 seconds**, keyed by the exact combination of query parameters used (page, limit,
+sort, category, brand, price range, search text, attribute filters, etc.) — two different filter
+combinations never share a cache entry.
+
+**Why only a short TTL, and no explicit invalidation:** this endpoint is sensitive to almost every
+kind of change in the system — stock (order placed), price (variant edit or currency rate refresh),
+active discounts, publish status, and more. Hunting down and invalidating on every one of those
+write paths is exactly the kind of fragile, easy-to-miss-one approach flagged as a risk when this
+caching phase was first proposed (see section 12). Instead, a tight 30-second TTL bounds the
+worst case precisely: a shopper browsing or searching may see a product's price/stock as it was up
+to 30 seconds ago. **The product detail page and the entire checkout/order path are not cached and
+never were** — those always compute price and stock fresh, at the moment that actually matters
+(the moment money changes hands). Covered by `tests/product-list-cache.test.ts`.
+
+Admin product listing (`GET /api/admin/products`) is deliberately **not cached** — admins need to
+see their own changes reflected immediately after saving.
+
+---
+
+## 14. Caching Rollout Completed Across the Rest of the Public Site
+
+**No API request/response shape changed.** Following up on section 13, here's where caching was
+and wasn't applied elsewhere, and why — this also directly addresses handling high-traffic
+discount days (Black Friday-style), where most visitors are browsing rather than checking out:
+
+### Now cached
+
+- **Landing/homepage** (`GET /` data) — the single highest-traffic endpoint in the app (it runs
+  10+ queries per request: banners, popups, stories, categories, blog, brands, and four separate
+  product lists). Cached **30 seconds**, no explicit invalidation (same reasoning as product
+  listing — too many independent write sources to track safely).
+- **Product detail page** (`GET /products/:slug`, `GET /products/:id`) — cached **15 seconds**.
+  This is the key addition for discount-day traffic: when a big sale is on, most concurrent traffic
+  *is* people opening product pages to look at the discounted price, not just the listing page.
+  15s (shorter than the 30s listing/landing TTL, since this page shows the exact price/stock) turns
+  an unbounded flood of identical requests into at most one database read every 15 seconds per
+  product — no matter how many thousands of people are looking at it at once. **View count and
+  per-user wishlist status are deliberately kept outside the cache** so they stay accurate on every
+  request even when the underlying product data is served from cache.
+- **Blog posts & categories** (list + single) — cached, invalidated immediately on any admin
+  create/update/delete.
+- **Brands** (list + single) — same, invalidated on write.
+- **Public site settings** (`getPublicSettings`) — same, invalidated on write.
+- **Active stories** (homepage story carousel) — invalidated on write, *plus* a 60s TTL safety net,
+  since the set of "active" stories also changes on its own over time as stories expire
+  (`expiresAt`), not just when an admin edits something.
+
+### Deliberately NOT cached (with reasoning)
+
+- **Comments** (`listApprovedComments`) — the response is personalized per request (whether *the
+  current logged-in user* liked each comment), so a shared cache would either leak one user's like
+  state to another or need a cache key per user × per product × per page, which defeats most of the
+  benefit. Also, admins expect a newly-approved comment to appear immediately.
+- **Addresses** (`listAddresses`) — private per-user data (PII), already a cheap indexed lookup,
+  low read volume. Caching PII in Redis for negligible performance gain isn't worth the added
+  privacy surface.
+- **Media library search/list** (admin) — admins need to see a file they just uploaded immediately;
+  this is an internal tool, not public-facing, so it doesn't get the traffic that would justify the
+  staleness risk.
+- **User management, sessions, admin listings in general** (users, admin product/blog/comment
+  lists, etc.) — security/moderation-sensitive and admin-only; correctness and immediacy matter far
+  more than shaving off a query, and traffic here is inherently low (only staff use these).
+- **Global/quick search** (free-text search-as-you-type) — query strings are almost never repeated
+  identically across users, so a cache would almost always miss; not worth the complexity.
+- **Checkout / cart / order path** — never cached, and this was true before this task too. No
+  matter how much traffic the storefront gets, the actual price/stock check at checkout is always
+  computed fresh, straight from the database, at the exact moment it matters.
+
+### On handling a real Black-Friday-style traffic spike specifically
+
+Putting it together, here's the actual plan for a high-traffic discount day:
+
+1. **Caching (this section) absorbs the "browsing" load** — homepage and product-detail pages,
+   which is where the bulk of traffic goes when people are reviewing a sale, now cost the database
+   roughly the same regardless of whether 100 or 100,000 people are looking, because of the TTL
+   caching above.
+2. **The app is now safe to run on more than one instance** (see section 12) — rate limiting and
+   job locking are already Redis-backed, so if you need to handle a traffic spike by scaling
+   horizontally (more Node processes behind a load balancer), nothing here breaks or duplicates.
+   This was one of the main reasons for building the Redis infrastructure this way.
+3. **Checkout stays accurate under load** — because it was never cached, a customer never gets
+   charged based on stale price/stock data, no matter how cache-heavy the browsing experience gets.
+4. **Not addressed here, worth a future look if you expect flash-sale-style limited stock:** if a
+   sale item has very limited stock and many customers race to buy it at the same moment, the
+   current stock check at order time (a normal database read/write) can still be a point of
+   contention under extreme concurrency. If you expect that specific scenario, a Redis-backed
+   atomic stock reservation (similar to how the rate limiter's Lua script works) would be the next
+   thing worth building — flagged here, not implemented, since it changes order-creation behavior
+   and deserves its own dedicated pass.
+
+Covered by `tests/product-detail-cache.test.ts` and `tests/misc-cache.test.ts`.

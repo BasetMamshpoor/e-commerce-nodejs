@@ -6,6 +6,7 @@ import {
   UpdateBlogCategoryInput,
 } from "../../validations/blog.validation";
 import { BlogCategory } from "../../generated/prisma";
+import { getOrSetCache, invalidateCache } from "../../lib/cache";
 
 async function isSlugTaken(slug: string, excludeId?: number): Promise<boolean> {
   const existing = await prisma.blogCategory.findUnique({ where: { slug } });
@@ -21,7 +22,9 @@ export async function createBlogCategory(input: CreateBlogCategoryInput): Promis
     throw ApiError.conflict("این slug قبلاً استفاده شده است");
   }
 
-  return prisma.blogCategory.create({ data: { ...input, slug } });
+  const created = await prisma.blogCategory.create({ data: { ...input, slug } });
+  await invalidateCache("blog-category");
+  return created;
 }
 
 export async function updateBlogCategory(
@@ -37,7 +40,9 @@ export async function updateBlogCategory(
     if (await isSlugTaken(slug, id)) throw ApiError.conflict("این slug قبلاً استفاده شده است");
   }
 
-  return prisma.blogCategory.update({ where: { id }, data: { ...input, slug } });
+  const updated = await prisma.blogCategory.update({ where: { id }, data: { ...input, slug } });
+  await invalidateCache("blog-category");
+  return updated;
 }
 
 export async function deleteBlogCategory(id: number): Promise<void> {
@@ -50,14 +55,19 @@ export async function deleteBlogCategory(id: number): Promise<void> {
   }
 
   await prisma.blogCategory.delete({ where: { id } });
+  await invalidateCache("blog-category");
 }
 
 export async function listBlogCategories(): Promise<BlogCategory[]> {
-  return prisma.blogCategory.findMany({ orderBy: { name: "asc" } });
+  return getOrSetCache("blog-category-list", 300, () =>
+    prisma.blogCategory.findMany({ orderBy: { name: "asc" } })
+  );
 }
 
 export async function getBlogCategoryBySlug(slug: string): Promise<BlogCategory> {
-  const category = await prisma.blogCategory.findUnique({ where: { slug } });
-  if (!category) throw ApiError.notFound("دسته‌بندی وبلاگ پیدا نشد");
-  return category;
+  return getOrSetCache(`blog-category:slug:${slug}`, 300, async () => {
+    const category = await prisma.blogCategory.findUnique({ where: { slug } });
+    if (!category) throw ApiError.notFound("دسته‌بندی وبلاگ پیدا نشد");
+    return category;
+  });
 }
