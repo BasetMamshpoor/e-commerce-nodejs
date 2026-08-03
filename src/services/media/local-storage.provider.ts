@@ -105,9 +105,17 @@ export class LocalStorageProvider implements IStorageProvider {
     }
   }
 
+  // ⚠️ عمداً یک مسیر نسبی برمی‌گرداند، نه URL کامل با دامنه/پورت.
+  // قبلاً اینجا `${env.APP_BASE_URL}/uploads/...` برگردانده می‌شد و همین
+  // مقدار مستقیم در دیتابیس (Media.url و فیلدهای denormalized مثل
+  // Banner.imageUrl) ذخیره می‌شد — یعنی با هر تغییر دامنه یا پورت پروژه،
+  // تمام لینک‌های رسانه‌ی قبلاً ذخیره‌شده برای همیشه خراب می‌ماندند.
+  // حالا فقط مسیر نسبی ذخیره می‌شود؛ تبدیل به URL کامل هر بار در لحظه‌ی
+  // پاسخ‌دادن (بر اساس APP_BASE_URL همان لحظه) انجام می‌شود — ببینید
+  // src/middlewares/resolveMediaUrls.middleware.ts
   getUrl(filePath: string): string {
     const clean = filePath.split(path.sep).join("/");
-    return `${env.APP_BASE_URL}/uploads/${clean}`;
+    return `/uploads/${clean}`;
   }
 
   resolveRoot(): string {
@@ -115,8 +123,10 @@ export class LocalStorageProvider implements IStorageProvider {
   }
 
   urlToFilePath(url: string): string {
-    const prefix = `${env.APP_BASE_URL}/uploads/`;
-    const relative = url.startsWith(prefix) ? url.slice(prefix.length) : url.replace(/^\/?uploads\//, "");
+    // هم مسیر نسبی جدید (/uploads/...) و هم URL کامل قدیمی (که ممکن است
+    // هنوز قبل از اجرای migration در دیتابیس مانده باشد) را می‌پذیرد.
+    const withoutOrigin = url.replace(/^https?:\/\/[^/]+/, "");
+    const relative = withoutOrigin.replace(/^\/?uploads\//, "");
     return path.join(this.uploadRoot, relative);
   }
 }

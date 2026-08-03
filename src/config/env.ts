@@ -10,6 +10,13 @@ import { z } from "zod";
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.coerce.number().int().positive().default(4000),
+  // این مقدار در دیتابیس ذخیره نمی‌شود (فقط لحظه‌ی پاسخ‌دادن برای ساخت
+  // URL کامل رسانه‌ها استفاده می‌شود — نگاه کنید به
+  // resolveMediaUrls.middleware.ts) پس با خیال راحت هر زمان خواستید
+  // دامنه/پورت پروژه را عوض کنید، فقط همین مقدار را عوض کنید:
+  //   - dev:        http://localhost:4000  (با پورت، چون پشت پراکسی نیست)
+  //   - production: https://api.domain.com  (بدون پورت — پشت Nginx/Load
+  //     balancer که روی 443 گوش می‌دهد و به پورت داخلی PORT فوروارد می‌کند)
   APP_BASE_URL: z.string().url().default("http://localhost:4000"),
   // آدرس عمومی سایت فروشگاه (فرانت‌اند) — برای ساخت لینک‌های sitemap.xml.
   // معمولاً دامنه‌ی فرانت با دامنه‌ی همین API فرق دارد؛ اگر ست نشود همان

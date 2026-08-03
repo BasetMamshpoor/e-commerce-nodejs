@@ -526,3 +526,54 @@ Putting it together, here's the actual plan for a high-traffic discount day:
    and deserves its own dedicated pass.
 
 Covered by `tests/product-detail-cache.test.ts` and `tests/misc-cache.test.ts`.
+
+---
+
+## 15. Media URLs No Longer Break When the Domain/Port Changes (Important — Action Required)
+
+**Root cause fixed.** Media URLs (uploaded images/videos/files) used to be stored in the database
+as a **full absolute URL** — domain, port, and all — baked in at upload time. Changing
+`APP_BASE_URL` (moving to a new domain, or dropping the port for production) meant every
+previously-uploaded file's URL, everywhere it was stored (`Media.url`, `Product` image links,
+`Banner.imageUrl`, `Category.imageUrl`, `Brand.logoUrl`, `ShippingCompany.logoUrl`,
+`BlogPost.coverImageUrl`, `Story.coverImageUrl`/`videoUrl`, `Popup.mediaUrl`), pointed at the old,
+now-wrong address permanently.
+
+**Fix:** the database now only ever stores a **relative path** (e.g.
+`/uploads/products/2026/07/xyz.jpg`). The full URL is built **at response time**, using whatever
+`APP_BASE_URL` is configured *right now* — via one new, centralized piece of middleware
+(`resolveMediaUrls`) that rewrites every `/uploads/...` string in every JSON response, automatically,
+for every endpoint (current and future). Nothing in any individual controller/service/serializer
+needed to change for this. **The shape of API responses is exactly the same as before** — every
+`imageUrl`/`logoUrl`/etc. field is still a ready-to-use full URL; only how that URL gets built
+internally changed.
+
+This also settled the dev vs. production port question directly: `APP_BASE_URL` is exactly the one
+place that controls this, and now it's *only* used to build the response, never stored — so:
+```
+dev:         APP_BASE_URL=http://localhost:4000     (with port)
+production:  APP_BASE_URL=https://api.domain.com     (no port — Nginx/load balancer in front)
+```
+Change it any time, for any reason, and every existing media link keeps working without touching a
+single database row.
+
+### ⚠️ Action required after deploying this: run the one-off migration script once
+
+Existing rows still have the *old* full-URL format baked in from before this fix. Run this once,
+after pulling this update and before (or right after) restarting the server:
+
+```bash
+npm install
+npx ts-node scripts/normalize-media-urls.ts
+```
+
+It strips the old `http(s)://host[:port]` prefix from every affected column, leaving just the
+relative path — printing a per-table count of how many rows it fixed. **Safe to run more than
+once** (already-relative values are left alone), so there's no harm in re-running it if you're ever
+unsure whether it ran.
+
+No `prisma.schema` change, no migration needed for this task — this script edits data, not
+structure.
+
+Covered by `tests/media-url-domain.test.ts` (9 tests, including a real end-to-end upload check that
+the persisted `Media.url` never contains a domain).

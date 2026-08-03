@@ -8,6 +8,7 @@ import { errorHandler } from "./middlewares/errorHandler";
 import { globalApiLimiter } from "./middlewares/rateLimiter";
 import { checkBlockedIp } from "./middlewares/blockedIp.middleware";
 import { resolveUploadRoot } from "./middlewares/upload.middleware";
+import { resolveMediaUrls } from "./middlewares/resolveMediaUrls.middleware";
 import { buildSitemapEntries, entriesToXml, buildRobotsTxt } from "./services/seo/sitemap.service";
 import apiRouter from "./routes";
 
@@ -55,6 +56,7 @@ export function createApp(): Application {
 
   app.use(checkBlockedIp);
   app.use(globalApiLimiter(env.RATE_LIMIT_WINDOW_MS, env.RATE_LIMIT_MAX));
+  app.use(resolveMediaUrls());
 
   app.use("/api/v1", apiRouter);
 
