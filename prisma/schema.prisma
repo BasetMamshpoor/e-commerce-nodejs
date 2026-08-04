@@ -519,6 +519,10 @@ model Product {
   id               Int           @id @default(autoincrement())
   name             String
   slug             String        @unique
+  // کد کوتاه یکتای محصول — فروشنده این را زیر بیوگرافی/کپشن پست شبکه‌های
+  // اجتماعی می‌گذارد تا موتور پاسخگو (chat-engine) بتواند از روی متن پیام
+  // مشتری مستقیماً محصول را تشخیص بدهد (بدون نیاز به جست‌وجوی فازی).
+  shortCode        String?       @unique
   brandId          Int?
   brand            Brand?        @relation(fields: [brandId], references: [id])
   shortDescription String?

@@ -26574,6 +26574,7 @@ export namespace Prisma {
     id: number | null
     name: string | null
     slug: string | null
+    shortCode: string | null
     brandId: number | null
     shortDescription: string | null
     description: string | null
@@ -26608,6 +26609,7 @@ export namespace Prisma {
     id: number | null
     name: string | null
     slug: string | null
+    shortCode: string | null
     brandId: number | null
     shortDescription: string | null
     description: string | null
@@ -26642,6 +26644,7 @@ export namespace Prisma {
     id: number
     name: number
     slug: number
+    shortCode: number
     brandId: number
     shortDescription: number
     description: number
@@ -26715,6 +26718,7 @@ export namespace Prisma {
     id?: true
     name?: true
     slug?: true
+    shortCode?: true
     brandId?: true
     shortDescription?: true
     description?: true
@@ -26749,6 +26753,7 @@ export namespace Prisma {
     id?: true
     name?: true
     slug?: true
+    shortCode?: true
     brandId?: true
     shortDescription?: true
     description?: true
@@ -26783,6 +26788,7 @@ export namespace Prisma {
     id?: true
     name?: true
     slug?: true
+    shortCode?: true
     brandId?: true
     shortDescription?: true
     description?: true
@@ -26905,6 +26911,7 @@ export namespace Prisma {
     id: number
     name: string
     slug: string
+    shortCode: string | null
     brandId: number | null
     shortDescription: string | null
     description: string | null
@@ -26959,6 +26966,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
+    shortCode?: boolean
     brandId?: boolean
     shortDescription?: boolean
     description?: boolean
@@ -27006,6 +27014,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
+    shortCode?: boolean
     brandId?: boolean
     shortDescription?: boolean
     description?: boolean
@@ -27044,6 +27053,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
+    shortCode?: boolean
     brandId?: boolean
     shortDescription?: boolean
     description?: boolean
@@ -27082,6 +27092,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
+    shortCode?: boolean
     brandId?: boolean
     shortDescription?: boolean
     description?: boolean
@@ -27113,7 +27124,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "brandId" | "shortDescription" | "description" | "status" | "isFeatured" | "viewCount" | "basePrice" | "pricingMode" | "currencyId" | "sourcePrice" | "priceBufferPercent" | "currentPriceIRT" | "priceUpdatedAt" | "discountType" | "discountValue" | "minPrice" | "maxPrice" | "isInStock" | "hasActiveDiscount" | "avgRating" | "reviewCount" | "totalSold" | "metaTitle" | "metaDescription" | "canonicalUrl" | "structuredData" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "shortCode" | "brandId" | "shortDescription" | "description" | "status" | "isFeatured" | "viewCount" | "basePrice" | "pricingMode" | "currencyId" | "sourcePrice" | "priceBufferPercent" | "currentPriceIRT" | "priceUpdatedAt" | "discountType" | "discountValue" | "minPrice" | "maxPrice" | "isInStock" | "hasActiveDiscount" | "avgRating" | "reviewCount" | "totalSold" | "metaTitle" | "metaDescription" | "canonicalUrl" | "structuredData" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     brand?: boolean | Product$brandArgs<ExtArgs>
     currency?: boolean | Product$currencyArgs<ExtArgs>
@@ -27158,6 +27169,7 @@ export namespace Prisma {
       id: number
       name: string
       slug: string
+      shortCode: string | null
       brandId: number | null
       shortDescription: string | null
       description: string | null
@@ -27624,6 +27636,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Product", 'Int'>
     readonly name: FieldRef<"Product", 'String'>
     readonly slug: FieldRef<"Product", 'String'>
+    readonly shortCode: FieldRef<"Product", 'String'>
     readonly brandId: FieldRef<"Product", 'Int'>
     readonly shortDescription: FieldRef<"Product", 'String'>
     readonly description: FieldRef<"Product", 'String'>
@@ -78515,6 +78528,7 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     slug: 'slug',
+    shortCode: 'shortCode',
     brandId: 'brandId',
     shortDescription: 'shortDescription',
     description: 'description',
@@ -80944,6 +80958,7 @@ export namespace Prisma {
     id?: IntFilter<"Product"> | number
     name?: StringFilter<"Product"> | string
     slug?: StringFilter<"Product"> | string
+    shortCode?: StringNullableFilter<"Product"> | string | null
     brandId?: IntNullableFilter<"Product"> | number | null
     shortDescription?: StringNullableFilter<"Product"> | string | null
     description?: StringNullableFilter<"Product"> | string | null
@@ -80990,6 +81005,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    shortCode?: SortOrderInput | SortOrder
     brandId?: SortOrderInput | SortOrder
     shortDescription?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
@@ -81035,6 +81051,7 @@ export namespace Prisma {
   export type ProductWhereUniqueInput = Prisma.AtLeast<{
     id?: number
     slug?: string
+    shortCode?: string
     AND?: ProductWhereInput | ProductWhereInput[]
     OR?: ProductWhereInput[]
     NOT?: ProductWhereInput | ProductWhereInput[]
@@ -81079,12 +81096,13 @@ export namespace Prisma {
     displayAttributeValues?: ProductDisplayAttributeValueListRelationFilter
     stories?: StoryProductListRelationFilter
     blogPosts?: BlogPostProductListRelationFilter
-  }, "id" | "slug">
+  }, "id" | "slug" | "shortCode">
 
   export type ProductOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    shortCode?: SortOrderInput | SortOrder
     brandId?: SortOrderInput | SortOrder
     shortDescription?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
@@ -81128,6 +81146,7 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"Product"> | number
     name?: StringWithAggregatesFilter<"Product"> | string
     slug?: StringWithAggregatesFilter<"Product"> | string
+    shortCode?: StringNullableWithAggregatesFilter<"Product"> | string | null
     brandId?: IntNullableWithAggregatesFilter<"Product"> | number | null
     shortDescription?: StringNullableWithAggregatesFilter<"Product"> | string | null
     description?: StringNullableWithAggregatesFilter<"Product"> | string | null
@@ -85673,6 +85692,7 @@ export namespace Prisma {
   export type ProductCreateInput = {
     name: string
     slug: string
+    shortCode?: string | null
     shortDescription?: string | null
     description?: string | null
     status?: $Enums.ProductStatus
@@ -85716,6 +85736,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     brandId?: number | null
     shortDescription?: string | null
     description?: string | null
@@ -85758,6 +85779,7 @@ export namespace Prisma {
   export type ProductUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
@@ -85801,6 +85823,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     brandId?: NullableIntFieldUpdateOperationsInput | number | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85844,6 +85867,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     brandId?: number | null
     shortDescription?: string | null
     description?: string | null
@@ -85878,6 +85902,7 @@ export namespace Prisma {
   export type ProductUpdateManyMutationInput = {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
@@ -85910,6 +85935,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     brandId?: NullableIntFieldUpdateOperationsInput | number | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -90495,6 +90521,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    shortCode?: SortOrder
     brandId?: SortOrder
     shortDescription?: SortOrder
     description?: SortOrder
@@ -90548,6 +90575,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    shortCode?: SortOrder
     brandId?: SortOrder
     shortDescription?: SortOrder
     description?: SortOrder
@@ -90582,6 +90610,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    shortCode?: SortOrder
     brandId?: SortOrder
     shortDescription?: SortOrder
     description?: SortOrder
@@ -99211,6 +99240,7 @@ export namespace Prisma {
   export type ProductCreateWithoutCreatedByInput = {
     name: string
     slug: string
+    shortCode?: string | null
     shortDescription?: string | null
     description?: string | null
     status?: $Enums.ProductStatus
@@ -99253,6 +99283,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     brandId?: number | null
     shortDescription?: string | null
     description?: string | null
@@ -99959,6 +99990,7 @@ export namespace Prisma {
     id?: IntFilter<"Product"> | number
     name?: StringFilter<"Product"> | string
     slug?: StringFilter<"Product"> | string
+    shortCode?: StringNullableFilter<"Product"> | string | null
     brandId?: IntNullableFilter<"Product"> | number | null
     shortDescription?: StringNullableFilter<"Product"> | string | null
     description?: StringNullableFilter<"Product"> | string | null
@@ -101938,6 +101970,7 @@ export namespace Prisma {
   export type ProductCreateWithoutCurrencyInput = {
     name: string
     slug: string
+    shortCode?: string | null
     shortDescription?: string | null
     description?: string | null
     status?: $Enums.ProductStatus
@@ -101980,6 +102013,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     brandId?: number | null
     shortDescription?: string | null
     description?: string | null
@@ -102627,6 +102661,7 @@ export namespace Prisma {
   export type ProductCreateWithoutBrandInput = {
     name: string
     slug: string
+    shortCode?: string | null
     shortDescription?: string | null
     description?: string | null
     status?: $Enums.ProductStatus
@@ -102669,6 +102704,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     shortDescription?: string | null
     description?: string | null
     status?: $Enums.ProductStatus
@@ -103876,6 +103912,7 @@ export namespace Prisma {
   export type ProductCreateWithoutCategoriesInput = {
     name: string
     slug: string
+    shortCode?: string | null
     shortDescription?: string | null
     description?: string | null
     status?: $Enums.ProductStatus
@@ -103918,6 +103955,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     brandId?: number | null
     shortDescription?: string | null
     description?: string | null
@@ -104019,6 +104057,7 @@ export namespace Prisma {
   export type ProductUpdateWithoutCategoriesInput = {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
@@ -104061,6 +104100,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     brandId?: NullableIntFieldUpdateOperationsInput | number | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -104152,6 +104192,7 @@ export namespace Prisma {
   export type ProductCreateWithoutImagesInput = {
     name: string
     slug: string
+    shortCode?: string | null
     shortDescription?: string | null
     description?: string | null
     status?: $Enums.ProductStatus
@@ -104194,6 +104235,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     brandId?: number | null
     shortDescription?: string | null
     description?: string | null
@@ -104311,6 +104353,7 @@ export namespace Prisma {
   export type ProductUpdateWithoutImagesInput = {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
@@ -104353,6 +104396,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     brandId?: NullableIntFieldUpdateOperationsInput | number | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -104460,6 +104504,7 @@ export namespace Prisma {
   export type ProductCreateWithoutVariantsInput = {
     name: string
     slug: string
+    shortCode?: string | null
     shortDescription?: string | null
     description?: string | null
     status?: $Enums.ProductStatus
@@ -104502,6 +104547,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     brandId?: number | null
     shortDescription?: string | null
     description?: string | null
@@ -104646,6 +104692,7 @@ export namespace Prisma {
   export type ProductUpdateWithoutVariantsInput = {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
@@ -104688,6 +104735,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     brandId?: NullableIntFieldUpdateOperationsInput | number | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -104931,6 +104979,7 @@ export namespace Prisma {
   export type ProductCreateWithoutDisplayAttributeValuesInput = {
     name: string
     slug: string
+    shortCode?: string | null
     shortDescription?: string | null
     description?: string | null
     status?: $Enums.ProductStatus
@@ -104973,6 +105022,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     brandId?: number | null
     shortDescription?: string | null
     description?: string | null
@@ -105060,6 +105110,7 @@ export namespace Prisma {
   export type ProductUpdateWithoutDisplayAttributeValuesInput = {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
@@ -105102,6 +105153,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     brandId?: NullableIntFieldUpdateOperationsInput | number | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -105259,6 +105311,7 @@ export namespace Prisma {
   export type ProductCreateWithoutWishlistsInput = {
     name: string
     slug: string
+    shortCode?: string | null
     shortDescription?: string | null
     description?: string | null
     status?: $Enums.ProductStatus
@@ -105301,6 +105354,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     brandId?: number | null
     shortDescription?: string | null
     description?: string | null
@@ -105444,6 +105498,7 @@ export namespace Prisma {
   export type ProductUpdateWithoutWishlistsInput = {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
@@ -105486,6 +105541,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     brandId?: NullableIntFieldUpdateOperationsInput | number | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -106137,6 +106193,7 @@ export namespace Prisma {
   export type ProductCreateWithoutDiscountCodesInput = {
     name: string
     slug: string
+    shortCode?: string | null
     shortDescription?: string | null
     description?: string | null
     status?: $Enums.ProductStatus
@@ -106179,6 +106236,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     brandId?: number | null
     shortDescription?: string | null
     description?: string | null
@@ -106288,6 +106346,7 @@ export namespace Prisma {
   export type ProductUpdateWithoutDiscountCodesInput = {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
@@ -106330,6 +106389,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     brandId?: NullableIntFieldUpdateOperationsInput | number | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112223,6 +112283,7 @@ export namespace Prisma {
   export type ProductCreateWithoutBlogPostsInput = {
     name: string
     slug: string
+    shortCode?: string | null
     shortDescription?: string | null
     description?: string | null
     status?: $Enums.ProductStatus
@@ -112265,6 +112326,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     brandId?: number | null
     shortDescription?: string | null
     description?: string | null
@@ -112374,6 +112436,7 @@ export namespace Prisma {
   export type ProductUpdateWithoutBlogPostsInput = {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
@@ -112416,6 +112479,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     brandId?: NullableIntFieldUpdateOperationsInput | number | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112774,6 +112838,7 @@ export namespace Prisma {
   export type ProductCreateWithoutStoriesInput = {
     name: string
     slug: string
+    shortCode?: string | null
     shortDescription?: string | null
     description?: string | null
     status?: $Enums.ProductStatus
@@ -112816,6 +112881,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     brandId?: number | null
     shortDescription?: string | null
     description?: string | null
@@ -112909,6 +112975,7 @@ export namespace Prisma {
   export type ProductUpdateWithoutStoriesInput = {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
@@ -112951,6 +113018,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     brandId?: NullableIntFieldUpdateOperationsInput | number | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -113743,6 +113811,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     brandId?: number | null
     shortDescription?: string | null
     description?: string | null
@@ -114355,6 +114424,7 @@ export namespace Prisma {
   export type ProductUpdateWithoutCreatedByInput = {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
@@ -114397,6 +114467,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     brandId?: NullableIntFieldUpdateOperationsInput | number | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -114439,6 +114510,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     brandId?: NullableIntFieldUpdateOperationsInput | number | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -115266,6 +115338,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     brandId?: number | null
     shortDescription?: string | null
     description?: string | null
@@ -115325,6 +115398,7 @@ export namespace Prisma {
   export type ProductUpdateWithoutCurrencyInput = {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
@@ -115367,6 +115441,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     brandId?: NullableIntFieldUpdateOperationsInput | number | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -115409,6 +115484,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     brandId?: NullableIntFieldUpdateOperationsInput | number | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -115571,6 +115647,7 @@ export namespace Prisma {
     id?: number
     name: string
     slug: string
+    shortCode?: string | null
     shortDescription?: string | null
     description?: string | null
     status?: $Enums.ProductStatus
@@ -115604,6 +115681,7 @@ export namespace Prisma {
   export type ProductUpdateWithoutBrandInput = {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
@@ -115646,6 +115724,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
@@ -115688,6 +115767,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    shortCode?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
