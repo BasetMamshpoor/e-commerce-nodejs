@@ -7,11 +7,16 @@ import { ApiExceptionFilter } from "./common/filters/api-exception.filter";
 import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
 import { RedisIoAdapter } from "./realtime/redis-io.adapter";
 import { TenancyService } from "./tenancy/tenancy.service";
+import { TelegramPollingService } from "./telegram/telegram-polling.service";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
     cors: { origin: env.CORS_ORIGIN, credentials: true },
   });
+
+  // بدون این، هوک‌های OnApplicationShutdown (بستن Pool های Postgres، حلقه‌ی
+  // polling تلگرام و ...) هیچ‌وقت صدا زده نمی‌شوند
+  app.enableShutdownHooks();
 
   app.setGlobalPrefix("api");
   app.useGlobalFilters(new ApiExceptionFilter());
@@ -27,6 +32,10 @@ async function bootstrap() {
   await app.listen(env.PORT, "0.0.0.0");
   // eslint-disable-next-line no-console
   console.log(`🚀 chat-engine روی پورت ${env.PORT} در حالت ${env.NODE_ENV} اجرا شد`);
+
+  // بعد از این‌که سرور بالا آمد و تنانت پیش‌فرض تضمین شد، polling تلگرام
+  // را شروع کن (اگر TELEGRAM_MODE=webhook باشد، خودش کاری نمی‌کند)
+  await app.get(TelegramPollingService).start();
 }
 
 bootstrap().catch((err) => {

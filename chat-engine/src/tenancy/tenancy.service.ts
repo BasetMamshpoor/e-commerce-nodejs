@@ -14,17 +14,29 @@ import { ApiError } from "../utils/ApiError";
 export class TenancyService {
   async ensureDefaultTenant(): Promise<void> {
     const count = await TenantModel.countDocuments();
-    if (count > 0) return;
 
-    await TenantModel.create({
-      key: env.DEFAULT_TENANT_KEY,
-      name: env.DEFAULT_TENANT_NAME,
-      storeDatabaseUrl: env.DEFAULT_TENANT_STORE_DATABASE_URL,
-      isActive: true,
-    });
+    if (count === 0) {
+      await TenantModel.create({
+        key: env.DEFAULT_TENANT_KEY,
+        name: env.DEFAULT_TENANT_NAME,
+        storeDatabaseUrl: env.DEFAULT_TENANT_STORE_DATABASE_URL,
+        isActive: true,
+        telegramBotToken: env.DEFAULT_TENANT_TELEGRAM_BOT_TOKEN || null,
+      });
 
-    // eslint-disable-next-line no-console
-    console.log(`✅ تنانت پیش‌فرض «${env.DEFAULT_TENANT_KEY}» ساخته شد`);
+      // eslint-disable-next-line no-console
+      console.log(`✅ تنانت پیش‌فرض «${env.DEFAULT_TENANT_KEY}» ساخته شد`);
+      return;
+    }
+
+    // اگر تنانت پیش‌فرض قبلاً ساخته شده ولی توکن تلگرام بعداً به .env اضافه
+    // شده، همین‌جا sync می‌شود — بدون نیاز به دستکاری دستی Mongo.
+    if (env.DEFAULT_TENANT_TELEGRAM_BOT_TOKEN) {
+      await TenantModel.updateOne(
+        { key: env.DEFAULT_TENANT_KEY, telegramBotToken: null },
+        { $set: { telegramBotToken: env.DEFAULT_TENANT_TELEGRAM_BOT_TOKEN } }
+      );
+    }
   }
 
   async resolveTenant(tenantKey: string): Promise<TenantDocument> {

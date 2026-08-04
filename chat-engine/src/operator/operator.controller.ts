@@ -10,7 +10,7 @@ import { OperatorModel } from "../models/operator.model";
 import { CustomerModel } from "../models/customer.model";
 import { ConversationService } from "../conversation/conversation.service";
 import { MessageService } from "../conversation/message.service";
-import { RealtimeService } from "../realtime/realtime.service";
+import { OutboundDeliveryService } from "../delivery/outbound-delivery.service";
 import { operatorReplySchema, queueQuerySchema, OperatorReplyInput } from "../validations/operator.validation";
 
 @Controller("operator")
@@ -19,7 +19,7 @@ export class OperatorController {
   constructor(
     private readonly conversationService: ConversationService,
     private readonly messageService: MessageService,
-    private readonly realtimeService: RealtimeService
+    private readonly deliveryService: OutboundDeliveryService
   ) {}
 
   @Get("queue")
@@ -81,13 +81,15 @@ export class OperatorController {
       text: body.text,
     });
 
-    // اگر مکالمه از کانال وب‌سایت است، پاسخ اپراتور را همان لحظه از طریق
-    // Socket.io به مشتری برسانیم (بدون این‌که مشتری صفحه را رفرش کند)
-    if (result?.conversation.channel === "WEBSITE") {
+    // پاسخ اپراتور را همان لحظه به مشتری برسانیم — روی هر کانالی که
+    // پیام آمده باشد (وب‌سایت با Socket.io، تلگرام با پیام ربات، ...)
+    if (result?.conversation) {
       const customer = await CustomerModel.findById(result.conversation.customerId);
       if (customer) {
-        this.realtimeService.emitToCustomer(customer.externalId, "operator:reply", {
-          conversationId: body.conversationId,
+        await this.deliveryService.deliverToCustomer({
+          tenant,
+          conversation: result.conversation,
+          customer,
           text: body.text,
         });
       }

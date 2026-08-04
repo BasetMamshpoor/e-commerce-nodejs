@@ -42,6 +42,19 @@ export const envSchema = z.object({
   // اکثر ترافیک تکراری را جذب می‌کند، اما یک موج از سوال‌های کاملاً
   // متفاوت (محصولات مختلف) هنوز به همین pool می‌رسد.
   STORE_DB_POOL_MAX: z.coerce.number().int().positive().default(20),
+
+  // --- تلگرام ---
+  // polling: خودِ سرور مدام از تلگرام می‌پرسد «پیام جدید داری؟» — نیازی به
+  //   دامنه/HTTPS ندارد، برای توسعه مناسب است.
+  // webhook: تلگرام خودش پیام را به یک آدرس مشخص از سرور POST می‌کند —
+  //   نیاز به دامنه‌ی HTTPS واقعی دارد، برای تولید توصیه می‌شود.
+  // فقط همین یک متغیر عوض می‌شود؛ هیچ کد دیگری لازم نیست تغییر کند.
+  TELEGRAM_MODE: z.enum(["polling", "webhook"]).default("polling"),
+  // فقط برای بوت‌استرپ تنانت پیش‌فرض؛ چند-مستاجری بعدی از روی خودِ
+  // Tenant.telegramBotToken در Mongo خوانده می‌شود.
+  DEFAULT_TENANT_TELEGRAM_BOT_TOKEN: z.string().optional().default(""),
+  // فقط برای حالت webhook لازم است (برای ثبت خودکار وبهوک روی تلگرام)
+  TELEGRAM_WEBHOOK_BASE_URL: z.string().optional().default(""),
 });
 
 export type Env = z.infer<typeof envSchema>;

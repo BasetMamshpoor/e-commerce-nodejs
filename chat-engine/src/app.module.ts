@@ -9,6 +9,9 @@ import { ConversationModule } from "./conversation/conversation.module";
 import { RealtimeModule } from "./realtime/realtime.module";
 import { ChatModule } from "./chat/chat.module";
 import { OperatorModule } from "./operator/operator.module";
+import { TelegramClientModule } from "./telegram/telegram-client.module";
+import { TelegramModule } from "./telegram/telegram.module";
+import { DeliveryModule } from "./delivery/delivery.module";
 
 @Module({
   imports: [
@@ -19,8 +22,11 @@ import { OperatorModule } from "./operator/operator.module";
     EngineModule,
     ConversationModule,
     RealtimeModule,
+    TelegramClientModule,
+    DeliveryModule,
     ChatModule,
     OperatorModule,
+    TelegramModule,
   ],
 })
 export class AppModule implements NestModule {

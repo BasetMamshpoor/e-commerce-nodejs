@@ -111,9 +111,17 @@ Socket.io: namespace `/chat` (کوئری `guestToken`؛ رویداد `message:se
 (هندشیک با `auth.token` = همان JWT پنل ادمین؛ رویداد `queue:new`) برای
 اطلاع لحظه‌ای صف اپراتور.
 
+## کانال‌ها
+
+- **وب‌سایت** — چت زنده با Socket.io. راهنمای کامل فرانت‌اند:
+  [`docs/FRONTEND_INTEGRATION.md`](./docs/FRONTEND_INTEGRATION.md)
+- **تلگرام** — وصل شده (حالت polling برای توسعه، آماده برای سوییچ به
+  webhook در تولید بدون تغییر کد). راهنما:
+  [`docs/TELEGRAM_SETUP.md`](./docs/TELEGRAM_SETUP.md)
+
 ## هنوز اضافه نشده (تسک‌های بعدی)
 
-- اتصال به API رسمی اینستاگرام/واتساپ/تلگرام/بله (وبهوک‌ها به همین
-  `MessageService.processIncomingMessage` مشترک وصل می‌شوند)
+- اتصال به API رسمی اینستاگرام/واتساپ/بله (همان الگوی تلگرام: وبهوک‌ها به
+  همین `MessageService.processIncomingMessage` مشترک وصل می‌شوند)
 - ثبت سفارش از داخل چت
 - پنل مدیریت تنانت‌ها (فعلاً فقط از طریق دیتابیس)
