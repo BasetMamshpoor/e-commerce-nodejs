@@ -286,23 +286,23 @@ async function main() {
   // ============================================================
   // 2. Users
   // ============================================================
-  // console.log("👤 ایجاد کاربران...");
+  console.log("👤 ایجاد کاربران...");
 
-  // const hashedPassword = await bcrypt.hash("a1234", 10);
-  // const customerPassword = await bcrypt.hash("a1234", 10);
+  const hashedPassword = await bcrypt.hash("a1234", 10);
+  const customerPassword = await bcrypt.hash("a1234", 10);
 
-  // const admin = await prisma.user.create({
-  //   data: {
-  //     fullName: "مدیر سیستم",
-  //     email: "admin@mrkafshdoz.com",
-  //     phone: "09100000001",
-  //     password: hashedPassword,
-  //     role: Role.ADMIN,
-  //     emailVerifiedAt: new Date(),
-  //     phoneVerifiedAt: new Date(),
-  //     lastLoginAt: new Date(),
-  //   },
-  // });
+  const admin = await prisma.user.create({
+    data: {
+      fullName: "مدیر سیستم",
+      email: "admin@gmail.com",
+      phone: "09123456789",
+      password: hashedPassword,
+      role: Role.ADMIN,
+      emailVerifiedAt: new Date(),
+      phoneVerifiedAt: new Date(),
+      lastLoginAt: new Date(),
+    },
+  });
 
   // const editor = await prisma.user.create({
   //   data: {

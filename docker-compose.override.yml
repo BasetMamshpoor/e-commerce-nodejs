@@ -1,0 +1,32 @@
+name: e-commerce
+
+# ----------------------------------------------------------------------------
+# این فایل به‌صورت خودکار توسط «docker compose up» با docker-compose.yml
+# ترکیب می‌شود (این رفتار پیش‌فرض Compose است، نیازی به تنظیم نیست) — یعنی
+# به‌صورت پیش‌فرض همیشه در حالت توسعه (hot reload) اجرا می‌شوی.
+#
+# روی سرور production این فایل را نمی‌خواهیم؛ یا حذفش کن، یا صریحاً فقط
+# فایل اصلی را بده:
+#   docker compose -f docker-compose.yml up -d --build
+# ----------------------------------------------------------------------------
+
+services:
+  backend:
+    build:
+      target: dev
+    environment:
+      NODE_ENV: development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: sh -c "npx prisma migrate deploy && npm run dev"
+
+  chat-engine:
+    build:
+      target: dev
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./chat-engine:/app
+      - /app/node_modules
+    command: npm run dev

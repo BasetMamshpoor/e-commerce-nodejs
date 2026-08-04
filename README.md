@@ -131,6 +131,22 @@ npx jest --watch  # حالت watch
 
 ## راه‌اندازی
 
+### با Docker (پیشنهادی — هم برای تست لوکال، هم برای سرور)
+
+```bash
+cp .env.example .env
+cp chat-engine/.env.example chat-engine/.env
+# مقادیر .env و chat-engine/.env را پر کن (راهنمای کامل: docs/DOCKER.md)
+
+docker compose up --build
+```
+
+همین. Postgres، Redis، MongoDB، بک‌اند اصلی، و chat-engine همه با هم بالا
+می‌آیند؛ migration ها خودکار اجرا می‌شوند. راهنمای کامل (دستورات، دیپلوی
+production، عیب‌یابی): [`docs/DOCKER.md`](./docs/DOCKER.md)
+
+### بدون Docker (مستقیم روی سیستم)
+
 ```bash
 npm install
 

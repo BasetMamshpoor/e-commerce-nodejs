@@ -1,7 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type Redis from "ioredis";
-import { REDIS_CLIENT } from "./redis.module";
-
+import Redis from "ioredis";
+import { REDIS_CLIENT } from "./redis.constants";
 // ----------------------------------------------------------------------------
 // کوئری‌های خواندنی روی دیتابیس فروشگاه (قیمت/موجودی/جست‌وجو) در یک مکالمه‌ی
 // شلوغ ممکن است چندین‌بار برای همان محصول تکرار شوند — حتی هزاران‌بار در

@@ -1,0 +1,110 @@
+name: e-commerce
+
+services:
+  # ==========================================================================
+  # دیتابیس فروشگاه (Postgres) — هم بک‌اند اصلی روش می‌نویسه، هم chat-engine
+  # مستقیماً و فقط-خواندنی ازش می‌خونه (دقیقاً همون معماری‌ای که طراحی شد)
+  # ==========================================================================
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-baset4591}
+      POSTGRES_DB: shopdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432" # فقط برای اتصال از خودِ سرور (مثلاً با یه DB GUI)؛ به بیرون باز نیست
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ==========================================================================
+  # Redis بک‌اند اصلی (rate limiter، قفل جاب‌ها، کش)
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  # ==========================================================================
+  # دیتابیس مخصوص chat-engine (مکالمات/پیام‌ها/تنانت‌ها) — کاملاً جدا از
+  # Postgres فروشگاه، عمداً
+  # ==========================================================================
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "127.0.0.1:27017:27017"
+
+  # ==========================================================================
+  # Redis مخصوص chat-engine (آداپتور Socket.io + کش کوتاه‌مدت + rate limit)
+  # عمداً جدا از redis بک‌اند اصلی — استقلال دو سرویس حفظ می‌شه
+  # ==========================================================================
+  chat-redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6380:6379"
+
+  # ==========================================================================
+  # بک‌اند اصلی فروشگاه
+  # ==========================================================================
+  backend:
+    build:
+      context: .
+      target: production
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # این‌ها همیشه باید به نام سرویس‌های همین شبکه‌ی Docker اشاره کنن،
+      # نه localhost — مقدارشون تو .env هم اگه چیز دیگه‌ای باشه، همینا برنده‌ن
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-baset4591}@postgres:5432/shopdb
+      REDIS_URL: redis://redis:6379
+      PORT: 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - uploads_data:/app/uploads
+
+  # ==========================================================================
+  # موتور پاسخگوی هوشمند (وب‌سایت + تلگرام)
+  # ==========================================================================
+  chat-engine:
+    build:
+      context: ./chat-engine
+      target: production
+    restart: unless-stopped
+    env_file:
+      - ./chat-engine/.env
+    environment:
+      MONGO_URI: mongodb://mongo:27017/chat_engine
+      REDIS_URL: redis://chat-redis:6379
+      # مستقیم به همون Postgres فروشگاه (فقط خواندنی) وصل می‌شه
+      DEFAULT_TENANT_STORE_DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-baset4591}@postgres:5432/shopdb
+      # باید دقیقاً همون JWT_ACCESS_SECRET بک‌اند اصلی باشه — این‌جوری
+      # هرچی تو .env اصلی گذاشتی همینه، نیازی نیست دستی sync کنی
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      PORT: 8001
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  mongo_data:
+  uploads_data:

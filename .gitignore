@@ -15,4 +15,6 @@ opencode2.json
 postman.json
 /src/generated/prisma
 /update-claude
-.*
+.DS_Store
+.vscode
+.idea

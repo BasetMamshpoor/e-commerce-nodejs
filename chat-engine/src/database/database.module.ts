@@ -1,4 +1,9 @@
-import { Global, Module, OnApplicationShutdown, OnModuleInit } from "@nestjs/common";
+import {
+  Global,
+  Module,
+  OnApplicationShutdown,
+  OnModuleInit,
+} from "@nestjs/common";
 import mongoose from "mongoose";
 import { env, isProd } from "../config/env";
 
@@ -10,7 +15,17 @@ import { env, isProd } from "../config/env";
 // ----------------------------------------------------------------------------
 
 @Global()
-@Module({})
+@Module({
+  providers: [
+    {
+      provide: "MONGO_CONNECTION",
+      useFactory: async () => {
+        mongoose.set("strictQuery", true);
+        return mongoose.connect(env.MONGO_URI);
+      },
+    },
+  ],
+})
 export class DatabaseModule implements OnModuleInit, OnApplicationShutdown {
   async onModuleInit() {
     mongoose.set("strictQuery", true);
