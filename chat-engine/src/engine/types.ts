@@ -35,3 +35,23 @@ export interface EngineReply {
   // اگر true باشد، یعنی هیچ لایه‌ای اطمینان کافی نداشت و باید به اپراتور ارجاع شود
   needsOperator: boolean;
 }
+
+// ----------------------------------------------------------------------------
+// حافظه‌ی مکالمه — همان چیزی که به لایه ۱ اجازه می‌دهد پیام بعدی مشتری را
+// در متن گفتگو بفهمد، نه به‌عنوان یک پیام تازه و بی‌ربط:
+//
+// - pendingAction: دقیقاً همان چیزی که آخرین پیام موتور از مشتری خواسته
+//   بود (مثلاً «کد محصول رو بفرست» یا «یکی از گزینه‌ها رو انتخاب کن»).
+//   فقط برای همان یک نوبت بعدی معتبر است.
+// - lastProductId: آخرین محصولی که در این مکالمه با اطمینان شناسایی شد.
+//   وقتی مشتری بدون تکرار کد می‌پرسد «رنگاش چی داره؟»، همین به کار می‌آید.
+// ----------------------------------------------------------------------------
+
+export type PendingAction =
+  | { type: "AWAITING_PRODUCT_CODE"; intent: string }
+  | { type: "AWAITING_OPTION_SELECTION"; intent: string; candidateProductIds: number[] };
+
+export interface ConversationContext {
+  pendingAction?: PendingAction;
+  lastProductId?: number;
+}

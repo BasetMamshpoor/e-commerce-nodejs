@@ -15,7 +15,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:5432:5432" # فقط برای اتصال از خودِ سرور (مثلاً با یه DB GUI)؛ به بیرون باز نیست
+      - "127.0.0.1:5433:5432" # فقط برای اتصال از خودِ سرور (مثلاً با یه DB GUI)؛ به بیرون باز نیست
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -28,8 +28,6 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:6379:6379"
 
   # ==========================================================================
   # دیتابیس مخصوص chat-engine (مکالمات/پیام‌ها/تنانت‌ها) — کاملاً جدا از
@@ -50,8 +48,6 @@ services:
   chat-redis:
     image: redis:7-alpine
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:6380:6379"
 
   # ==========================================================================
   # بک‌اند اصلی فروشگاه

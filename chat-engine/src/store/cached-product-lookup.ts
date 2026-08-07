@@ -26,6 +26,11 @@ export function createCachedProductLookup(pool: Pool, cache: RedisCacheService, 
       return cache.wrap(key, SHORT_CODE_TTL_SECONDS, () => direct.findByShortCode(code));
     },
 
+    findById: (id) => {
+      const key = `product:id:${tenantKey}:${id}`;
+      return cache.wrap(key, SHORT_CODE_TTL_SECONDS, () => direct.findById(id));
+    },
+
     search: (text, limit = 5) => {
       // کلید بر اساس کلمات معنادار استخراج‌شده است، نه متن خام — یعنی
       // «کراپ مشکی دارید؟» و «کراپ مشکی رو دارید؟» یک کلید کش می‌شوند.

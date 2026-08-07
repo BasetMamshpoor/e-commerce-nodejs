@@ -53,6 +53,7 @@ export interface ProductSearchResult {
 // ----------------------------------------------------------------------------
 export interface ProductLookupPort {
   findByShortCode(code: string): Promise<ResolvedProduct | null>;
+  findById(id: number): Promise<ResolvedProduct | null>;
   search(text: string, limit?: number): Promise<ProductSearchResult[]>;
   countActiveBrands(): Promise<number>;
 }

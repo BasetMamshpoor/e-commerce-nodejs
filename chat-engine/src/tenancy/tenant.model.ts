@@ -11,7 +11,7 @@ export interface TenantDocument extends Document {
   name: string;
   storeDatabaseUrl: string; // کانکشن‌استرینگ Postgres همان بک‌اند (فقط خواندنی)
   isActive: boolean;
-  aiProviderOverride?: "anthropic" | "openai" | null;
+  aiProviderOverride?: string | null;
   // --- تلگرام (اختیاری؛ اگر ست نشده باشد یعنی این تنانت بات تلگرام ندارد) ---
   telegramBotToken?: string | null;
   telegramWebhookSecret?: string | null; // برای اعتبارسنجی هدر وبهوک، فقط در حالت webhook لازم است
@@ -25,7 +25,7 @@ const tenantSchema = new Schema<TenantDocument>(
     name: { type: String, required: true },
     storeDatabaseUrl: { type: String, required: true },
     isActive: { type: Boolean, default: true },
-    aiProviderOverride: { type: String, enum: ["anthropic", "openai", null], default: null },
+    aiProviderOverride: { type: String, default: null },
     telegramBotToken: { type: String, default: null },
     telegramWebhookSecret: { type: String, default: null },
   },

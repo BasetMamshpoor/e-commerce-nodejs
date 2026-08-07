@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { ProductLookupPort } from "./types";
-import { findProductByShortCode } from "./productCode";
+import { findProductByShortCode, findProductById } from "./productCode";
 import { searchProducts } from "./productSearch";
 import { countActiveBrands } from "./storeStats";
 
@@ -13,6 +13,7 @@ import { countActiveBrands } from "./storeStats";
 export function createDirectProductLookup(pool: Pool): ProductLookupPort {
   return {
     findByShortCode: (code) => findProductByShortCode(pool, code),
+    findById: (id) => findProductById(pool, id),
     search: (text, limit) => searchProducts(pool, text, limit),
     countActiveBrands: () => countActiveBrands(pool),
   };

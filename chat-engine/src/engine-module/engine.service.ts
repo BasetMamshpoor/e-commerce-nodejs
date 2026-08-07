@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { runEnginePipeline } from "../engine/pipeline";
-import { IncomingMessage, EngineReply } from "../engine/types";
+import { IncomingMessage, EngineReply, ConversationContext } from "../engine/types";
 import { ProductLookupPort } from "../engine/productMatcher/types";
 import { AiHistoryTurn } from "../engine/layer2-ai/ai.types";
 
@@ -17,8 +17,9 @@ export class EngineService {
     lookup: ProductLookupPort,
     message: IncomingMessage,
     history: AiHistoryTurn[],
-    tenantAiOverride?: "anthropic" | "openai" | null
+    context: ConversationContext,
+    tenantAiOverride?: string | null
   ): Promise<EngineReply> {
-    return runEnginePipeline(lookup, message, history, tenantAiOverride);
+    return runEnginePipeline(lookup, message, history, context, tenantAiOverride);
   }
 }

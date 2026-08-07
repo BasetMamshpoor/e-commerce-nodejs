@@ -3,8 +3,10 @@ import { ResolvedProduct, ResolvedVariant, ProductLookupPort } from "./types";
 
 // ----------------------------------------------------------------------------
 // روش اول تشخیص محصول: کد کوتاه یکتایی که فروشنده زیر بیوگرافی/کپشن پست
-// می‌گذارد (ستون "shortCode" جدول "Product"). اگر مشتری دقیقاً همین کد را
-// بفرستد، محصول بدون هیچ ابهامی پیدا می‌شود.
+// می‌گذارد (ستون "shortCode" جدول "Product"). findProductById هم همان
+// چیز را با شناسه‌ی عددی برمی‌گرداند — برای وقتی که محصول را قبلاً در همین
+// مکالمه شناسایی کرده‌ایم (context.lastProductId) و فقط می‌خواهیم دوباره
+// اطلاعات کاملش را بگیریم.
 //
 // این کوئری‌ها SQL خام‌اند (بدون Prisma) و مستقیماً به Pool تنانتِ مربوطه
 // وصل می‌شوند — نام جدول/ستون‌ها دقیقاً همان‌هایی است که Prisma در پروژه‌ی
@@ -13,37 +15,51 @@ import { ResolvedProduct, ResolvedVariant, ProductLookupPort } from "./types";
 
 export const PRODUCT_CODE_PATTERN = /\b([A-Za-z0-9\-]{3,20})\b/g;
 
+interface ProductRow {
+  id: number;
+  name: string;
+  slug: string;
+  shortCode: string | null;
+  shortDescription: string | null;
+  minPrice: number;
+  maxPrice: number;
+  isInStock: boolean;
+  hasActiveDiscount: boolean;
+  brandName: string | null;
+}
+
+const PRODUCT_SELECT = `SELECT p.id, p.name, p.slug, p."shortCode", p."shortDescription",
+            p."minPrice", p."maxPrice", p."isInStock", p."hasActiveDiscount",
+            b.name AS "brandName"
+     FROM "Product" p
+     LEFT JOIN "Brand" b ON b.id = p."brandId"`;
+
 export async function findProductByShortCode(pool: Pool, rawCode: string): Promise<ResolvedProduct | null> {
   const code = rawCode.trim();
   if (!code) return null;
 
-  const productRes = await pool.query<{
-    id: number;
-    name: string;
-    slug: string;
-    shortCode: string | null;
-    shortDescription: string | null;
-    minPrice: number;
-    maxPrice: number;
-    isInStock: boolean;
-    hasActiveDiscount: boolean;
-    brandName: string | null;
-  }>(
-    `SELECT p.id, p.name, p.slug, p."shortCode", p."shortDescription",
-            p."minPrice", p."maxPrice", p."isInStock", p."hasActiveDiscount",
-            b.name AS "brandName"
-     FROM "Product" p
-     LEFT JOIN "Brand" b ON b.id = p."brandId"
-     WHERE p."shortCode" = $1 AND p.status = 'PUBLISHED'
-     LIMIT 1`,
+  const productRes = await pool.query<ProductRow>(
+    `${PRODUCT_SELECT} WHERE p."shortCode" = $1 AND p.status = 'PUBLISHED' LIMIT 1`,
     [code]
   );
 
-  const product = productRes.rows[0];
+  return hydrateProduct(pool, productRes.rows[0]);
+}
+
+export async function findProductById(pool: Pool, id: number): Promise<ResolvedProduct | null> {
+  if (!Number.isInteger(id) || id <= 0) return null;
+
+  const productRes = await pool.query<ProductRow>(
+    `${PRODUCT_SELECT} WHERE p.id = $1 AND p.status = 'PUBLISHED' LIMIT 1`,
+    [id]
+  );
+
+  return hydrateProduct(pool, productRes.rows[0]);
+}
+
+async function hydrateProduct(pool: Pool, product: ProductRow | undefined): Promise<ResolvedProduct | null> {
   if (!product) return null;
-
   const variants = await loadVariantsWithAttributes(pool, product.id);
-
   return { ...product, variants };
 }
 

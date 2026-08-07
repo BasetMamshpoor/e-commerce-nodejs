@@ -12,6 +12,9 @@ export interface ConversationDocument extends Document {
   assignedOperatorId?: Types.ObjectId | null;
   // شناسه‌ی نخِ مکالمه در پلتفرم مبدا (برای فوروارد پست/دایرکت اینستاگرام و ...)
   externalThreadId?: string | null;
+  // آخرین محصولی که در این مکالمه با اطمینان شناسایی شد — به لایه ۱/۲ اجازه
+  // می‌دهد سوال‌های بعدی مثل «رنگاش چی داره؟» را بدون تکرار کد بفهمند.
+  lastProductId?: number | null;
   lastMessageAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -33,6 +36,7 @@ const conversationSchema = new Schema<ConversationDocument>(
     },
     assignedOperatorId: { type: Schema.Types.ObjectId, ref: "Operator", default: null },
     externalThreadId: { type: String, default: null },
+    lastProductId: { type: Number, default: null },
     lastMessageAt: { type: Date, default: null },
   },
   { timestamps: true }

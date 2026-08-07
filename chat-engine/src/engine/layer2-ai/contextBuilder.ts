@@ -1,5 +1,6 @@
 import { findProductByShortCodeInText } from "../productMatcher/productCode";
 import { ProductLookupPort } from "../productMatcher/types";
+import { ConversationContext } from "../types";
 import { formatToman } from "../../utils/pricing";
 
 // ----------------------------------------------------------------------------
@@ -9,12 +10,23 @@ import { formatToman } from "../../utils/pricing";
 // صحنه کش‌شده باشد) و به‌عنوان یک context متنی در system prompt قرار
 // می‌دهیم. پرامپت هم صریحاً از مدل می‌خواهد فقط از همین context استفاده
 // کند و در غیر این صورت اطمینان کم گزارش بدهد.
+//
+// اگر پیام فعلی مشتری اسم/کد محصولی نداشت ولی مکالمه قبلاً روی یک محصول
+// خاص فوکوس داشته (context.lastProductId)، همان را به‌جای جست‌وجوی
+// عمومی در نظر می‌گیریم — دقیقاً همان منطق carryover لایه ۱.
 // ----------------------------------------------------------------------------
 
-export async function buildGroundedContext(lookup: ProductLookupPort, customerMessage: string): Promise<string> {
+export async function buildGroundedContext(
+  lookup: ProductLookupPort,
+  customerMessage: string,
+  context: ConversationContext
+): Promise<string> {
   const parts: string[] = [];
 
-  const matchedProduct = await findProductByShortCodeInText(lookup, customerMessage);
+  let matchedProduct = await findProductByShortCodeInText(lookup, customerMessage);
+  if (!matchedProduct && context.lastProductId) {
+    matchedProduct = await lookup.findById(context.lastProductId);
+  }
 
   if (matchedProduct) {
     const colors = [

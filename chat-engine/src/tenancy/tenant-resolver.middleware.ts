@@ -5,6 +5,7 @@ import { TenantDocument } from "./tenant.model";
 interface RequestWithTenant {
   headers: Record<string, string | string[] | undefined>;
   tenant?: TenantDocument;
+  raw?: { tenant?: TenantDocument };
 }
 
 // ----------------------------------------------------------------------------
@@ -23,6 +24,9 @@ export class TenantResolverMiddleware implements NestMiddleware {
       const header = req.headers["x-tenant-key"];
       const tenantKey = (Array.isArray(header) ? header[0] : header) ?? this.tenancyService.resolveDefaultTenantKey();
       req.tenant = await this.tenancyService.resolveTenant(tenantKey);
+      if (req.raw && typeof req.raw === "object") {
+        req.raw.tenant = req.tenant;
+      }
       next();
     } catch (err) {
       next(err);

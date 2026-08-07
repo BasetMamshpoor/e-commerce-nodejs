@@ -1,5 +1,5 @@
 import { env } from "../../config/env";
-import { IncomingMessage, EngineReply } from "../types";
+import { IncomingMessage, EngineReply, ConversationContext } from "../types";
 import { ProductLookupPort } from "../productMatcher/types";
 import { buildGroundedContext } from "./contextBuilder";
 import { getAiProvider } from "./factory";
@@ -12,7 +12,7 @@ import { AiHistoryTurn } from "./ai.types";
 // کمتر باشد، needsOperator=true برمی‌گردد تا لایه ۳ مکالمه را دست بگیرد.
 // ----------------------------------------------------------------------------
 
-const SYSTEM_PROMPT_TEMPLATE = (context: string) => `
+const SYSTEM_PROMPT_TEMPLATE = (dbContext: string) => `
 تو دستیار پاسخگوی فروشگاه اینترنتی هستی. فقط و فقط بر اساس اطلاعاتی که در
 بخش «اطلاعات دیتابیس» زیر آمده پاسخ بده. هرگز از دانش عمومی خودت، اینترنت،
 یا هر منبع دیگری خارج از همین اطلاعات استفاده نکن. اگر پاسخ سوال مشتری در
@@ -33,17 +33,18 @@ const SYSTEM_PROMPT_TEMPLATE = (context: string) => `
   دارد (مثل چانه‌زنی روی قیمت، شکایت، مرجوعی خاص): زیر 0.3
 
 اطلاعات دیتابیس:
-${context || "(اطلاعات مرتبطی در دیتابیس پیدا نشد)"}
+${dbContext || "(اطلاعات مرتبطی در دیتابیس پیدا نشد)"}
 `.trim();
 
 export async function runAiLayer(
   lookup: ProductLookupPort,
   message: IncomingMessage,
   history: AiHistoryTurn[],
-  tenantAiOverride?: "anthropic" | "openai" | null
+  conversationContext: ConversationContext,
+  tenantAiOverride?: string | null
 ): Promise<EngineReply> {
-  const context = await buildGroundedContext(lookup, message.text);
-  const systemPrompt = SYSTEM_PROMPT_TEMPLATE(context);
+  const dbContext = await buildGroundedContext(lookup, message.text, conversationContext);
+  const systemPrompt = SYSTEM_PROMPT_TEMPLATE(dbContext);
   const provider = getAiProvider(tenantAiOverride);
 
   try {
@@ -56,6 +57,8 @@ export async function runAiLayer(
       metadata: { provider: provider.name },
     };
   } catch (err) {
+    console.log(err);
+    
     // اگر سرویس AI در دسترس نبود (کلید تنظیم نشده/قطعی سرویس)، به‌جای کرش
     // کردن، مستقیم مکالمه را برای اپراتور علامت می‌زنیم.
     return {

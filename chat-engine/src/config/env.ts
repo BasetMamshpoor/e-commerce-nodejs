@@ -31,12 +31,56 @@ export const envSchema = z.object({
   DEFAULT_TENANT_NAME: z.string().default("فروشگاه پیش‌فرض"),
   DEFAULT_TENANT_STORE_DATABASE_URL: z.string().min(1, "DEFAULT_TENANT_STORE_DATABASE_URL تنظیم نشده است"),
 
-  AI_PROVIDER: z.enum(["anthropic", "openai"]).default("anthropic"),
+  // ----------------------------------------------------------------------------
+  // لایه‌ی دوم (AI) — قابل تعویض بین چند سرویس، کاملاً از env کنترل می‌شود.
+  // AI_PROVIDER تعیین می‌کند کدام یک «فعال» است؛ فقط همان یکی نیاز به کلید
+  // واقعی دارد، بقیه می‌توانند خالی بمانند.
+  //
+  // anthropic  → Anthropic Messages API (شکل درخواست/پاسخش با بقیه فرق دارد)
+  // openai / deepseek / openrouter / kilo / google / custom
+  //            → همه‌شان یک API سازگار با OpenAI (/chat/completions) دارند؛
+  //              فقط baseUrl، apiKey و model عوض می‌شود. base URL های
+  //              پیش‌فرض verify‌شده‌اند (اسناد رسمی هر سرویس)، ولی هرکدام
+  //              قابل override هم هستند.
+  // "custom"   → برای هر gateway دیگری که این لیست را ندارد؛ baseUrl حتماً
+  //              باید خودتان بدهید.
+  // ----------------------------------------------------------------------------
+  AI_PROVIDER: z.enum(["anthropic", "openai", "deepseek", "openrouter", "kilo", "google", "custom"]).default("anthropic"),
+  AI_CONFIDENCE_THRESHOLD: z.coerce.number().min(0).max(1).default(0.55),
+
   ANTHROPIC_API_KEY: z.string().optional().default(""),
   ANTHROPIC_MODEL: z.string().default("claude-sonnet-4-6"),
+
   OPENAI_API_KEY: z.string().optional().default(""),
   OPENAI_MODEL: z.string().default("gpt-4o-mini"),
-  AI_CONFIDENCE_THRESHOLD: z.coerce.number().min(0).max(1).default(0.55),
+  OPENAI_BASE_URL: z.string().default("https://api.openai.com/v1"),
+
+  // مدل‌های v4 پرچمدار دیپ‌سیک؛ نام‌های قدیمی deepseek-chat/deepseek-reasoner
+  // منسوخ شده‌اند
+  DEEPSEEK_API_KEY: z.string().optional().default(""),
+  DEEPSEEK_MODEL: z.string().default("deepseek-v4-flash"),
+  DEEPSEEK_BASE_URL: z.string().default("https://api.deepseek.com"),
+
+  // مدل‌های رایگان با پسوند ":free" در openrouter.ai/models قابل فیلتر کردن‌اند
+  OPENROUTER_API_KEY: z.string().optional().default(""),
+  OPENROUTER_MODEL: z.string().default("meta-llama/llama-3.3-70b-instruct:free"),
+  OPENROUTER_BASE_URL: z.string().default("https://openrouter.ai/api/v1"),
+
+  // فرمت مدل: provider/model-name (مثلاً anthropic/claude-sonnet-4.5)
+  KILO_API_KEY: z.string().optional().default(""),
+  KILO_MODEL: z.string().default("kilocode/kilo-auto/balanced"),
+  KILO_BASE_URL: z.string().default("https://api.kilo.ai/api/gateway"),
+
+  // Google AI Studio (Gemini) — لایه‌ی سازگار با OpenAI؛ سهمیه‌ی رایگان
+  // سخاوتمندانه‌ای دارد
+  GOOGLE_API_KEY: z.string().optional().default(""),
+  GOOGLE_MODEL: z.string().default("gemini-2.5-flash"),
+  GOOGLE_BASE_URL: z.string().default("https://generativelanguage.googleapis.com/v1beta/openai/"),
+
+  // برای هر gateway دیگری که در لیست بالا نیست
+  CUSTOM_API_KEY: z.string().optional().default(""),
+  CUSTOM_MODEL: z.string().optional().default(""),
+  CUSTOM_BASE_URL: z.string().optional().default(""),
 
   // حداکثر تعداد کانکشن هم‌زمان Postgres به‌ازای هر تنانت. کش Redis
   // اکثر ترافیک تکراری را جذب می‌کند، اما یک موج از سوال‌های کاملاً

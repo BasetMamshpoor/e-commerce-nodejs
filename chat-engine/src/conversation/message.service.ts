@@ -7,8 +7,8 @@ import { EngineService } from "../engine-module/engine.service";
 import { RedisCacheService } from "../redis/redis-cache.service";
 import { ConversationService } from "./conversation.service";
 import { ConversationModel } from "../models/conversation.model";
-import { ConversationMessageModel } from "../models/message.model";
-import { IncomingMessage, EngineReply } from "../engine/types";
+import { ConversationMessageModel, ConversationMessageDocument } from "../models/message.model";
+import { IncomingMessage, EngineReply, ConversationContext, PendingAction } from "../engine/types";
 import { AiHistoryTurn } from "../engine/layer2-ai/ai.types";
 import { ApiError } from "../utils/ApiError";
 
@@ -37,8 +37,9 @@ export class DuplicateMessageError extends Error {
 // ----------------------------------------------------------------------------
 // نقطه‌ی ورودی مشترک همه‌ی کانال‌ها (وب‌سایت الان، اینستاگرام/واتساپ/تلگرام/
 // بله بعداً): یک پیام مشتری می‌گیرد، مکالمه/مشتری را resolve می‌کند، پیام را
-// ذخیره می‌کند، از pipeline موتور رد می‌کند، پاسخ را ذخیره می‌کند و وضعیت
-// مکالمه را طبق EngineReply.needsOperator به‌روز می‌کند (لایه ۳).
+// ذخیره می‌کند، حافظه‌ی مکالمه (ConversationContext) را می‌سازد، از
+// pipeline موتور رد می‌کند، پاسخ را ذخیره می‌کند و وضعیت مکالمه را طبق
+// EngineReply.needsOperator به‌روز می‌کند (لایه ۳).
 // ----------------------------------------------------------------------------
 
 @Injectable()
@@ -76,6 +77,17 @@ export class MessageService {
       externalThreadId: incoming.externalThreadId,
     });
 
+    // تاریخچه و حافظه‌ی مکالمه را از روی پیام‌های قبلی می‌سازیم — قبل از
+    // این‌که پیام تازه‌ی مشتری ذخیره شود؛ وگرنه «آخرین پیام موتور» همیشه
+    // خودِ همین پیام تازه‌ی مشتری می‌شد (که هنوز پیامِ موتور هم نیست) و
+    // pendingAction هیچ‌وقت درست تشخیص داده نمی‌شد.
+    const recentMessages = await this.loadRecentMessages(String(conversation._id));
+    const history = toAiHistory(recentMessages);
+    const context: ConversationContext = {
+      pendingAction: extractPendingAction(recentMessages),
+      lastProductId: conversation.lastProductId ?? undefined,
+    };
+
     // جلوگیری از پردازش دوباره‌ی همان پیام (وبهوک تکراری پلتفرم‌های بیرونی)
     if (incoming.externalMessageId) {
       const duplicate = await ConversationMessageModel.findOne({
@@ -95,11 +107,9 @@ export class MessageService {
       externalMessageId: incoming.externalMessageId ?? null,
     });
 
-    const history = await this.loadHistoryForAi(String(conversation._id));
-
     const pool = this.storeSql.getPool(tenant.storeDatabaseUrl);
     const lookup = this.productLookupFactory.forTenant(tenant.key, pool);
-    const reply = await this.engine.run(lookup, incoming, history, tenant.aiProviderOverride);
+    const reply = await this.engine.run(lookup, incoming, history, context, tenant.aiProviderOverride);
 
     const engineMessage = await ConversationMessageModel.create({
       tenantId: tenant.key,
@@ -112,6 +122,12 @@ export class MessageService {
 
     conversation.status = reply.needsOperator ? "NEEDS_OPERATOR" : "AI_HANDLING";
     conversation.lastMessageAt = new Date();
+    // اگر این پاسخ روی یک محصول مشخص resolve شد، آن را برای پیام‌های بعدی
+    // مکالمه به‌عنوان «محصول در کانون توجه» به خاطر می‌سپاریم
+    const resolvedProductId = reply.metadata?.productId;
+    if (typeof resolvedProductId === "number") {
+      conversation.lastProductId = resolvedProductId;
+    }
     await conversation.save();
 
     return {
@@ -152,17 +168,47 @@ export class MessageService {
     return ConversationMessageModel.find({ tenantId, conversationId }).sort({ createdAt: 1 });
   }
 
-  private async loadHistoryForAi(conversationId: string): Promise<AiHistoryTurn[]> {
+  private async loadRecentMessages(conversationId: string): Promise<ConversationMessageDocument[]> {
     const messages = await ConversationMessageModel.find({ conversationId })
       .sort({ createdAt: -1 })
       .limit(HISTORY_LIMIT);
-
-    return messages
-      .reverse()
-      .filter((m) => m.senderType === "CUSTOMER" || m.senderType === "ENGINE" || m.senderType === "OPERATOR")
-      .map((m) => ({
-        role: m.senderType === "CUSTOMER" ? ("customer" as const) : ("engine" as const),
-        text: m.content,
-      }));
+    return messages.reverse();
   }
+}
+
+function toAiHistory(messages: ConversationMessageDocument[]): AiHistoryTurn[] {
+  return messages
+    .filter((m) => m.senderType === "CUSTOMER" || m.senderType === "ENGINE" || m.senderType === "OPERATOR")
+    .map((m) => ({
+      role: m.senderType === "CUSTOMER" ? ("customer" as const) : ("engine" as const),
+      text: m.content,
+    }));
+}
+
+// ----------------------------------------------------------------------------
+// آخرین پیام موتور (ENGINE) در تاریخچه را پیدا می‌کند و اگر روی آن یک
+// pendingAction ثبت شده بود (لایه ۱ منتظر کد محصول یا انتخاب گزینه بود)،
+// آن را برمی‌گرداند — اما فقط اگر همان آخرین پیامِ کل مکالمه هم باشد؛
+// یعنی اگر مشتری خودش قبلاً یک پیام دیگر فرستاده و رد شده، این pendingAction
+// دیگر معتبر نیست (فقط برای «نوبت بعدی» معتبر است).
+// ----------------------------------------------------------------------------
+function extractPendingAction(recentMessages: ConversationMessageDocument[]): PendingAction | undefined {
+  const lastMessage = recentMessages[recentMessages.length - 1];
+  if (!lastMessage || lastMessage.senderType !== "ENGINE") return undefined;
+
+  const metadata = lastMessage.metadata as { pendingAction?: unknown } | null | undefined;
+  const candidate = metadata?.pendingAction;
+  if (!isPendingAction(candidate)) return undefined;
+
+  return candidate;
+}
+
+function isPendingAction(value: unknown): value is PendingAction {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  if (v.type === "AWAITING_PRODUCT_CODE") return typeof v.intent === "string";
+  if (v.type === "AWAITING_OPTION_SELECTION") {
+    return typeof v.intent === "string" && Array.isArray(v.candidateProductIds);
+  }
+  return false;
 }

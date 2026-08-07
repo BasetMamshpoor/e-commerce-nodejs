@@ -16,6 +16,6 @@ export interface AiAnswerResult {
 }
 
 export interface AiProvider {
-  readonly name: "anthropic" | "openai";
+  readonly name: string;
   answer(request: AiAnswerRequest): Promise<AiAnswerResult>;
 }
