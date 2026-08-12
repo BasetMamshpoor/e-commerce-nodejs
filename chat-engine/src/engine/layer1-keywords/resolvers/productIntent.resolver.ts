@@ -70,6 +70,26 @@ export function resolveSizeReply(product: ResolvedProduct): string {
   return resolveVariantAttributeReply(product, (inputType) => inputType !== "COLOR", "سایز/مشخصات");
 }
 
+export function resolveInfoReply(product: ResolvedProduct): string {
+  const lines = [
+    `«${product.name}»${product.brandName ? ` — برند ${product.brandName}` : ""}`,
+    resolvePriceReply(product),
+    product.isInStock ? "موجود است ✅" : "فعلاً موجود نیست 🙁",
+  ];
+
+  const colors = [
+    ...new Set(
+      product.variants
+        .flatMap((v) => v.attributeValues)
+        .filter((av) => av.attributeInputType === "COLOR")
+        .map((av) => av.value)
+    ),
+  ];
+  if (colors.length > 0) lines.push(`رنگ‌های موجود: ${colors.join("، ")}`);
+
+  return lines.join("\n");
+}
+
 const RESOLVERS: Partial<Record<KeywordIntent, (product: ResolvedProduct) => string>> = {
   PRICE: resolvePriceReply,
   STOCK: resolveStockReply,
@@ -77,6 +97,7 @@ const RESOLVERS: Partial<Record<KeywordIntent, (product: ResolvedProduct) => str
   DISCOUNT: resolveDiscountReply,
   COLOR: resolveColorReply,
   SIZE: resolveSizeReply,
+  INFO: resolveInfoReply,
 };
 
 export function resolveProductScopedIntent(intent: KeywordIntent, product: ResolvedProduct): string | null {

@@ -12,8 +12,10 @@ export type KeywordIntent =
   | "SIZE"
   | "BRAND"
   | "DISCOUNT"
+  | "INFO"
   | "HOW_TO_ORDER"
-  | "SHIPPING";
+  | "SHIPPING"
+  | "CONTACT_SUPPORT";
 
 // intent هایی که برای پاسخ‌دادن نیاز به «محصول مشخص» دارند
 export const PRODUCT_SCOPED_INTENTS = new Set<KeywordIntent>([
@@ -23,6 +25,7 @@ export const PRODUCT_SCOPED_INTENTS = new Set<KeywordIntent>([
   "SIZE",
   "BRAND",
   "DISCOUNT",
+  "INFO",
 ]);
 
 export const KEYWORD_MAP: Record<KeywordIntent, string[]> = {
@@ -48,12 +51,19 @@ export const KEYWORD_MAP: Record<KeywordIntent, string[]> = {
   SIZE: ["سایز", "سایزبندی", "بزرگ", "کوچیک", "متوسط", "کیلویی", "لیتری"],
   BRAND: ["برند", "سازنده", "شرکت سازنده", "کمپانی"],
   DISCOUNT: ["تخفیف", "آفر", "حراج", "کد تخفیف"],
+  // درخواست معرفی/اطلاعات کلی محصول (نه یک فیلد خاص) — عمدتاً از دکمه‌ی
+  // «جستجوی محصول» منوی تلگرام فعال می‌شود
+  INFO: ["معرفی کن", "توضیح بده", "مشخصات", "جستجوی محصول", "دنبال یه محصول"],
   HOW_TO_ORDER: ["ثبت سفارش", "چجوری بخرم", "چطور سفارش", "چطوری سفارش", "نحوه خرید", "چجوری بخرم"],
   SHIPPING: ["ارسال", "پست", "تحویل", "هزینه ارسال", "هزینه‌ی ارسال"],
+  // درخواست مستقیم صحبت با انسان — این intent محصول‌محور نیست و مستقیم
+  // مکالمه را به لایه ۳ ارجاع می‌دهد (resolveGenericIntent در generic.resolver.ts)
+  CONTACT_SUPPORT: ["پشتیبانی", "اپراتور", "صحبت با انسان", "همکار", "کارشناس"],
 };
 
 // ترتیب اولویت وقتی چند intent هم‌زمان مچ شوند (مثلاً «قیمت رنگ آبی چنده؟» هم PRICE هم COLOR است)
 export const INTENT_PRIORITY: KeywordIntent[] = [
+  "CONTACT_SUPPORT",
   "PRICE",
   "STOCK",
   "DISCOUNT",
@@ -62,4 +72,5 @@ export const INTENT_PRIORITY: KeywordIntent[] = [
   "BRAND",
   "SHIPPING",
   "HOW_TO_ORDER",
+  "INFO",
 ];

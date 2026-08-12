@@ -1,11 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { Types } from "mongoose";
 import { CustomerModel, Channel } from "../models/customer.model";
-import { ConversationModel, ConversationStatus } from "../models/conversation.model";
+import { ConversationModel, ConversationDocument, ConversationStatus } from "../models/conversation.model";
+import { ConversationMessageModel } from "../models/message.model";
 import { ApiError } from "../utils/ApiError";
+import { RealtimeService } from "../realtime/realtime.service";
 
 @Injectable()
 export class ConversationService {
+  constructor(private readonly realtimeService: RealtimeService) {}
+
   async getOrCreateCustomer(params: {
     tenantId: string;
     channel: Channel;
@@ -55,13 +59,32 @@ export class ConversationService {
     return conversation;
   }
 
+  // لیست عمومی مکالمات برای پنل ادمین — با فیلتر آزاد روی status/channel
+  // (برخلاف قبل که فقط NEEDS_OPERATOR/WITH_OPERATOR را نشان می‌داد).
+  // اگر هیچ status ای داده نشود، همان پیش‌فرض قبلی (صف‌های مرتبط با
+  // اپراتور) حفظ می‌شود تا رفتار فعلی داشبورد نشکند.
+  async listConversations(params: {
+    tenantId: string;
+    status?: ConversationStatus | ConversationStatus[];
+    channel?: string;
+  }) {
+    const filter: Record<string, unknown> = { tenantId: params.tenantId };
+
+    if (params.status) {
+      filter.status = Array.isArray(params.status) ? { $in: params.status } : params.status;
+    } else {
+      filter.status = { $in: ["NEEDS_OPERATOR", "WITH_OPERATOR"] };
+    }
+    if (params.channel) {
+      filter.channel = params.channel;
+    }
+
+    return ConversationModel.find(filter).sort({ lastMessageAt: -1 }).populate("customerId");
+  }
+
+  // نگه‌داشته شده برای سازگاری با کد قبلی؛ همان listConversations است
   async listOperatorQueue(tenantId: string, status?: ConversationStatus) {
-    return ConversationModel.find({
-      tenantId,
-      status: status ?? { $in: ["NEEDS_OPERATOR", "WITH_OPERATOR"] },
-    })
-      .sort({ lastMessageAt: -1 })
-      .populate("customerId");
+    return this.listConversations({ tenantId, status });
   }
 
   async assignOperator(tenantId: string, conversationId: string, operatorId: Types.ObjectId) {
@@ -69,6 +92,7 @@ export class ConversationService {
     conversation.assignedOperatorId = operatorId;
     conversation.status = "WITH_OPERATOR";
     await conversation.save();
+    await this.emitQueueUpdate(conversation);
     return conversation;
   }
 
@@ -76,6 +100,56 @@ export class ConversationService {
     const conversation = await this.findConversationById(tenantId, conversationId);
     conversation.status = "CLOSED";
     await conversation.save();
+    this.realtimeService.emitToOperators(tenantId, "queue:removed", { id: String(conversation._id) });
     return conversation;
+  }
+
+  // اپراتور مکالمه را «آزاد» می‌کند — یعنی از این به بعد دوباره لایه‌های
+  // خودکار (۱ و ۲) اجازه دارند به پیام‌های بعدی این مکالمه جواب بدهند.
+  // این تنها راهی است که یک مکالمه‌ی NEEDS_OPERATOR/WITH_OPERATOR به حالت
+  // خودکار برمی‌گردد — خودِ AI هیچ‌وقت این کار را خودسرانه انجام نمی‌دهد.
+  async releaseConversation(tenantId: string, conversationId: string) {
+    const conversation = await this.findConversationById(tenantId, conversationId);
+    conversation.status = "OPEN";
+    conversation.assignedOperatorId = null;
+    await conversation.save();
+    this.realtimeService.emitToOperators(tenantId, "queue:removed", { id: String(conversation._id) });
+    return conversation;
+  }
+
+  async deleteConversation(tenantId: string, conversationId: string) {
+    const conversation = await this.findConversationById(tenantId, conversationId);
+    await ConversationMessageModel.deleteMany({ tenantId, conversationId: conversation._id });
+    await conversation.deleteOne();
+    this.realtimeService.emitToOperators(tenantId, "queue:removed", { id: String(conversation._id) });
+    return conversation;
+  }
+
+  // ----------------------------------------------------------------------------
+  // شکل یکسان یک آیتم صف برای پنل اپراتور — هم REST (listConversations) و
+  // هم رویدادهای Socket.io (queue:new/queue:update) از همین شکل استفاده
+  // می‌کنند تا فرانت مجبور به تفسیر دو فرمت مختلف نباشد.
+  // ----------------------------------------------------------------------------
+  async emitQueueNew(conversation: ConversationDocument): Promise<void> {
+    const payload = await this.toQueuePayload(conversation);
+    this.realtimeService.emitToOperators(conversation.tenantId, "queue:new", payload);
+  }
+
+  async emitQueueUpdate(conversation: ConversationDocument): Promise<void> {
+    const payload = await this.toQueuePayload(conversation);
+    this.realtimeService.emitToOperators(conversation.tenantId, "queue:update", payload);
+  }
+
+  async toQueuePayload(conversation: ConversationDocument) {
+    if (!conversation.populated("customerId")) {
+      await conversation.populate("customerId");
+    }
+    return {
+      id: String(conversation._id),
+      channel: conversation.channel,
+      status: conversation.status,
+      customer: conversation.customerId,
+      lastMessageAt: conversation.lastMessageAt,
+    };
   }
 }

@@ -42,7 +42,18 @@ export async function runKeywordLayer(
   if (!PRODUCT_SCOPED_INTENTS.has(primaryIntent)) {
     const text = resolveGenericIntent(primaryIntent);
     if (!text) return null;
-    return { layer: "KEYWORD", text, confidence: 1, needsOperator: false, metadata: { intent: primaryIntent } };
+
+    // درخواست مستقیم صحبت با پشتیبانی — به‌جای پاسخ‌دادن، مستقیم به لایه ۳
+    // ارجاع می‌دهیم (نه لایه ۲/AI که فقط سوال‌های واقعی را جواب می‌دهد)
+    const needsOperator = primaryIntent === "CONTACT_SUPPORT";
+
+    return {
+      layer: "KEYWORD",
+      text,
+      confidence: 1,
+      needsOperator,
+      metadata: { intent: primaryIntent },
+    };
   }
 
   // روش اول: کد محصول مستقیم در متن پیام

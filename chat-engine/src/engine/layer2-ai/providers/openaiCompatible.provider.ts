@@ -16,9 +16,7 @@ export interface OpenAiCompatibleConfig {
   model: string;
 }
 
-export function createOpenAiCompatibleProvider(
-  config: OpenAiCompatibleConfig,
-): AiProvider {
+export function createOpenAiCompatibleProvider(config: OpenAiCompatibleConfig): AiProvider {
   return {
     name: config.name,
 
@@ -36,21 +34,14 @@ export function createOpenAiCompatibleProvider(
       const messages = [
         { role: "system" as const, content: request.systemPrompt },
         ...request.history.map((turn) => ({
-          role:
-            turn.role === "customer"
-              ? ("user" as const)
-              : ("assistant" as const),
+          role: turn.role === "customer" ? ("user" as const) : ("assistant" as const),
           content: turn.text,
         })),
         { role: "user" as const, content: request.customerMessage },
       ];
 
       const url = `${config.baseUrl.replace(/\/+$/, "")}/chat/completions`;
-      console.log({
-        provider: config.name,
-        url,
-        model: config.model,
-      });
+
       const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -65,14 +56,10 @@ export function createOpenAiCompatibleProvider(
       });
 
       if (!res.ok) {
-        throw new Error(
-          `خطای ${config.name} API: ${res.status} ${await res.text()}`,
-        );
+        throw new Error(`خطای ${config.name} API: ${res.status} ${await res.text()}`);
       }
 
-      const data = (await res.json()) as {
-        choices: { message: { content: string } }[];
-      };
+      const data = (await res.json()) as { choices: { message: { content: string } }[] };
       const rawText = data.choices[0]?.message.content ?? "";
 
       return parseAiJsonReply(rawText);

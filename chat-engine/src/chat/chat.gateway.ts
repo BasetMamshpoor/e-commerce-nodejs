@@ -65,16 +65,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayInit {
         text,
       });
 
+      // اگر مکالمه دست اپراتور است، هیچ پاسخ خودکاری نیست — فقط یک ack کوچک
+      // که پیام رسید (queue:update/queue:new را خودِ MessageService
+      // مرکزی مدیریت می‌کند، این‌جا دوباره تکرارش نمی‌کنیم)
+      if (result.handledByHuman || !result.reply) {
+        this.realtimeService.emitToCustomer(guestToken, "message:received", {
+          conversationId: result.conversationId,
+        });
+        return;
+      }
+
       this.realtimeService.emitToCustomer(guestToken, "engine:reply", {
         conversationId: result.conversationId,
         text: result.reply.text,
         layer: result.reply.layer,
         needsOperator: result.reply.needsOperator,
       });
-
-      if (result.reply.needsOperator) {
-        this.realtimeService.emitToOperators(tenantKey, "queue:new", { conversationId: result.conversationId });
-      }
     } catch (err) {
       if (err instanceof DuplicateMessageError) return;
       socket.emit("error", { message: err instanceof Error ? err.message : "خطا در پردازش پیام" });

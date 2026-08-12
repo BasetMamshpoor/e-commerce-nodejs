@@ -11,12 +11,43 @@ export interface TelegramUpdate {
   message?: TelegramMessage;
 }
 
+export interface TelegramPhotoSize {
+  file_id: string;
+  file_unique_id: string;
+  width: number;
+  height: number;
+}
+
 export interface TelegramMessage {
   message_id: number;
   date: number;
   chat: { id: number; type: string };
   from?: { id: number; first_name?: string; last_name?: string; username?: string };
   text?: string;
+  // رسانه — عمداً فقط file_id را نگه می‌داریم، خودِ فایل را دانلود/ذخیره نمی‌کنیم
+  photo?: TelegramPhotoSize[];
+  voice?: { file_id: string; duration: number };
+  audio?: { file_id: string; duration: number };
+  video?: { file_id: string };
+  document?: { file_id: string; file_name?: string };
+  sticker?: { file_id: string; emoji?: string };
+}
+
+export interface TelegramKeyboardButton {
+  text: string;
+}
+
+export interface TelegramReplyKeyboard {
+  keyboard: TelegramKeyboardButton[][];
+  resize_keyboard?: boolean;
+  is_persistent?: boolean;
+}
+
+export interface SendMessageOptions {
+  replyMarkup?: TelegramReplyKeyboard;
+  // برای quote-کردن یک پیام مشخص از مشتری — چیزی که ویجت سایت اصلاً مفهومش
+  // را ندارد ولی تلگرام به‌صورت بومی پشتیبانی می‌کند
+  replyToMessageId?: number;
 }
 
 @Injectable()
@@ -43,16 +74,40 @@ export class TelegramClientService {
     return data.result ?? [];
   }
 
-  async sendMessage(botToken: string, chatId: string | number, text: string): Promise<void> {
+  async sendMessage(
+    botToken: string,
+    chatId: string | number,
+    text: string,
+    options: SendMessageOptions = {}
+  ): Promise<void> {
     const res = await fetch(`${this.baseUrl(botToken)}/sendMessage`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text }),
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        ...(options.replyMarkup ? { reply_markup: options.replyMarkup } : {}),
+        ...(options.replyToMessageId ? { reply_parameters: { message_id: options.replyToMessageId } } : {}),
+      }),
     });
     if (!res.ok) {
       const body = await res.text();
       this.logger.error(`sendMessage failed for chat ${chatId}: ${body}`);
     }
+  }
+
+  // ----------------------------------------------------------------------------
+  // «بدون ذخیره کردن» یعنی ما هیچ‌وقت خودِ فایل را دانلود/روی دیسک‌مان
+  // نمی‌ریزیم — فقط لینک موقتِ دانلود مستقیم از سرورهای تلگرام را می‌سازیم
+  // (هر بار که لازم شد، تازه). این لینک چند ساعت اعتبار دارد.
+  // ----------------------------------------------------------------------------
+  async getFileUrl(botToken: string, fileId: string): Promise<string> {
+    const res = await fetch(`${this.baseUrl(botToken)}/getFile?file_id=${encodeURIComponent(fileId)}`);
+    const data = (await res.json()) as { ok: boolean; result?: { file_path: string }; description?: string };
+    if (!data.ok || !data.result) {
+      throw new Error(`Telegram getFile failed: ${data.description ?? res.status}`);
+    }
+    return `https://api.telegram.org/file/bot${botToken}/${data.result.file_path}`;
   }
 
   // --- Webhook (برای وقتی تصمیم به تغییر از polling گرفته شد) ---

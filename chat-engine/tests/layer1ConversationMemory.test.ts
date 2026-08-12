@@ -123,6 +123,43 @@ describe("layer1: conversation memory — carryover (lastProductId)", () => {
   });
 });
 
+describe("layer1: CONTACT_SUPPORT escalates directly", () => {
+  it("درخواست صحبت با پشتیبانی نیاز به اپراتور را true می‌کند", async () => {
+    const lookup = fakeSearchLookup([], []);
+    const reply = await runKeywordLayer(lookup, msg("میخوام با پشتیبانی صحبت کنم"), EMPTY_CONTEXT);
+
+    expect(reply).not.toBeNull();
+    expect(reply!.needsOperator).toBe(true);
+    expect(reply!.metadata?.intent).toBe("CONTACT_SUPPORT");
+  });
+});
+
+describe("layer1: INFO gives a combined product summary", () => {
+  it("وقتی محصول پیدا شد، خلاصه‌ی قیمت/موجودی/رنگ را با هم می‌دهد", async () => {
+    const product = makeProduct({
+      id: 3,
+      name: "کوله پشتی",
+      isInStock: true,
+      variants: [
+        {
+          id: 1,
+          sku: "SKU-1",
+          priceAdjustment: 0,
+          stock: 2,
+          attributeValues: [{ attributeName: "رنگ", attributeInputType: "COLOR", value: "آبی" }],
+        },
+      ],
+    });
+    const lookup = makeFakeLookup([product]);
+
+    const reply = await runKeywordLayer(lookup, msg("می‌خوام محصولی رو معرفی کنید CRP01"), EMPTY_CONTEXT);
+
+    expect(reply!.text).toContain("کوله پشتی");
+    expect(reply!.text).toContain("موجود است");
+    expect(reply!.text).toContain("آبی");
+  });
+});
+
 describe("layer1: channel-aware phrasing", () => {
   it("ویجت سایت اشاره‌ای به کد زیر بیوگرافی یا فوروارد پست نمی‌کند", async () => {
     const lookup = fakeSearchLookup([], []);

@@ -116,24 +116,41 @@ npx prisma generate
 
 ## API
 
-- `POST /api/chat/messages` — ارسال پیام از ویجت چت سایت `{ guestToken, text, displayName? }`
+**ویجت چت سایت:**
+- `POST /api/chat/messages` — ارسال پیام `{ guestToken, text, displayName? }` (اگر مکالمه دست اپراتور باشد، `reply: null` برمی‌گردد — رجوع به «رفتار sticky» پایین)
 - `GET /api/chat/messages?guestToken=...` — تاریخچه‌ی مکالمه
-- `GET /api/operator/queue` — صف مکالمه‌های نیازمند اپراتور (نیازمند توکن پنل ادمین سایت اصلی)
+
+**پنل اپراتور** (نیازمند توکن پنل ادمین سایت اصلی؛ راهنمای کامل: [`docs/OPERATOR_INTEGRATION.md`](./docs/OPERATOR_INTEGRATION.md)):
+- `GET /api/operator/queue?status=&channel=` — لیست مکالمات با فیلتر آزاد روی status/channel (بدون status، پیش‌فرض صف کلاسیک NEEDS_OPERATOR/WITH_OPERATOR)
 - `GET /api/operator/conversations/:id` — پیام‌های یک مکالمه
 - `POST /api/operator/reply` — پاسخ اپراتور `{ conversationId, text }`
 - `POST /api/operator/conversations/:id/close` — بستن مکالمه
+- `POST /api/operator/conversations/:id/release` — آزادکردن مکالمه (برگشت به حالت خودکار — تنها راه خروج از NEEDS_OPERATOR/WITH_OPERATOR)
+- `DELETE /api/operator/conversations/:id` — حذف کامل مکالمه
+- `GET /api/operator/conversations/:id/messages/:messageId/media` — پروکسی رسانه‌ی تلگرام (عکس/صوت) بدون ذخیره‌سازی
 
-Socket.io: namespace `/chat` (کوئری `guestToken`؛ رویداد `message:send` →
-`engine:reply` / `operator:reply`) برای ویجت سایت، و namespace `/operator`
-(هندشیک با `auth.token` = همان JWT پنل ادمین؛ رویداد `queue:new`) برای
-اطلاع لحظه‌ای صف اپراتور.
+Socket.io:
+- namespace `/chat` (کوئری `guestToken`؛ رویداد `message:send` → `engine:reply` / `operator:reply` / `message:received`) برای ویجت سایت
+- namespace `/operator` (هندشیک با `auth.token`؛ رویدادهای `queue:new` / `queue:update` / `queue:removed` لحظه‌ای، و `operator:reply` هم قابل emit از همین‌جاست — نیازی به REST جدا نیست)
+
+### رفتار «sticky» — یک باگ مهم که رفع شد
+
+به محض این‌که یک مکالمه `NEEDS_OPERATOR` یا `WITH_OPERATOR` شد، لایه‌های
+خودکار (۱ و ۲) دیگر **هیچ‌وقت خودشان دوباره وارد نمی‌شوند** — حتی اگر پیام
+بعدی مشتری دوباره یک کلمه‌ی رزرو شده داشته باشد. قبلاً این‌طور نبود: هر
+پیام تازه، صرف‌نظر از وضعیت مکالمه، از لایه ۱ رد می‌شد. تنها راه برگشت به
+حالت خودکار، `POST /api/operator/conversations/:id/release` است.
 
 ## کانال‌ها
 
-- **وب‌سایت** — چت زنده با Socket.io. راهنمای کامل فرانت‌اند:
+- **وب‌سایت** — چت زنده با Socket.io، بدون مفهوم «ریپلای به یک پیام
+  مشخص» (فقط لیست خطی پیام‌ها). راهنمای کامل فرانت‌اند:
   [`docs/FRONTEND_INTEGRATION.md`](./docs/FRONTEND_INTEGRATION.md)
 - **تلگرام** — وصل شده (حالت polling برای توسعه، آماده برای سوییچ به
-  webhook در تولید بدون تغییر کد). راهنما:
+  webhook در تولید بدون تغییر کد). یک منوی دکمه‌ی سریع دارد (جستجوی
+  محصول/بررسی موجودی/استعلام قیمت/تماس با پشتیبانی)، پاسخ اپراتور به‌صورت
+  بومی روی پیام مشتری quote می‌شود (reply threading)، و عکس/صوت بدون
+  ذخیره‌سازی مستقیم به اپراتور ارجاع داده می‌شود. راهنما:
   [`docs/TELEGRAM_SETUP.md`](./docs/TELEGRAM_SETUP.md)
 
 ## هنوز اضافه نشده (تسک‌های بعدی)

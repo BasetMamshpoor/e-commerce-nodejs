@@ -57,8 +57,6 @@ export async function runAiLayer(
       metadata: { provider: provider.name },
     };
   } catch (err) {
-    console.log(err);
-    
     // اگر سرویس AI در دسترس نبود (کلید تنظیم نشده/قطعی سرویس)، به‌جای کرش
     // کردن، مستقیم مکالمه را برای اپراتور علامت می‌زنیم.
     return {

@@ -22,6 +22,14 @@ export interface IncomingMessage {
   externalMessageId?: string;
   // شناسه‌ی نخِ مکالمه در پلتفرم مبدا (مثلاً برای فوروارد پست/استوری)
   externalThreadId?: string;
+  // اگر true باشد، هیچ لایه‌ی خودکاری (۱/۲) اجرا نمی‌شود و مکالمه مستقیم
+  // NEEDS_OPERATOR می‌شود — برای رسانه‌هایی (عکس/صوت) که موتور اصلاً
+  // نمی‌تواند پردازششان کند
+  forceEscalate?: boolean;
+  // اطلاعات کمکی رسانه (مثلاً telegramFileId) — روی همان پیام مشتری در
+  // Mongo ذخیره می‌شود تا اپراتور بعداً بتواند نمایشش بدهد، بدون این‌که
+  // خودِ فایل جایی ذخیره شود
+  attachmentMetadata?: Record<string, unknown>;
 }
 
 export interface EngineReply {

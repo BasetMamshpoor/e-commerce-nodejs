@@ -17,12 +17,20 @@ const HISTORY_LIMIT = 12;
 // (لایه ۱ رایگان است و محدود نمی‌شود، این فقط جلوی سیل پیام به AI را می‌گیرد)
 const AI_RATE_LIMIT_PER_MINUTE = 20;
 
+// وضعیت‌هایی که یعنی «الان دست انسان است» — در این حالت هیچ لایه‌ی خودکاری
+// دیگر روی پیام‌های تازه‌ی همین مکالمه اجرا نمی‌شود
+const HUMAN_HANDLING_STATUSES = new Set(["NEEDS_OPERATOR", "WITH_OPERATOR"]);
+
 export interface ProcessResult {
   conversationId: string;
   customerMessageId: string;
-  engineMessageId: string;
-  reply: EngineReply;
+  // اگر مکالمه دست اپراتور بود، هیچ پاسخ خودکاری تولید نمی‌شود — این دو
+  // فیلد undefined می‌مانند و caller باید همین را به معنی «فقط پیام ذخیره
+  // شد، منتظر جواب انسانی باش» بفهمد.
+  engineMessageId?: string;
+  reply?: EngineReply;
   conversationStatus: string;
+  handledByHuman: boolean;
 }
 
 export class DuplicateMessageError extends Error {
@@ -35,11 +43,18 @@ export class DuplicateMessageError extends Error {
 }
 
 // ----------------------------------------------------------------------------
-// نقطه‌ی ورودی مشترک همه‌ی کانال‌ها (وب‌سایت الان، اینستاگرام/واتساپ/تلگرام/
-// بله بعداً): یک پیام مشتری می‌گیرد، مکالمه/مشتری را resolve می‌کند، پیام را
-// ذخیره می‌کند، حافظه‌ی مکالمه (ConversationContext) را می‌سازد، از
-// pipeline موتور رد می‌کند، پاسخ را ذخیره می‌کند و وضعیت مکالمه را طبق
+// نقطه‌ی ورودی مشترک همه‌ی کانال‌ها (وب‌سایت، اینستاگرام/واتساپ/تلگرام/بله):
+// یک پیام مشتری می‌گیرد، مکالمه/مشتری را resolve می‌کند، پیام را ذخیره
+// می‌کند، و —‌ مگر این‌که مکالمه از قبل دست اپراتور باشد — از pipeline
+// موتور رد می‌کند، پاسخ را ذخیره می‌کند و وضعیت مکالمه را طبق
 // EngineReply.needsOperator به‌روز می‌کند (لایه ۳).
+//
+// نکته‌ی مهم (رفع یک باگ واقعی): وقتی یک مکالمه به اپراتور ارجاع شده
+// (NEEDS_OPERATOR) یا در دست اوست (WITH_OPERATOR)، لایه‌های خودکار دیگر
+// اصلاً روی پیام‌های بعدی همین مکالمه اجرا نمی‌شوند — حتی اگر پیام
+// مشتری دوباره یک کلمه‌ی رزرو شده داشته باشد. تنها راه برگشت به حالت
+// خودکار، آزادکردن صریح مکالمه توسط اپراتور است
+// (conversationService.releaseConversation).
 // ----------------------------------------------------------------------------
 
 @Injectable()
@@ -77,17 +92,6 @@ export class MessageService {
       externalThreadId: incoming.externalThreadId,
     });
 
-    // تاریخچه و حافظه‌ی مکالمه را از روی پیام‌های قبلی می‌سازیم — قبل از
-    // این‌که پیام تازه‌ی مشتری ذخیره شود؛ وگرنه «آخرین پیام موتور» همیشه
-    // خودِ همین پیام تازه‌ی مشتری می‌شد (که هنوز پیامِ موتور هم نیست) و
-    // pendingAction هیچ‌وقت درست تشخیص داده نمی‌شد.
-    const recentMessages = await this.loadRecentMessages(String(conversation._id));
-    const history = toAiHistory(recentMessages);
-    const context: ConversationContext = {
-      pendingAction: extractPendingAction(recentMessages),
-      lastProductId: conversation.lastProductId ?? undefined,
-    };
-
     // جلوگیری از پردازش دوباره‌ی همان پیام (وبهوک تکراری پلتفرم‌های بیرونی)
     if (incoming.externalMessageId) {
       const duplicate = await ConversationMessageModel.findOne({
@@ -98,6 +102,51 @@ export class MessageService {
         throw new DuplicateMessageError(String(conversation._id), String(duplicate._id));
       }
     }
+
+    // *** رفع باگ: اگر مکالمه از قبل دست اپراتور است، یا این پیام (مثلاً
+    // یک عکس/صوت تلگرام) اصلاً قابل پردازش خودکار نیست، هیچ لایه‌ی خودکاری
+    // اجرا نمی‌شود — فقط پیام ذخیره و اپراتور مطلع می‌شود ***
+    const wasAlreadyHumanHandled = HUMAN_HANDLING_STATUSES.has(conversation.status);
+
+    if (wasAlreadyHumanHandled || incoming.forceEscalate) {
+      const customerMessage = await ConversationMessageModel.create({
+        tenantId: tenant.key,
+        conversationId: conversation._id,
+        senderType: "CUSTOMER",
+        content: incoming.text,
+        externalMessageId: incoming.externalMessageId ?? null,
+        metadata: incoming.attachmentMetadata ?? null,
+      });
+
+      if (!wasAlreadyHumanHandled) {
+        conversation.status = "NEEDS_OPERATOR";
+      }
+      conversation.lastMessageAt = new Date();
+      await conversation.save();
+
+      if (wasAlreadyHumanHandled) {
+        await this.conversationService.emitQueueUpdate(conversation);
+      } else {
+        await this.conversationService.emitQueueNew(conversation);
+      }
+
+      return {
+        conversationId: String(conversation._id),
+        customerMessageId: String(customerMessage._id),
+        conversationStatus: conversation.status,
+        handledByHuman: true,
+      };
+    }
+
+    // تاریخچه و حافظه‌ی مکالمه را از روی پیام‌های قبلی می‌سازیم — قبل از
+    // این‌که پیام تازه‌ی مشتری ذخیره شود؛ وگرنه «آخرین پیام موتور» همیشه
+    // خودِ همین پیام تازه‌ی مشتری می‌شد و pendingAction درست تشخیص داده نمی‌شد.
+    const recentMessages = await this.loadRecentMessages(String(conversation._id));
+    const history = toAiHistory(recentMessages);
+    const context: ConversationContext = {
+      pendingAction: extractPendingAction(recentMessages),
+      lastProductId: conversation.lastProductId ?? undefined,
+    };
 
     const customerMessage = await ConversationMessageModel.create({
       tenantId: tenant.key,
@@ -130,12 +179,17 @@ export class MessageService {
     }
     await conversation.save();
 
+    if (reply.needsOperator) {
+      await this.conversationService.emitQueueNew(conversation);
+    }
+
     return {
       conversationId: String(conversation._id),
       customerMessageId: String(customerMessage._id),
       engineMessageId: String(engineMessage._id),
       reply,
       conversationStatus: conversation.status,
+      handledByHuman: false,
     };
   }
 
@@ -160,6 +214,7 @@ export class MessageService {
     conversation.assignedOperatorId = params.operatorId;
     conversation.lastMessageAt = new Date();
     await conversation.save();
+    await this.conversationService.emitQueueUpdate(conversation);
 
     return { message, conversation };
   }

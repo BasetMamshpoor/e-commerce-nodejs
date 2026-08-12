@@ -101,8 +101,20 @@ const socket = io(`${WS_BASE_URL}/chat`, {
 | `connect` | اتصال برقرار شد | — |
 | `disconnect` | اتصال قطع شد (Socket.io خودش تلاش برای وصل‌شدن دوباره می‌کند) | reason: string |
 | `engine:reply` | موتور (لایه ۱ یا ۲) به پیام مشتری جواب داد | `{ conversationId, text, layer, needsOperator }` |
+| `message:received` | پیام رسید ولی مکالمه از قبل دست اپراتور بود، پس هیچ پاسخ خودکاری نیامد (رجوع کنید به «رفتار sticky» پایین) | `{ conversationId }` |
 | `operator:reply` | یک اپراتور انسانی جواب داد | `{ conversationId, text }` |
 | `error` | خطایی در پردازش پیام رخ داد (مثلاً محدودیت نرخ پیام) | `{ message }` |
+
+### رفتار «sticky» — وقتی مکالمه دست اپراتور افتاد
+
+به محض این‌که یک مکالمه به اپراتور ارجاع داده شد (`needsOperator: true`) یا
+اپراتور واقعاً جواب داد، لایه‌های خودکار دیگر **هیچ‌وقت** خودشان دوباره وارد
+نمی‌شوند — حتی اگر مشتری در همین حین دوباره پیام بفرستد. فرانت باید این را
+در نظر بگیرد: بعد از یک `engine:reply` با `needsOperator: true`، دیگر منتظر
+`engine:reply` بعدی نباش؛ فقط `message:received` (ack ساده) یا
+`operator:reply` (پاسخ واقعی انسان) می‌آید. رفتار طبیعی UI: بعد از
+`needsOperator: true`، حالت «در انتظار اپراتور» را نشان بده و همان‌جا بمان
+تا `operator:reply` برسد.
 
 ### رویدادی که می‌فرستی
 
@@ -366,11 +378,16 @@ fallback برای وقتی WebSocket در دسترس نیست (یا برای پ�
   "data": {
     "conversationId": "665f1a2b3c4d5e6f7a8b9c0d",
     "status": "AI_HANDLING",
+    "handledByHuman": false,
     "reply": { "text": "...", "layer": "KEYWORD", "needsOperator": false }
   }
 }
 ```
 `status` یکی از: `OPEN`, `AI_HANDLING`, `NEEDS_OPERATOR`, `WITH_OPERATOR`, `CLOSED`.
+
+⚠️ اگر مکالمه از قبل دست اپراتور بود (`handledByHuman: true`)، `reply` مقدار
+`null` است — یعنی هیچ پاسخ خودکاری تولید نشد، فقط پیام ذخیره شد و اپراتور
+مطلع شد. همان رفتار «sticky» که در بخش WebSocket توضیح داده شد.
 
 **خطاها:**
 - `409 Conflict` — یا پیام تکراری فرستاده شده، یا مشتری از سقف نرخ پیام

@@ -80,11 +80,15 @@ export class ChatController {
 function toSendMessageResponse(result: {
   conversationId: string;
   conversationStatus: string;
-  reply: { text: string; layer: string; needsOperator: boolean };
+  handledByHuman: boolean;
+  reply?: { text: string; layer: string; needsOperator: boolean };
 }) {
   return {
     conversationId: result.conversationId,
     status: result.conversationStatus,
-    reply: { text: result.reply.text, layer: result.reply.layer, needsOperator: result.reply.needsOperator },
+    handledByHuman: result.handledByHuman,
+    // اگر مکالمه دست اپراتور است، هیچ پاسخ خودکاری نیست — reply در این
+    // حالت null است تا فرانت بفهمد باید منتظر پاسخ انسانی بماند
+    reply: result.reply ? { text: result.reply.text, layer: result.reply.layer, needsOperator: result.reply.needsOperator } : null,
   };
 }
