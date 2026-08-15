@@ -31,10 +31,13 @@ Authorization: Bearer <همان access token پنل ادمین>
 
 | پارامتر | مقادیر | توضیح |
 |---|---|---|
-| `status` | `OPEN`, `AI_HANDLING`, `NEEDS_OPERATOR`, `WITH_OPERATOR`, `CLOSED` | بدون این پارامتر، پیش‌فرض فقط `NEEDS_OPERATOR` + `WITH_OPERATOR` را نشان می‌دهد (صف کلاسیک). برای دیدن همه‌چیز (مثلاً یک تب «تاریخچه» یا «بسته‌شده‌ها») صریح status بده. |
+| `status` | `OPEN`, `AI_HANDLING`, `NEEDS_OPERATOR`, `WITH_OPERATOR`, `CLOSED` (با کاما هم می‌شود چندتا داد) | **بدون این پارامتر، همه‌ی مکالمات نشان داده می‌شوند** — چت‌های مشتری با بات را هم شامل می‌شود، نه فقط صف اپراتور. برای دیدن فقط چت‌های نیازمند پشتیبانی: `status=NEEDS_OPERATOR,WITH_OPERATOR` |
 | `channel` | `WEBSITE`, `INSTAGRAM`, `WHATSAPP`, `TELEGRAM`, `BALE` | فیلتر روی یک کانال خاص |
 
-مثال: `GET /api/operator/queue?status=CLOSED&channel=TELEGRAM`
+مثال‌ها:
+- `GET /api/operator/queue` → همه‌چیز (چت‌های خودکار با بات را هم می‌بینی)
+- `GET /api/operator/queue?status=NEEDS_OPERATOR,WITH_OPERATOR` → فقط صف نیازمند پشتیبانی
+- `GET /api/operator/queue?status=CLOSED&channel=TELEGRAM` → تاریخچه‌ی بسته‌شده‌های تلگرام
 
 **پاسخ:**
 ```json
@@ -102,11 +105,30 @@ const socket = io(`${WS_BASE_URL}/operator`, {
 socket.emit("operator:reply", {
   conversationId: "665f1a2b3c4d5e6f7a8b9c0d",
   text: "بله موجوده، همین امروز ارسال می‌شه",
+  replyToMessageId: "665f1a2b3c4d5e6f7a8b9c0e", // اختیاری — رجوع به بخش «ریپلای به پیام مشخص»
 });
 ```
 
 اگر خطایی رخ بدهد (مثلاً conversationId نامعتبر)، رویداد `error` با
 `{ message }` می‌رسد.
+
+### ریپلای به یک پیام مشخص (نه فقط آخرین پیام)
+
+هر پیام (چه از مشتری، چه از موتور، چه از اپراتور) یک `id` دارد. اگر
+اپراتور بخواهد دقیقاً به یک پیام مشخص از تاریخچه پاسخ بدهد (نه لزوماً
+آخرین پیام)، همان `id` را به‌عنوان `replyToMessageId` بفرست — هم در
+`POST /api/operator/reply` هم در `socket.emit("operator:reply", ...)`.
+
+- برای **تلگرام**: این به quote-کردن بومی تلگرام (reply در همان چت) تبدیل
+  می‌شود — مشتری می‌بیند اپراتور دقیقاً به کدام پیامش جواب داده.
+- برای **وب‌سایت**: چون ویجت وب‌سایت اصلاً مفهوم ریپلای به یک پیام مشخص
+  را ندارد (فقط یک لیست خطی است)، این مقدار همراه رویداد `operator:reply`
+  فرستاده می‌شود (`{ conversationId, text, replyToMessageId }`) تا اگر
+  خواستی در UI پیام quote‌شده را نشان بدهی، بتوانی — ولی اجباری نیست.
+
+خودِ پیام‌های موتور (ENGINE) هم همیشه `replyToMessageId` را به همان پیام
+مشتری که جوابش را داده‌اند ست می‌کنند — یعنی از همین حالا کل تاریخچه‌ی هر
+مکالمه thread‌پذیر است، حتی اگر UI فعلی‌ات ازش استفاده نکند.
 
 ---
 

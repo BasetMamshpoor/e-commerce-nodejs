@@ -35,7 +35,7 @@ export class OperatorController {
   // می‌شود هر وضعیتی دید — قدرت کامل فیلتر برای پنل ادمین
   @Get("queue")
   async listQueue(
-    @Query(new ZodValidationPipe(queueQuerySchema)) query: { status?: ConversationStatus; channel?: Channel },
+    @Query(new ZodValidationPipe(queueQuerySchema)) query: { status?: ConversationStatus[]; channel?: Channel },
     @CurrentTenant() tenant: TenantDocument
   ) {
     const conversations = await this.conversationService.listConversations({
@@ -64,6 +64,7 @@ export class OperatorController {
         senderType: m.senderType,
         layer: m.layer ?? null,
         content: m.content,
+        replyToMessageId: m.replyToMessageId ? String(m.replyToMessageId) : null,
         metadata: m.metadata ?? null,
         createdAt: m.createdAt,
       }))
@@ -76,7 +77,7 @@ export class OperatorController {
     @CurrentTenant() tenant: TenantDocument,
     @CurrentOperator() operator: OperatorPrincipal
   ) {
-    const result = await this.operatorActions.reply(tenant, operator, body.conversationId, body.text);
+    const result = await this.operatorActions.reply(tenant, operator, body.conversationId, body.text, body.replyToMessageId);
     return ApiResponse.created({ id: result ? String(result.message._id) : null });
   }
 

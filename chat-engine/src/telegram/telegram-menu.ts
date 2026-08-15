@@ -26,7 +26,10 @@ export const TELEGRAM_REPLY_KEYBOARD: TelegramReplyKeyboard = {
 };
 
 const BUTTON_TO_TRIGGER_TEXT: Record<string, string> = {
-  [TELEGRAM_MENU_LABELS.SEARCH_PRODUCT]: "می‌خوام محصولی رو معرفی کنید",
+  // باید هم intent INFO را trigger کند (کلمه‌ی کلیدی «جستجوی محصول» را در
+  // خودش دارد) و هم بعد از فیلتر stopword به nameTerms خالی برسد — همین دو
+  // کلمه‌ی تنها هر دو شرط را برآورده می‌کند
+  [TELEGRAM_MENU_LABELS.SEARCH_PRODUCT]: "جستجوی محصول",
   [TELEGRAM_MENU_LABELS.CHECK_STOCK]: "این موجوده؟",
   [TELEGRAM_MENU_LABELS.PRICE_INQUIRY]: "قیمتش چنده؟",
   [TELEGRAM_MENU_LABELS.CONTACT_SUPPORT]: "میخوام با پشتیبانی صحبت کنم",

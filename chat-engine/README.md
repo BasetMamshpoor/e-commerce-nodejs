@@ -41,6 +41,13 @@ Prisma)، تا در آینده اگر لازم شد بشود همین موتور
   - متن پاسخ‌ها بر اساس کانال فرق می‌کند: ویجت وب‌سایت هیچ‌وقت از
     «فوروارد پست» یا «کد زیر بیوگرافی» حرف نمی‌زند (این مفاهیم آنجا
     اصلاً وجود ندارند)، برخلاف تلگرام/اینستاگرام/واتساپ/بله.
+  - **جست‌وجوی ساختاریافته**: جمله‌ای مثل «کفش مجلسی قهوه‌ای سایز ۴۲»
+    تجزیه می‌شود به نوع محصول + رنگ + سایز
+    (`engine/productMatcher/attributeExtraction.ts`) و بین **تنوع‌های
+    (variants)** محصول هم جست‌وجو می‌کند، نه فقط اسم محصول.
+  - **پرس‌وجوی مبهم → دقیق‌تر بپرس**: اگر جست‌وجو نتایج خیلی زیادی داشت
+    (مثلاً فقط «کفش»)، به‌جای یک لیست شلوغ، از مشتری می‌خواهد دقیق‌تر
+    بگوید و پیام بعدی را با همان ترکیب می‌کند (`AWAITING_NARROWER_SEARCH`).
 - **لایه ۲ — هوش مصنوعی** (`src/engine/layer2-ai`): وقتی لایه ۱ جوابی
   نداشت. context فقط از دیتابیس فروشگاه ساخته می‌شود (همان
   `lastProductId` هم اینجا به‌عنوان fallback استفاده می‌شود) و به مدل
@@ -50,6 +57,15 @@ Prisma)، تا در آینده اگر لازم شد بشود همین موتور
   anthropic یک API سازگار با OpenAI (`/chat/completions`) دارند؛ فقط
   `baseUrl`/`apiKey`/`model` فرق می‌کند (`custom` برای هر gateway دیگری که
   در لیست نیست). جزئیات و مثال هر کدام: `.env.example`.
+
+  ⚠️ **باگ مهم رفع شد**: بعضی مدل‌های ضعیف‌تر/رایگان مقدار `confidence`
+  را به‌جای عدد، رشته (`"0.9"`) یا درصد (`90`) برمی‌گرداندند؛ پارسر قبلی
+  این‌ها را رد می‌کرد و همیشه `confidence=0` می‌گذاشت — یعنی حتی وقتی
+  مدل درست جواب می‌داد، موتور فکر می‌کرد مطمئن نیست و مکالمه را مدام به
+  اپراتور ارجاع می‌داد. `parseAiJsonReply.ts` الان رشته/درصد/عدد را هم
+  قبول می‌کند (`tests/parseAiJsonReply.test.ts`). اگر همچنان ارجاع زیاد
+  می‌بینی، احتمالاً مدل انتخابی خیلی ضعیف است — `AI_CONFIDENCE_THRESHOLD`
+  را در `.env` کمی پایین‌تر ببر یا مدل قوی‌تری امتحان کن.
 - **لایه ۳ — اپراتور**: اگر اطمینان لایه ۲ کمتر از `AI_CONFIDENCE_THRESHOLD`
   باشد، وضعیت مکالمه `NEEDS_OPERATOR` می‌شود و در صف real-time اپراتور
   (namespace `/operator`) ظاهر می‌شود.
@@ -121,9 +137,9 @@ npx prisma generate
 - `GET /api/chat/messages?guestToken=...` — تاریخچه‌ی مکالمه
 
 **پنل اپراتور** (نیازمند توکن پنل ادمین سایت اصلی؛ راهنمای کامل: [`docs/OPERATOR_INTEGRATION.md`](./docs/OPERATOR_INTEGRATION.md)):
-- `GET /api/operator/queue?status=&channel=` — لیست مکالمات با فیلتر آزاد روی status/channel (بدون status، پیش‌فرض صف کلاسیک NEEDS_OPERATOR/WITH_OPERATOR)
-- `GET /api/operator/conversations/:id` — پیام‌های یک مکالمه
-- `POST /api/operator/reply` — پاسخ اپراتور `{ conversationId, text }`
+- `GET /api/operator/queue?status=&channel=` — لیست مکالمات؛ **بدون `status`، همه‌چیز را نشان می‌دهد** (چت‌های خودکار با بات را هم شامل می‌شود). برای فقط صف نیازمند پشتیبانی: `status=NEEDS_OPERATOR,WITH_OPERATOR`
+- `GET /api/operator/conversations/:id` — پیام‌های یک مکالمه (هرکدام `replyToMessageId` هم دارد)
+- `POST /api/operator/reply` — پاسخ اپراتور `{ conversationId, text, replyToMessageId? }` (ریپلای به یک پیام مشخص، نه فقط آخرین پیام)
 - `POST /api/operator/conversations/:id/close` — بستن مکالمه
 - `POST /api/operator/conversations/:id/release` — آزادکردن مکالمه (برگشت به حالت خودکار — تنها راه خروج از NEEDS_OPERATOR/WITH_OPERATOR)
 - `DELETE /api/operator/conversations/:id` — حذف کامل مکالمه

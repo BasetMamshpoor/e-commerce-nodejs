@@ -17,6 +17,7 @@ interface OperatorReplyPayload {
   conversationId: string;
   text: string;
   tenantKey?: string;
+  replyToMessageId?: string;
 }
 
 // ----------------------------------------------------------------------------
@@ -67,7 +68,7 @@ export class OperatorGateway implements OnGatewayConnection, OnGatewayInit {
     try {
       const tenantKey = payload.tenantKey ?? (socket.data.tenantKey as string) ?? this.tenancyService.resolveDefaultTenantKey();
       const tenant = await this.tenancyService.resolveTenant(tenantKey);
-      await this.operatorActions.reply(tenant, operator, conversationId, text);
+      await this.operatorActions.reply(tenant, operator, conversationId, text, payload.replyToMessageId);
     } catch (err) {
       socket.emit("error", { message: err instanceof Error ? err.message : "خطا در ارسال پاسخ" });
     }

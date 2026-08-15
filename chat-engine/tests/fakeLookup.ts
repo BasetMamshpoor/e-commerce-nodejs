@@ -10,9 +10,10 @@ export function makeFakeLookup(products: ResolvedProduct[]): ProductLookupPort {
     },
     async search(text) {
       const lower = text.toLowerCase();
-      return products
+      const results = products
         .filter((p) => lower.includes(p.name.toLowerCase()) || p.name.toLowerCase().includes(lower))
         .map(toSearchResult);
+      return { results, hasMore: false };
     },
     async countActiveBrands() {
       return 3;
@@ -34,13 +35,14 @@ function toSearchResult(p: ResolvedProduct): ProductSearchResult {
 }
 
 // یک لیست دلخواه از محصولات را برای جست‌وجوی متنی برمی‌گرداند (بدون
-// نیازی به تطابق واقعی نام) — برای شبیه‌سازی سناریوی «چند گزینه پیدا شد»
-export function fakeSearchLookup(products: ResolvedProduct[], searchResults: ResolvedProduct[]): ProductLookupPort {
+// نیازی به تطابق واقعی نام) — برای شبیه‌سازی سناریوی «چند گزینه پیدا شد».
+// اگر hasMore=true بدهی، سناریوی «جست‌وجوی مبهم» را شبیه‌سازی می‌کند.
+export function fakeSearchLookup(products: ResolvedProduct[], searchResults: ResolvedProduct[], hasMore = false): ProductLookupPort {
   const base = makeFakeLookup(products);
   return {
     ...base,
     async search() {
-      return searchResults.map(toSearchResult);
+      return { results: searchResults.map(toSearchResult), hasMore };
     },
   };
 }

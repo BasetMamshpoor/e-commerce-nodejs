@@ -33,14 +33,17 @@ export class OutboundDeliveryService {
     conversation: ConversationDocument;
     customer: CustomerDocument;
     text: string;
+    // اگر اپراتور صریحاً به یک پیام مشخص ریپلای زده (نه فقط آخرین پیام)
+    replyToMessageId?: string;
   }): Promise<void> {
-    const { tenant, conversation, customer, text } = params;
+    const { tenant, conversation, customer, text, replyToMessageId } = params;
 
     switch (conversation.channel) {
       case "WEBSITE":
         this.realtimeService.emitToCustomer(customer.externalId, "operator:reply", {
           conversationId: String(conversation._id),
           text,
+          replyToMessageId: replyToMessageId ?? null,
         });
         return;
 
@@ -50,7 +53,7 @@ export class OutboundDeliveryService {
           return;
         }
         await this.telegramClient.sendMessage(tenant.telegramBotToken, customer.externalId, text, {
-          replyToMessageId: await this.lastCustomerTelegramMessageId(conversation),
+          replyToMessageId: await this.resolveTelegramReplyTarget(conversation, replyToMessageId),
         });
         return;
 
@@ -59,15 +62,38 @@ export class OutboundDeliveryService {
     }
   }
 
-  private async lastCustomerTelegramMessageId(conversation: ConversationDocument): Promise<number | undefined> {
+  // اگر اپراتور صریحاً یک پیام مشخص (replyToMessageId، شناسه‌ی خودمان در
+  // Mongo) را هدف گرفته، همان را به message_id تلگرام تبدیل می‌کنیم؛ وگرنه
+  // مثل قبل، آخرین پیام مشتری را quote می‌کنیم.
+  private async resolveTelegramReplyTarget(
+    conversation: ConversationDocument,
+    replyToMessageId?: string
+  ): Promise<number | undefined> {
+    if (replyToMessageId) {
+      const target = await ConversationMessageModel.findOne({
+        _id: replyToMessageId,
+        conversationId: conversation._id,
+      });
+      const explicit = extractTelegramMessageId(target?.externalMessageId);
+      if (explicit !== undefined) return explicit;
+    }
+
     const lastCustomerMessage = await ConversationMessageModel.findOne({
       conversationId: conversation._id,
       senderType: "CUSTOMER",
     }).sort({ createdAt: -1 });
 
-    // externalMessageId برای تلگرام همیشه به شکل "chatId:messageId" است
-    const raw = lastCustomerMessage?.externalMessageId;
-    const messageId = raw ? Number(raw.split(":")[1]) : NaN;
-    return Number.isFinite(messageId) ? messageId : undefined;
+    return extractTelegramMessageId(lastCustomerMessage?.externalMessageId);
   }
+}
+
+// externalMessageId برای تلگرام همیشه به شکل "chatId:messageId" است (پیام‌های
+// عادی) — callback_query ها ("chatId:cb:...") قابل quote-کردن نیستند چون
+// خودشان یک پیام واقعی جدید نبودند، پس در آن حالت undefined برمی‌گردد
+function extractTelegramMessageId(raw: string | null | undefined): number | undefined {
+  if (!raw) return undefined;
+  const parts = raw.split(":");
+  if (parts.length !== 2) return undefined;
+  const messageId = Number(parts[1]);
+  return Number.isFinite(messageId) ? messageId : undefined;
 }

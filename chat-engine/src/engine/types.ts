@@ -57,7 +57,11 @@ export interface EngineReply {
 
 export type PendingAction =
   | { type: "AWAITING_PRODUCT_CODE"; intent: string }
-  | { type: "AWAITING_OPTION_SELECTION"; intent: string; candidateProductIds: number[] };
+  | { type: "AWAITING_OPTION_SELECTION"; intent: string; candidateProductIds: number[] }
+  // جست‌وجو خیلی مبهم بود (مثلاً فقط «کفش»، ده‌ها تطابق) — از مشتری دقیق‌تر
+  // خواستیم؛ پیام بعدی‌اش را به previousQuery اضافه می‌کنیم تا جست‌وجوی
+  // ترکیبی‌تری بزنیم («کفش» + «اسپورت کتان» = «کفش اسپورت کتان»)
+  | { type: "AWAITING_NARROWER_SEARCH"; intent: string; previousQuery: string };
 
 export interface ConversationContext {
   pendingAction?: PendingAction;

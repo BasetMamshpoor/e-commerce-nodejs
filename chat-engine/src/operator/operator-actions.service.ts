@@ -37,7 +37,13 @@ export class OperatorActionsService {
     );
   }
 
-  async reply(tenant: TenantDocument, operator: OperatorPrincipal, conversationId: string, text: string) {
+  async reply(
+    tenant: TenantDocument,
+    operator: OperatorPrincipal,
+    conversationId: string,
+    text: string,
+    replyToMessageId?: string
+  ) {
     const operatorDoc = await this.getOrCreateOperatorDoc(tenant.key, operator.userId);
 
     await this.conversationService.assignOperator(tenant.key, conversationId, operatorDoc._id);
@@ -46,6 +52,7 @@ export class OperatorActionsService {
       conversationId,
       operatorId: operatorDoc._id,
       text,
+      replyToMessageId,
     });
 
     // پاسخ اپراتور را همان لحظه به مشتری برسانیم — روی هر کانالی که پیام
@@ -58,6 +65,7 @@ export class OperatorActionsService {
           conversation: result.conversation,
           customer,
           text,
+          replyToMessageId,
         });
       }
     }

@@ -59,10 +59,10 @@ export class ConversationService {
     return conversation;
   }
 
-  // لیست عمومی مکالمات برای پنل ادمین — با فیلتر آزاد روی status/channel
-  // (برخلاف قبل که فقط NEEDS_OPERATOR/WITH_OPERATOR را نشان می‌داد).
-  // اگر هیچ status ای داده نشود، همان پیش‌فرض قبلی (صف‌های مرتبط با
-  // اپراتور) حفظ می‌شود تا رفتار فعلی داشبورد نشکند.
+  // لیست عمومی مکالمات برای پنل ادمین — پیش‌فرض «همه‌چیز» (چت‌های مشتری با
+  // بات را هم شامل می‌شود، نه فقط صف اپراتور)، با فیلتر آزاد روی
+  // status/channel برای وقتی ادمین می‌خواهد فقط چت‌های نیازمند پشتیبانی را
+  // ببیند (`status=NEEDS_OPERATOR,WITH_OPERATOR`).
   async listConversations(params: {
     tenantId: string;
     status?: ConversationStatus | ConversationStatus[];
@@ -72,8 +72,6 @@ export class ConversationService {
 
     if (params.status) {
       filter.status = Array.isArray(params.status) ? { $in: params.status } : params.status;
-    } else {
-      filter.status = { $in: ["NEEDS_OPERATOR", "WITH_OPERATOR"] };
     }
     if (params.channel) {
       filter.channel = params.channel;
@@ -82,9 +80,10 @@ export class ConversationService {
     return ConversationModel.find(filter).sort({ lastMessageAt: -1 }).populate("customerId");
   }
 
-  // نگه‌داشته شده برای سازگاری با کد قبلی؛ همان listConversations است
-  async listOperatorQueue(tenantId: string, status?: ConversationStatus) {
-    return this.listConversations({ tenantId, status });
+  // میان‌بر برای همان فیلتر قدیمی (فقط چت‌های نیازمند/دست اپراتور) — استفاده
+  // در جایی که صریحاً فقط صف پشتیبانی لازم است
+  async listConversationsNeedingOperator(tenantId: string) {
+    return this.listConversations({ tenantId, status: ["NEEDS_OPERATOR", "WITH_OPERATOR"] });
   }
 
   async assignOperator(tenantId: string, conversationId: string, operatorId: Types.ObjectId) {

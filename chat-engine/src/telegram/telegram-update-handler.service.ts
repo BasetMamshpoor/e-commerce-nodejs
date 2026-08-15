@@ -1,14 +1,28 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { TenantDocument } from "../tenancy/tenant.model";
-import { MessageService, DuplicateMessageError } from "../conversation/message.service";
-import { TelegramClientService, TelegramUpdate, TelegramMessage } from "./telegram-client.service";
+import { MessageService, DuplicateMessageError, ProcessResult } from "../conversation/message.service";
+import {
+  TelegramClientService,
+  TelegramUpdate,
+  TelegramMessage,
+  TelegramCallbackQuery,
+  TelegramInlineKeyboard,
+} from "./telegram-client.service";
 import { TELEGRAM_REPLY_KEYBOARD, WELCOME_MESSAGE, resolveMenuButtonTriggerText } from "./telegram-menu";
+import { ProductSearchResult } from "../engine/productMatcher/types";
+import { formatToman } from "../utils/pricing";
 
 // ----------------------------------------------------------------------------
 // این سرویس تنها جایی است که یک TelegramUpdate را به IncomingMessage
 // (فرمت مشترک همه‌ی کانال‌ها) تبدیل می‌کند و از pipeline موتور رد می‌کند.
 // چه از طریق polling صدا زده شود چه از طریق webhook، رفتار دقیقاً یکسان
 // است — سوییچ‌کردن روش دریافت پیام هیچ اثری روی این منطق ندارد.
+//
+// نکته‌ی مهم درباره‌ی دکمه‌های شیشه‌ای (inline): تپ‌زدن روی آن‌ها یک
+// callback_query می‌فرستد، نه یک پیام معمولی. به‌جای نوشتن یک مسیر پردازش
+// جداگانه، همان تپ را به یک متن معادل («۲» برای گزینه‌ی دوم) تبدیل می‌کنیم
+// و از همان processIncomingMessage رد می‌کنیم — یعنی منطق pendingAction
+// (که در engine/* نوشته شده) عیناً و بدون تکرار همین‌جا هم کار می‌کند.
 // ----------------------------------------------------------------------------
 
 @Injectable()
@@ -21,11 +35,16 @@ export class TelegramUpdateHandlerService {
   ) {}
 
   async handle(tenant: TenantDocument, update: TelegramUpdate): Promise<void> {
-    const message = update.message;
-    if (!message) return;
-
     const botToken = tenant.telegramBotToken;
     if (!botToken) return;
+
+    if (update.callback_query) {
+      await this.handleCallbackQuery(tenant, botToken, update.callback_query);
+      return;
+    }
+
+    const message = update.message;
+    if (!message) return;
 
     // /start — خوش‌آمد + نصب منوی دکمه‌های سریع (کیبورد persistent)؛ این
     // خودش پیامی نیست که باید از موتور رد شود
@@ -81,17 +100,87 @@ export class TelegramUpdateHandlerService {
         externalThreadId: String(message.chat.id),
       });
 
-      if (result.reply) {
-        await this.telegramClient.sendMessage(botToken, message.chat.id, result.reply.text);
-      }
-      // اگر result.handledByHuman بود، یعنی از قبل دست اپراتور است — همان
-      // سکوت طبیعی درست است، دوباره پیام تکراری نمی‌فرستیم
+      await this.deliverReply(botToken, message.chat.id, result);
     } catch (err) {
       if (err instanceof DuplicateMessageError) return; // وبهوک/آپدیت تکراری، بی‌خطر
       this.logger.error(`خطا در پردازش پیام تلگرام تنانت «${tenant.key}»: ${err instanceof Error ? err.message : err}`);
       throw err;
     }
   }
+
+  private async handleCallbackQuery(
+    tenant: TenantDocument,
+    botToken: string,
+    callbackQuery: TelegramCallbackQuery
+  ): Promise<void> {
+    const chatId = callbackQuery.message?.chat.id;
+    if (!chatId) return;
+
+    // بدون این، دکمه روی گوشی کاربر در حالت "در حال بارگذاری" گیر می‌کند
+    await this.telegramClient.answerCallbackQuery(botToken, callbackQuery.id);
+
+    const match = (callbackQuery.data ?? "").match(/^opt:(\d+)$/);
+    if (!match) return; // فرمت callback_data ناشناخته — نادیده بگیر
+
+    const optionText = match[1]; // دقیقاً همان چیزی که اگر مشتری تایپ می‌کرد («۲») به pipeline می‌رسید
+
+    try {
+      const result = await this.messageService.processIncomingMessage(tenant, {
+        channel: "TELEGRAM",
+        externalCustomerId: String(chatId),
+        text: optionText,
+        externalMessageId: `${chatId}:cb:${callbackQuery.id}`,
+        externalThreadId: String(chatId),
+      });
+
+      await this.deliverReply(botToken, chatId, result);
+    } catch (err) {
+      if (err instanceof DuplicateMessageError) return;
+      this.logger.error(
+        `خطا در پردازش callback_query تنانت «${tenant.key}»: ${err instanceof Error ? err.message : err}`
+      );
+    }
+  }
+
+  // ----------------------------------------------------------------------------
+  // اگر پاسخ لایه ۱ چند گزینه‌ی محصول داشت (metadata.searchResults)، هرکدام
+  // را با عکس واقعی‌اش + یک دکمه‌ی شیشه‌ی «این رو میخوام» جدا می‌فرستیم —
+  // نه یک متن ساده. برای بقیه‌ی پاسخ‌ها (قیمت/موجودی/راهنما و ...) همان متن
+  // ساده کافی است.
+  // ----------------------------------------------------------------------------
+  private async deliverReply(botToken: string, chatId: number, result: ProcessResult): Promise<void> {
+    if (!result.reply) return; // مکالمه دست اپراتور بود، پاسخ خودکاری نیست
+
+    const searchResults = result.reply.metadata?.searchResults as ProductSearchResult[] | undefined;
+
+    if (Array.isArray(searchResults) && searchResults.length > 0) {
+      const introLine = result.reply.text.split("\n")[0];
+      await this.telegramClient.sendMessage(botToken, chatId, introLine || "چند مدل نزدیک به سوال شما پیدا کردم:");
+
+      for (let i = 0; i < searchResults.length; i++) {
+        const candidate = searchResults[i];
+        const caption = buildCandidateCaption(candidate);
+        const keyboard: TelegramInlineKeyboard = {
+          inline_keyboard: [[{ text: "✅ این رو میخوام", callback_data: `opt:${i + 1}` }]],
+        };
+
+        if (candidate.mainImageUrl) {
+          await this.telegramClient.sendPhoto(botToken, chatId, candidate.mainImageUrl, caption, keyboard);
+        } else {
+          await this.telegramClient.sendMessage(botToken, chatId, caption, { replyMarkup: keyboard });
+        }
+      }
+      return;
+    }
+
+    await this.telegramClient.sendMessage(botToken, chatId, result.reply.text);
+  }
+}
+
+function buildCandidateCaption(item: ProductSearchResult): string {
+  const price = item.minPrice === item.maxPrice ? formatToman(item.minPrice) : `از ${formatToman(item.minPrice)}`;
+  const stock = item.isInStock ? "موجود ✅" : "ناموجود 🙁";
+  return `${item.name}\n${price} — ${stock}`;
 }
 
 interface MediaInfo {

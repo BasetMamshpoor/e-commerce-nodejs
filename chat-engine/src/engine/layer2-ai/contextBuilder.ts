@@ -58,7 +58,7 @@ export async function buildGroundedContext(
     );
   } else {
     // اگر کد محصول در پیام نبود، چند گزینه‌ی نزدیک را هم به‌عنوان راهنما می‌دهیم
-    const candidates = await lookup.search(customerMessage, 3);
+    const { results: candidates } = await lookup.search(customerMessage, 3);
     if (candidates.length > 0) {
       parts.push(
         "محصولات نزدیک به موضوع پیام مشتری (مطمئن نیستیم دقیقاً کدومه):\n" +

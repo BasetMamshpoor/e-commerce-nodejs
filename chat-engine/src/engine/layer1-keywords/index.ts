@@ -3,17 +3,28 @@ import { matchIntents } from "./matcher";
 import { PRODUCT_SCOPED_INTENTS, KeywordIntent } from "./keywords.config";
 import { findProductByShortCodeInText } from "../productMatcher/productCode";
 import { ProductLookupPort, ResolvedProduct } from "../productMatcher/types";
+import { parseProductQuery } from "../productMatcher/attributeExtraction";
 import { resolveProductScopedIntent } from "./resolvers/productIntent.resolver";
 import { resolveGenericIntent } from "./resolvers/generic.resolver";
-import { buildSearchOptionsReply, buildAskForCodeReply } from "./resolvers/searchOptions.resolver";
+import {
+  buildSearchOptionsReply,
+  buildAskForCodeReply,
+  buildAskWhatProductReply,
+  buildNarrowSearchReply,
+} from "./resolvers/searchOptions.resolver";
 import { parseOptionSelection } from "./parseOptionSelection";
+
+// حداکثر تعداد کاندیدی که با گزینه نشان می‌دهیم؛ بیشتر از این یعنی
+// جست‌وجو مبهم بوده و باید از مشتری دقیق‌تر بخواهیم
+const MAX_OPTIONS = 5;
 
 // ----------------------------------------------------------------------------
 // لایه ۱: تشخیص کلمات رزرو شده در متن مشتری و پاسخ‌دادن مستقیم از دیتابیس
 // فروشگاه — اما نه فقط بر اساس همین یک پیام تنها. قبل از هر چیز چک می‌کند
 // آیا این پیام «پاسخ به سوالی است که خودِ موتور همین الان پرسیده» (مثلاً
-// «کد محصول رو بفرست» یا «کدوم گزینه؟») یا ادامه‌ی طبیعی همان محصولی است که
-// چند پیام قبل درباره‌اش صحبت شده — نه یک پیام تازه و بی‌ربط.
+// «کد محصول رو بفرست»، «کدوم گزینه؟»، یا «دقیق‌تر بگو») یا ادامه‌ی طبیعی
+// همان محصولی است که چند پیام قبل درباره‌اش صحبت شده — نه یک پیام تازه و
+// بی‌ربط.
 //
 // اگر هیچ کلمه‌ی رزرو شده‌ای در متن نبود (و پاسخ به هیچ سوال معلقی هم نبود)،
 // null برمی‌گردد تا pipeline اصلی سراغ لایه ۲ (AI) برود.
@@ -26,7 +37,8 @@ export async function runKeywordLayer(
 ): Promise<EngineReply | null> {
   // مرحله‌ی صفر: اگر خودِ موتور در پیام قبلی منتظر پاسخ خاصی بود، اول همان
   // را امتحان کن — پیام مشتری اینجا لزوماً کلمه‌ی رزرو شده‌ای هم ندارد
-  // (مثلاً فقط «13» یا «۲»)، برای همین این چک باید قبل از matchIntents باشد.
+  // (مثلاً فقط «13» یا «۲» یا «اسپورت کتان»)، برای همین این چک باید قبل
+  // از matchIntents باشد.
   if (context.pendingAction) {
     const resolved = await resolvePendingAction(lookup, message, context.pendingAction);
     if (resolved) return resolved;
@@ -82,9 +94,41 @@ export async function runKeywordLayer(
   }
 
   // روش سوم: هیچ محصولی (نه از متن، نه از تاریخچه) پیدا نشد — جست‌وجوی
-  // متنی و ارائه‌ی گزینه‌های نزدیک؛ همزمان یک pendingAction ثبت می‌کنیم تا
-  // پیام بعدی مشتری («۲» یا «دومی») درست تفسیر شود.
-  const results = await lookup.search(message.text);
+  // متنی و ساختاریافته (نام/رنگ/سایز، بین تنوع‌ها هم می‌گردد)
+  return performSearchStep(lookup, message, primaryIntent, message.text);
+}
+
+// ----------------------------------------------------------------------------
+// جست‌وجو می‌زند و بر اساس تعداد نتایج تصمیم می‌گیرد: صفر نتیجه → درخواست
+// کد؛ خیلی زیاد (مبهم) → درخواست دقیق‌تر بگو (و queryText را برای ترکیب با
+// پیام بعدی نگه می‌دارد)؛ در غیر این صورت → لیست گزینه‌ها (با شناسه‌ی
+// دقیق هرکدام برای انتخاب بعدی).
+// ----------------------------------------------------------------------------
+async function performSearchStep(
+  lookup: ProductLookupPort,
+  message: IncomingMessage,
+  primaryIntent: KeywordIntent,
+  queryText: string
+): Promise<EngineReply> {
+  const parsed = parseProductQuery(queryText);
+  const hasCriteria = parsed.nameTerms.length > 0 || Boolean(parsed.color) || Boolean(parsed.size);
+
+  // فقط برای intent عمومی INFO (مثلاً دکمه‌ی «جستجوی محصول») معنا دارد که
+  // بپرسیم «دنبال چی هستید؟» — برای intent های خاص مثل PRICE/STOCK با
+  // معیار خالی («قیمت این چنده؟» بدون گفتن کدوم محصول)، مشتری معلومه یک
+  // محصول خاص را در ذهن دارد، پس مسیر معمول «کد رو بفرست» درست‌تر است.
+  if (!hasCriteria && primaryIntent === "INFO") {
+    const pendingAction: PendingAction = { type: "AWAITING_NARROWER_SEARCH", intent: primaryIntent, previousQuery: "" };
+    return {
+      layer: "KEYWORD",
+      text: buildAskWhatProductReply(),
+      confidence: 1,
+      needsOperator: false,
+      metadata: { intent: primaryIntent, matchedBy: "search-empty-query", pendingAction },
+    };
+  }
+
+  const { results, hasMore } = await lookup.search(queryText, MAX_OPTIONS);
 
   if (results.length === 0) {
     const pendingAction: PendingAction = { type: "AWAITING_PRODUCT_CODE", intent: primaryIntent };
@@ -94,6 +138,19 @@ export async function runKeywordLayer(
       confidence: 1,
       needsOperator: false,
       metadata: { intent: primaryIntent, matchedBy: "search", pendingAction },
+    };
+  }
+
+  if (hasMore) {
+    // نتایج بیشتر از MAX_OPTIONS بود — احتمالاً پرس‌وجو مبهم است؛ به‌جای
+    // یک لیست شلوغ، از مشتری دقیق‌تر می‌خواهیم و متن فعلی را نگه می‌داریم
+    const pendingAction: PendingAction = { type: "AWAITING_NARROWER_SEARCH", intent: primaryIntent, previousQuery: queryText };
+    return {
+      layer: "KEYWORD",
+      text: buildNarrowSearchReply(),
+      confidence: 1,
+      needsOperator: false,
+      metadata: { intent: primaryIntent, matchedBy: "search-too-broad", pendingAction },
     };
   }
 
@@ -111,7 +168,10 @@ export async function runKeywordLayer(
     metadata: {
       intent: primaryIntent,
       matchedBy: "search",
-      candidateProductIds: results.map((r) => r.id),
+      // لیست کامل (با عکس/قیمت) برای کانال‌هایی مثل تلگرام که می‌توانند
+      // هرکدام را با عکس و دکمه‌ی جداگانه نشان بدهند — engine خودش کاری
+      // با این فیلد ندارد، فقط برای مصرف لایه‌ی کانال ذخیره می‌شود
+      searchResults: results,
       pendingAction,
     },
   };
@@ -146,6 +206,14 @@ async function resolvePendingAction(
     if (!product) return null;
 
     return buildResolvedReply(pending.intent, product, "pendingOptionSelection");
+  }
+
+  if (pending.type === "AWAITING_NARROWER_SEARCH") {
+    // متن قبلی («کفش») را با پیام تازه («اسپورت کتان») ترکیب می‌کنیم تا
+    // جست‌وجوی دقیق‌تری بزنیم؛ همان تصمیم‌گیریِ ۰/زیاد/چندتا دوباره اجرا
+    // می‌شود — اگر بازهم مبهم بود، دوباره AWAITING_NARROWER_SEARCH می‌شود
+    const combinedQuery = `${pending.previousQuery} ${message.text}`.trim();
+    return performSearchStep(lookup, message, pending.intent as KeywordIntent, combinedQuery);
   }
 
   return null;

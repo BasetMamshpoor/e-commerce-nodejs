@@ -9,6 +9,14 @@ import { Injectable, Logger } from "@nestjs/common";
 export interface TelegramUpdate {
   update_id: number;
   message?: TelegramMessage;
+  callback_query?: TelegramCallbackQuery;
+}
+
+export interface TelegramCallbackQuery {
+  id: string;
+  data?: string;
+  message?: TelegramMessage;
+  from: { id: number; first_name?: string; last_name?: string; username?: string };
 }
 
 export interface TelegramPhotoSize {
@@ -33,6 +41,8 @@ export interface TelegramMessage {
   sticker?: { file_id: string; emoji?: string };
 }
 
+// دکمه‌ی معمولی (زیر کیبورد) — فقط متن، تپ‌کردنش یعنی «همین متن را به‌عنوان
+// پیام بفرست» (منوی سریع اصلی از همین نوع است)
 export interface TelegramKeyboardButton {
   text: string;
 }
@@ -43,8 +53,19 @@ export interface TelegramReplyKeyboard {
   is_persistent?: boolean;
 }
 
+// دکمه‌ی «شیشه‌ای» (inline) — چسبیده به خودِ پیام، تپ‌کردنش یک callback_query
+// می‌فرستد (نه یک پیام معمولی) — برای انتخاب دقیق از چند گزینه استفاده می‌شود
+export interface TelegramInlineButton {
+  text: string;
+  callback_data: string;
+}
+
+export interface TelegramInlineKeyboard {
+  inline_keyboard: TelegramInlineButton[][];
+}
+
 export interface SendMessageOptions {
-  replyMarkup?: TelegramReplyKeyboard;
+  replyMarkup?: TelegramReplyKeyboard | TelegramInlineKeyboard;
   // برای quote-کردن یک پیام مشخص از مشتری — چیزی که ویجت سایت اصلاً مفهومش
   // را ندارد ولی تلگرام به‌صورت بومی پشتیبانی می‌کند
   replyToMessageId?: number;
@@ -62,9 +83,10 @@ export class TelegramClientService {
   // long-polling: درخواست تا timeout ثانیه باز می‌ماند و به محض رسیدن
   // پیام جدید یا رسیدن به timeout برمی‌گردد؛ offset یعنی «آخرین
   // update_id ای که پردازش کردم + ۱» — تلگرام هر چیزی با id کمتر از این
-  // را دیگر دوباره نمی‌فرستد.
+  // را دیگر دوباره نمی‌فرستد. callback_query هم اینجا اضافه شده تا تپ روی
+  // دکمه‌های شیشه‌ای هم از همین حلقه بیاید.
   async getUpdates(botToken: string, offset: number, timeoutSeconds = 30): Promise<TelegramUpdate[]> {
-    const allowedUpdates = encodeURIComponent(JSON.stringify(["message"]));
+    const allowedUpdates = encodeURIComponent(JSON.stringify(["message", "callback_query"]));
     const url = `${this.baseUrl(botToken)}/getUpdates?offset=${offset}&timeout=${timeoutSeconds}&allowed_updates=${allowedUpdates}`;
     const res = await fetch(url);
     const data = (await res.json()) as { ok: boolean; result?: TelegramUpdate[]; description?: string };
@@ -96,6 +118,41 @@ export class TelegramClientService {
     }
   }
 
+  // برای نشان‌دادن یک گزینه‌ی محصول با عکس واقعی‌اش (caption = نام/قیمت/
+  // موجودی) + دکمه‌ی شیشه‌ای «این رو میخوام» زیرش
+  async sendPhoto(
+    botToken: string,
+    chatId: string | number,
+    photoUrl: string,
+    caption: string,
+    replyMarkup?: TelegramInlineKeyboard
+  ): Promise<void> {
+    const res = await fetch(`${this.baseUrl(botToken)}/sendPhoto`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        photo: photoUrl,
+        caption,
+        ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      this.logger.error(`sendPhoto failed for chat ${chatId}: ${body}`);
+    }
+  }
+
+  // بعد از تپ روی یک دکمه‌ی شیشه‌ای باید این را صدا زد، وگرنه دکمه در
+  // حالت "در حال بارگذاری" (⏳) روی گوشی کاربر گیر می‌کند
+  async answerCallbackQuery(botToken: string, callbackQueryId: string, text?: string): Promise<void> {
+    await fetch(`${this.baseUrl(botToken)}/answerCallbackQuery`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ callback_query_id: callbackQueryId, text }),
+    });
+  }
+
   // ----------------------------------------------------------------------------
   // «بدون ذخیره کردن» یعنی ما هیچ‌وقت خودِ فایل را دانلود/روی دیسک‌مان
   // نمی‌ریزیم — فقط لینک موقتِ دانلود مستقیم از سرورهای تلگرام را می‌سازیم
@@ -115,7 +172,7 @@ export class TelegramClientService {
     const res = await fetch(`${this.baseUrl(botToken)}/setWebhook`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ url, secret_token: secretToken, allowed_updates: ["message"] }),
+      body: JSON.stringify({ url, secret_token: secretToken, allowed_updates: ["message", "callback_query"] }),
     });
     const data = (await res.json()) as { ok: boolean; description?: string };
     if (!data.ok) {

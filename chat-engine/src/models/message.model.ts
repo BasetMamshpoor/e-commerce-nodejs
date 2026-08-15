@@ -11,6 +11,9 @@ export interface ConversationMessageDocument extends Document {
   layer?: EngineLayer | null; // فقط برای senderType=ENGINE
   operatorId?: Types.ObjectId | null;
   content: string;
+  // اگر این پیام مستقیم پاسخ به یک پیام مشخص دیگر از همین مکالمه است
+  // (اپراتور یا موتور می‌توانند این را ست کنند) — برای نمایش thread در UI
+  replyToMessageId?: Types.ObjectId | null;
   // اطلاعات کمکی برای دیباگ/آنالیز: intent تشخیص‌داده‌شده، شناسه‌ی محصولات
   // مرتبط، امتیاز اطمینان لایه AI و ...
   metadata?: Record<string, unknown> | null;
@@ -27,6 +30,7 @@ const conversationMessageSchema = new Schema<ConversationMessageDocument>(
     layer: { type: String, enum: ["KEYWORD", "AI", null], default: null },
     operatorId: { type: Schema.Types.ObjectId, ref: "Operator", default: null },
     content: { type: String, required: true },
+    replyToMessageId: { type: Schema.Types.ObjectId, ref: "ConversationMessage", default: null },
     metadata: { type: Schema.Types.Mixed, default: null },
     externalMessageId: { type: String, default: null },
   },

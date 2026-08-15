@@ -43,6 +43,14 @@ export interface ProductSearchResult {
   mainImageUrl: string | null;
 }
 
+// hasMore=true یعنی جست‌وجو احتمالاً مبهم بوده (بیش از limit تطابق واقعی
+// داشت) — caller (layer1) به‌جای نشان‌دادن یک لیست شلوغ، از مشتری می‌خواهد
+// دقیق‌تر بگوید
+export interface SearchOutcome {
+  results: ProductSearchResult[];
+  hasMore: boolean;
+}
+
 // ----------------------------------------------------------------------------
 // engine/* هیچ‌وقت مستقیماً pg.Pool صدا نمی‌زند — همیشه از پشت این port.
 // دلیلش صرفاً تمیزی معماری نیست: این نقطه‌ای است که یک لایه‌ی کش (Redis)
@@ -54,6 +62,6 @@ export interface ProductSearchResult {
 export interface ProductLookupPort {
   findByShortCode(code: string): Promise<ResolvedProduct | null>;
   findById(id: number): Promise<ResolvedProduct | null>;
-  search(text: string, limit?: number): Promise<ProductSearchResult[]>;
+  search(text: string, limit?: number): Promise<SearchOutcome>;
   countActiveBrands(): Promise<number>;
 }

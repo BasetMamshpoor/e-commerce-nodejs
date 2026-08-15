@@ -160,6 +160,77 @@ describe("layer1: INFO gives a combined product summary", () => {
   });
 });
 
+describe("layer1: empty search criteria → asks what product, doesn't run a meaningless search", () => {
+  it("وقتی هیچ نام/رنگ/سایزی در پیام نیست، مستقیم می‌پرسد دنبال چی هستید", async () => {
+    let searchCalled = false;
+    const lookup = fakeSearchLookup([], []);
+    const originalSearch = lookup.search.bind(lookup);
+    lookup.search = async (...args) => {
+      searchCalled = true;
+      return originalSearch(...args);
+    };
+
+    // این دقیقاً همان متنی است که دکمه‌ی «جستجوی محصول» تلگرام می‌فرستد
+    const reply = await runKeywordLayer(lookup, msg("جستجوی محصول"), EMPTY_CONTEXT);
+
+    expect(searchCalled).toBe(false);
+    expect(reply!.metadata?.matchedBy).toBe("search-empty-query");
+    expect(reply!.metadata?.pendingAction).toEqual({
+      type: "AWAITING_NARROWER_SEARCH",
+      intent: "INFO",
+      previousQuery: "",
+    });
+  });
+
+  it("پیام بعدی مستقیم جست‌وجو می‌شود، حتی بدون کلمه‌ی کلیدی خاص", async () => {
+    const productA = makeProduct({ id: 1, name: "کفش مجلسی قهوه‌ای" });
+    const lookup = fakeSearchLookup([], [productA], false);
+
+    const context: ConversationContext = {
+      pendingAction: { type: "AWAITING_NARROWER_SEARCH", intent: "INFO", previousQuery: "" },
+    };
+
+    // بدون هیچ کلمه‌ی رزرو شده‌ای (نه قیمت، نه موجودی) — ولی چون
+    // pendingAction معلق داریم، باید به همان جست‌وجو برسد
+    const reply = await runKeywordLayer(lookup, msg("کفش مجلسی قهوه‌ای"), context);
+
+    expect(reply).not.toBeNull();
+    expect(reply!.metadata?.matchedBy).not.toBe("search-empty-query");
+  });
+});
+
+describe("layer1: too-vague search → ask to narrow down (AWAITING_NARROWER_SEARCH)", () => {
+  it("وقتی نتایج بیش از حد است، به‌جای لیست شلوغ از مشتری دقیق‌تر می‌خواهد", async () => {
+    const many = [makeProduct({ id: 1 }), makeProduct({ id: 2 })]; // محتوای دقیقش مهم نیست، فقط hasMore=true شبیه‌سازی می‌شود
+    const lookup = fakeSearchLookup([], many, true);
+
+    const reply = await runKeywordLayer(lookup, msg("کفش دارید؟ قیمتش چنده"), EMPTY_CONTEXT);
+
+    expect(reply!.metadata?.matchedBy).toBe("search-too-broad");
+    expect(reply!.metadata?.pendingAction).toEqual({
+      type: "AWAITING_NARROWER_SEARCH",
+      intent: "PRICE",
+      previousQuery: "کفش دارید؟ قیمتش چنده",
+    });
+  });
+
+  it("پیام بعدی را با متن قبلی ترکیب می‌کند و دوباره جست‌وجو می‌زند", async () => {
+    const productA = makeProduct({ id: 1, name: "کفش اسپورت کتان مشکی" });
+    const productB = makeProduct({ id: 2, name: "کفش اسپورت کتان سفید" });
+    const lookup = fakeSearchLookup([], [productA, productB], false);
+
+    const context: ConversationContext = {
+      pendingAction: { type: "AWAITING_NARROWER_SEARCH", intent: "PRICE", previousQuery: "کفش" },
+    };
+
+    const reply = await runKeywordLayer(lookup, msg("اسپورت کتان"), context);
+
+    // چون این بار hasMore=false و ۲ نتیجه داریم، باید به لیست گزینه‌ها برسد
+    expect(reply!.metadata?.matchedBy).toBe("search");
+    expect(reply!.metadata?.pendingAction).toMatchObject({ type: "AWAITING_OPTION_SELECTION" });
+  });
+});
+
 describe("layer1: channel-aware phrasing", () => {
   it("ویجت سایت اشاره‌ای به کد زیر بیوگرافی یا فوروارد پست نمی‌کند", async () => {
     const lookup = fakeSearchLookup([], []);

@@ -166,6 +166,7 @@ export class MessageService {
       senderType: "ENGINE",
       layer: reply.layer,
       content: reply.text,
+      replyToMessageId: customerMessage._id,
       metadata: reply.metadata ?? null,
     });
 
@@ -198,6 +199,7 @@ export class MessageService {
     conversationId: string;
     operatorId: Types.ObjectId;
     text: string;
+    replyToMessageId?: string;
   }) {
     const conversation = await ConversationModel.findOne({ _id: params.conversationId, tenantId: params.tenantId });
     if (!conversation) return null;
@@ -208,6 +210,7 @@ export class MessageService {
       senderType: "OPERATOR",
       operatorId: params.operatorId,
       content: params.text,
+      replyToMessageId: params.replyToMessageId ?? null,
     });
 
     conversation.status = "WITH_OPERATOR";
