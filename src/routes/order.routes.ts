@@ -14,6 +14,7 @@ import {
   listOrdersQuerySchema,
   adminListOrdersQuerySchema,
   adminListReturnsQuerySchema,
+  shippingEstimateQuerySchema,
 } from "../validations/order.validation";
 
 const router = Router();
@@ -46,6 +47,12 @@ router.put(
 
 // --- مشتری ---
 router.get("/", validate(listOrdersQuerySchema, "query"), orderController.listMine);
+router.get(
+  "/shipping-estimate",
+  authorize("CUSTOMER"),
+  validate(shippingEstimateQuerySchema, "query"),
+  orderController.shippingEstimate
+);
 router.post("/", authorize("CUSTOMER"), validate(createOrderSchema), orderController.create);
 router.get("/:id", orderController.getMine);
 

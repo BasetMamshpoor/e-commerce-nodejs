@@ -49,6 +49,96 @@ const ORDER_DETAIL_INCLUDE = {
   transactions: true,
 };
 
+/**
+ * Server-side-only distance calculation for WEIGHT_DISTANCE shipping — see
+ * createOrder for the full rationale (never trust client-supplied distance;
+ * haversine x a road-distance correction factor from a configured
+ * warehouse origin). Shared between createOrder and estimateShippingCost
+ * so the checkout preview and the actual charged amount can never drift
+ * apart from using two different implementations of the same formula
+ * (exactly the kind of bug the shippingWeight unit mismatch was).
+ */
+async function computeServerSideDistance(address: { lat: number | null; lng: number | null }): Promise<{
+  distanceKm?: number;
+  unavailableReason?: string;
+}> {
+  if (address.lat == null || address.lng == null) {
+    return { unavailableReason: "برای این آدرس مختصات جغرافیایی ثبت نشده" };
+  }
+  const settings = await getPublicSettings();
+  const warehouseLat = Number(settings.warehouseLat);
+  const warehouseLng = Number(settings.warehouseLng);
+  if (!Number.isFinite(warehouseLat) || !Number.isFinite(warehouseLng)) {
+    return { unavailableReason: "مبدأ ارسال هنوز تنظیم نشده" };
+  }
+  const straightLineKm = haversineDistanceKm(
+    { lat: warehouseLat, lng: warehouseLng },
+    { lat: address.lat, lng: address.lng }
+  );
+  const roadFactorRaw = Number(settings.shippingDistanceRoadFactor);
+  // Straight-line (haversine) distance is always shorter than the actual
+  // road route a ground courier drives — this correction factor gets
+  // meaningfully closer to real driving distance than the raw great-circle
+  // number. It's a configurable heuristic (Setting
+  // "shippingDistanceRoadFactor", default 1.3 — a commonly used rule-of-
+  // thumb multiplier for reasonably direct routes), not a real routing
+  // calculation. A real routing API (e.g. Neshan/Balad's Directions API,
+  // or a self-hosted OSRM instance with Iran's road network) would compute
+  // actual driving distance directly and should replace this if/when
+  // that's set up — needs an API key and usually a paid plan, so ask
+  // before adding one.
+  const roadFactor = Number.isFinite(roadFactorRaw) && roadFactorRaw > 0 ? roadFactorRaw : 1.3;
+  return { distanceKm: Math.round(straightLineKm * roadFactor) };
+}
+
+export interface ShippingEstimateResult {
+  shippingCost: number;
+  weightGrams: number;
+  distanceKm: number | null;
+  /** Set when distance couldn't be computed (address has no coordinates, or
+   *  the warehouse origin isn't configured yet) — the estimate still
+   *  returns, using distance 0, but the frontend should show this reason
+   *  rather than presenting the number as final/accurate. */
+  distanceUnavailableReason: string | null;
+}
+
+/** Total weight in grams from actual cart items (variant.weight x quantity)
+ *  — the single source of truth for weight, shared between the estimate
+ *  endpoint and createOrder so they can never drift apart from computing it
+ *  two different ways (see comment on createOrderSchema for why). */
+function computeCartWeightGrams(cart: { items: Array<{ weight?: number | null; quantity: number }> }): number {
+  return Math.round(cart.items.reduce((sum, item) => sum + (item.weight ?? 0) * item.quantity, 0) * 1000);
+}
+
+export async function estimateShippingCost(
+  userId: number,
+  addressId: number,
+  shippingCompanyId: number
+): Promise<ShippingEstimateResult> {
+  const [cart, address, shippingCompany] = await Promise.all([
+    cartService.getCart({ userId }),
+    prisma.address.findUnique({ where: { id: addressId } }),
+    prisma.shippingCompany.findUnique({ where: { id: shippingCompanyId } }),
+  ]);
+
+  if (!address || address.userId !== userId) throw ApiError.notFound("آدرس ارسال پیدا نشد");
+  if (!shippingCompany || !shippingCompany.isActive) throw ApiError.badRequest("شرکت ارسال انتخاب‌شده معتبر نیست");
+
+  const weightGrams = computeCartWeightGrams(cart);
+
+  let distanceKm: number | null = null;
+  let distanceUnavailableReason: string | null = null;
+  if (shippingCompany.pricingType === "WEIGHT_DISTANCE") {
+    const result = await computeServerSideDistance(address);
+    distanceKm = result.distanceKm ?? null;
+    distanceUnavailableReason = result.unavailableReason ?? null;
+  }
+
+  const shippingCost = calculateShippingCost(shippingCompany, weightGrams, distanceKm ?? 0);
+
+  return { shippingCost, weightGrams, distanceKm, distanceUnavailableReason };
+}
+
 export async function createOrder(userId: number, input: CreateOrderInput): Promise<Order> {
   const cart = await cartService.getCart({ userId });
   if (cart.items.length === 0) throw ApiError.badRequest("سبد خرید شما خالی است");
@@ -142,29 +232,22 @@ export async function createOrder(userId: number, input: CreateOrderInput): Prom
 
   const subtotal = cart.total;
 
-  // For WEIGHT_DISTANCE shipping, prefer a server-computed distance (from a
-  // configured warehouse origin to the delivery address) over trusting
-  // input.shippingDistance as-is. Two reasons: (1) the client had no way to
-  // compute this accurately anyway — the checkout page just asked the
-  // customer to type in an estimate — and (2) trusting an unverified
-  // client-supplied distance for a cost calculation is fixable now that a
-  // real source of truth exists, so there's no reason not to. Falls back to
-  // the client-supplied value if the warehouse origin isn't configured yet
-  // (Setting keys "warehouseLat"/"warehouseLng", set from /admin/settings)
-  // or the address has no coordinates, so checkout keeps working either way.
-  let shippingDistance = input.shippingDistance;
-  if (shippingCompany.pricingType === "WEIGHT_DISTANCE" && address.lat != null && address.lng != null) {
-    const settings = await getPublicSettings();
-    const warehouseLat = Number(settings.warehouseLat);
-    const warehouseLng = Number(settings.warehouseLng);
-    if (Number.isFinite(warehouseLat) && Number.isFinite(warehouseLng)) {
-      shippingDistance = Math.round(
-        haversineDistanceKm({ lat: warehouseLat, lng: warehouseLng }, { lat: address.lat, lng: address.lng })
+  // Distance for WEIGHT_DISTANCE shipping is ALWAYS computed server-side —
+  // never trust a client-supplied value (it directly affects the charged
+  // amount, and the checkout UI no longer even asks the customer for it).
+  let shippingDistance: number | undefined;
+  if (shippingCompany.pricingType === "WEIGHT_DISTANCE") {
+    const { distanceKm, unavailableReason } = await computeServerSideDistance(address);
+    if (unavailableReason) {
+      throw ApiError.badRequest(
+        `${unavailableReason}؛ این روش ارسال موقتاً در دسترس نیست یا موقعیت آدرس روی نقشه مشخص نشده`
       );
     }
+    shippingDistance = distanceKm;
   }
 
-  const shippingCost = calculateShippingCost(shippingCompany, input.shippingWeight, shippingDistance);
+  const shippingWeight = computeCartWeightGrams(cart);
+  const shippingCost = calculateShippingCost(shippingCompany, shippingWeight, shippingDistance);
 
   let discountAmount = 0;
   let discountCodeId: number | undefined;
@@ -251,7 +334,7 @@ export async function createOrder(userId: number, input: CreateOrderInput): Prom
         },
         shippingCompanyId: shippingCompany.id,
         shippingCost,
-        shippingWeight: input.shippingWeight ?? null,
+        shippingWeight: shippingWeight ?? null,
         shippingDistance: shippingDistance ?? null,
         subtotal,
         discountAmount,

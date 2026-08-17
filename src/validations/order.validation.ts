@@ -4,8 +4,14 @@ export const createOrderSchema = z
   .object({
     addressId: z.coerce.number().int().positive("آدرس ارسال الزامی است"),
     shippingCompanyId: z.coerce.number().int().positive("انتخاب شرکت ارسال الزامی است"),
-    shippingWeight: z.coerce.number().int().nonnegative().optional(),
-    shippingDistance: z.coerce.number().int().nonnegative().optional(),
+    // shippingWeight and shippingDistance intentionally removed: both are
+    // always computed server-side now (weight from the cart's actual
+    // variant.weight x quantity, distance from a configured warehouse
+    // origin -> address) and never trusted from the client — the same
+    // reasoning applies to both: they directly affect the charged amount,
+    // and having the client independently compute/send either one is
+    // exactly what caused the shippingWeight unit bug (grams vs kg
+    // mismatch between the checkout preview and the actual order).
     paymentMethod: z.enum(["GATEWAY", "WALLET", "MIXED", "FREIGHT_COLLECT"]),
     gatewaySlug: z.string().optional(),
     discountCode: z.string().trim().optional(),
@@ -17,6 +23,11 @@ export const createOrderSchema = z
 
 export const cancelOrderSchema = z.object({
   reason: z.string().trim().min(3, "دلیل لغو الزامی است").max(500),
+});
+
+export const shippingEstimateQuerySchema = z.object({
+  addressId: z.coerce.number().int().positive(),
+  shippingCompanyId: z.coerce.number().int().positive(),
 });
 
 export const returnOrderSchema = z.object({

@@ -20,6 +20,12 @@ export async function create(req: Request, res: Response) {
   return ApiResponse.created(res, detail, "سفارش با موفقیت ثبت شد");
 }
 
+export async function shippingEstimate(req: Request, res: Response) {
+  const query = req.validatedQuery as { addressId: number; shippingCompanyId: number };
+  const result = await orderService.estimateShippingCost(userId(req), query.addressId, query.shippingCompanyId);
+  return ApiResponse.ok(res, result);
+}
+
 export async function listMine(req: Request, res: Response) {
   return ApiResponse.ok(res, await orderService.listOrders(userId(req), req.validatedQuery as never));
 }
