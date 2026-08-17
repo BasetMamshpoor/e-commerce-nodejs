@@ -9,6 +9,8 @@ import * as discountApplyService from "../discount/discount-apply.service";
 import * as walletService from "../wallet/wallet.service";
 import * as gatewayAdminService from "../payment/payment-gateway-admin.service";
 import { calculateShippingCost } from "../shipping/shipping-company.service";
+import { getPublicSettings } from "../settings/settings.service";
+import { haversineDistanceKm } from "../../utils/geo";
 import { recomputeProductAggregates } from "../catalog/product.service";
 import { notifyUser } from "../notification/notification.service";
 import { createAdminNotification } from "../notification/admin-notification.service";
@@ -139,7 +141,30 @@ export async function createOrder(userId: number, input: CreateOrderInput): Prom
   }
 
   const subtotal = cart.total;
-  const shippingCost = calculateShippingCost(shippingCompany, input.shippingWeight, input.shippingDistance);
+
+  // For WEIGHT_DISTANCE shipping, prefer a server-computed distance (from a
+  // configured warehouse origin to the delivery address) over trusting
+  // input.shippingDistance as-is. Two reasons: (1) the client had no way to
+  // compute this accurately anyway — the checkout page just asked the
+  // customer to type in an estimate — and (2) trusting an unverified
+  // client-supplied distance for a cost calculation is fixable now that a
+  // real source of truth exists, so there's no reason not to. Falls back to
+  // the client-supplied value if the warehouse origin isn't configured yet
+  // (Setting keys "warehouseLat"/"warehouseLng", set from /admin/settings)
+  // or the address has no coordinates, so checkout keeps working either way.
+  let shippingDistance = input.shippingDistance;
+  if (shippingCompany.pricingType === "WEIGHT_DISTANCE" && address.lat != null && address.lng != null) {
+    const settings = await getPublicSettings();
+    const warehouseLat = Number(settings.warehouseLat);
+    const warehouseLng = Number(settings.warehouseLng);
+    if (Number.isFinite(warehouseLat) && Number.isFinite(warehouseLng)) {
+      shippingDistance = Math.round(
+        haversineDistanceKm({ lat: warehouseLat, lng: warehouseLng }, { lat: address.lat, lng: address.lng })
+      );
+    }
+  }
+
+  const shippingCost = calculateShippingCost(shippingCompany, input.shippingWeight, shippingDistance);
 
   let discountAmount = 0;
   let discountCodeId: number | undefined;
@@ -227,7 +252,7 @@ export async function createOrder(userId: number, input: CreateOrderInput): Prom
         shippingCompanyId: shippingCompany.id,
         shippingCost,
         shippingWeight: input.shippingWeight ?? null,
-        shippingDistance: input.shippingDistance ?? null,
+        shippingDistance: shippingDistance ?? null,
         subtotal,
         discountAmount,
         taxAmount: 0,
