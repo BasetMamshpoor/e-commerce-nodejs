@@ -124,6 +124,19 @@ export async function updateReturnAdmin(
   });
   if (!orderReturn) throw ApiError.notFound("درخواست مرجوعی پیدا نشد");
 
+  // Idempotency guard: without this, re-submitting the same status (e.g. an
+  // admin double-clicking "تایید نهایی", or a retried request after a
+  // network timeout) would re-run the side effects below — crediting the
+  // customer's wallet a second time for RECEIVED→REFUNDED, or incrementing
+  // variant stock a second time for RECEIVED. Both are real financial/
+  // inventory-correctness bugs, not just redundant no-ops.
+  if (input.status === "RECEIVED" && (orderReturn.status === "RECEIVED" || orderReturn.status === "REFUNDED")) {
+    throw ApiError.conflict("این مرجوعی قبلاً به‌عنوان دریافت‌شده ثبت شده است");
+  }
+  if (input.status === "REFUNDED" && orderReturn.status === "REFUNDED") {
+    throw ApiError.conflict("وجه این مرجوعی قبلاً بازگشت داده شده است");
+  }
+
   const updated = await prisma.$transaction(async (tx) => {
     if (input.status === "RECEIVED") {
       const itemsToRestock = orderReturn.orderItemId

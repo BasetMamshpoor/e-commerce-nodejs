@@ -17,6 +17,12 @@ const CART_INCLUDE = {
               pricingMode: true, currentPriceIRT: true, sourcePrice: true,
               priceBufferPercent: true,
               currency: { select: { currentRate: true } },
+              // Product has no scalar `image` column — images live on the
+              // separate ProductImage relation (see product-query.service.ts's
+              // LIST_INCLUDE for the same pattern). This was previously
+              // omitted entirely and the code below read a nonexistent
+              // `product.image` field, so cart items never had a thumbnail.
+              images: { where: { isMain: true }, take: 1, include: { media: true } },
             },
           },
           attributeValues: {
@@ -92,6 +98,10 @@ export interface CartSummary {
     lineTotal: number;
     isAvailable: boolean;
     availableStock: number;
+    /** Variant weight in grams, for WEIGHT_DISTANCE shipping calculations
+     *  (frontend previously had no way to compute this and made the
+     *  customer type total package weight in by hand at checkout). */
+    weight: number | null;
   }>;
 }
 
@@ -129,7 +139,7 @@ function summarize(cart: Record<string, unknown> | null): CartSummary {
       })
       .join("، ");
 
-    const productImage = (product as { image?: string }).image ?? null;
+    const productImage = (product.images as Array<{ media?: { url?: string } }> | undefined)?.[0]?.media?.url ?? null;
 
     return {
       id: item.id as number,
@@ -144,6 +154,7 @@ function summarize(cart: Record<string, unknown> | null): CartSummary {
       lineTotal: price.unitPrice * (item.quantity as number),
       isAvailable,
       availableStock: variant.stock as number,
+      weight: (variant.weight as number | null) ?? null,
     };
   });
 

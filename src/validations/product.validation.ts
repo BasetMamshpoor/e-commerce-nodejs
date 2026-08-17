@@ -2,8 +2,14 @@ import { z } from "zod";
 
 export const variantAttributeValueSchema = z.object({
   attributeValueId: z.coerce.number().int().positive(),
-  modifierType: z.enum(["PERCENTAGE", "FIXED_SOURCE_CURRENCY", "FIXED_IRT"]).optional(),
-  modifierValue: z.coerce.number().optional(),
+  // .nullable() added alongside .optional(): the Prisma column is nullable
+  // (modifierType/modifierValue are cleared to null when an admin removes a
+  // price modifier from an attribute value), and any client that sends the
+  // field back as an explicit `null` — rather than omitting the key
+  // entirely — used to get its whole request rejected by zod, since
+  // .optional() alone only accepts `undefined`, not `null`.
+  modifierType: z.enum(["PERCENTAGE", "FIXED_SOURCE_CURRENCY", "FIXED_IRT"]).nullable().optional(),
+  modifierValue: z.coerce.number().nullable().optional(),
 });
 
 export const variantInputSchema = z.object({

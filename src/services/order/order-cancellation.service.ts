@@ -97,6 +97,41 @@ async function performCancellation(order: OrderWithItems, reason: string): Promi
   return updated;
 }
 
+/**
+ * Cancel an order as an admin (no ownership check — caller is the admin
+ * panel). Reuses the exact same stock-restoration + refund logic as the
+ * customer-initiated cancelOrder, so an admin cancellation is never
+ * missing those side effects.
+ */
+export async function cancelOrderAdmin(orderId: number, reason: string): Promise<Order> {
+  const order = (await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { items: true },
+  })) as OrderWithItems | null;
+  if (!order) throw ApiError.notFound("سفارش پیدا نشد");
+
+  if (!CANCELLABLE_STATUSES.includes(order.status)) {
+    if (order.status === "CANCELLED" || order.status === "RETURNED") {
+      throw ApiError.conflict("این سفارش قبلاً لغو یا مرجوع شده است");
+    }
+    throw ApiError.conflict(
+      "این سفارش ارسال شده و دیگر از این مسیر قابل لغو نیست؛ از مسیر مرجوعی استفاده کنید"
+    );
+  }
+
+  const updated = await performCancellation(order, reason);
+
+  notifyUser({
+    userId: order.userId,
+    type: "ORDER",
+    title: `سفارش ${order.orderNumber}`,
+    message: "سفارش شما توسط پشتیبانی لغو شد",
+    link: `/orders/${order.id}`,
+  }).catch(() => undefined);
+
+  return updated;
+}
+
 export async function cancelOrder(
   userId: number,
   orderId: number,

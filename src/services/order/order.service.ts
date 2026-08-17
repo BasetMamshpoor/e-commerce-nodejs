@@ -12,6 +12,7 @@ import { calculateShippingCost } from "../shipping/shipping-company.service";
 import { recomputeProductAggregates } from "../catalog/product.service";
 import { notifyUser } from "../notification/notification.service";
 import { createAdminNotification } from "../notification/admin-notification.service";
+import { cancelOrderAdmin } from "./order-cancellation.service";
 import {
   CreateOrderInput,
   ListOrdersQuery,
@@ -397,6 +398,18 @@ export async function updateOrderStatusAdmin(
 ): Promise<Order> {
   const order = await prisma.order.findUnique({ where: { id: orderId } });
   if (!order) throw ApiError.notFound("سفارش پیدا نشد");
+
+  // The generic status dropdown in the admin panel includes "لغو شده"
+  // (CANCELLED) as a plain option alongside PROCESSING/SHIPPED/etc. Setting
+  // it through the raw update below (as this function used to do
+  // unconditionally) skips stock restoration and refund creation entirely —
+  // an admin using the obvious, prominent status dropdown to cancel an
+  // order would silently leave inventory permanently decremented and any
+  // payment un-refunded. Route CANCELLED through the same logic the
+  // dedicated cancel endpoint uses instead.
+  if (input.status === "CANCELLED" && order.status !== "CANCELLED") {
+    return cancelOrderAdmin(orderId, input.note || "لغو توسط ادمین");
+  }
 
   const wasDelivered = order.status !== "DELIVERED" && input.status === "DELIVERED";
 

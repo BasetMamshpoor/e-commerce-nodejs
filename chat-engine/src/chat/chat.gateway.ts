@@ -17,6 +17,12 @@ interface SendMessagePayload {
   text?: string;
   displayName?: string;
   tenantKey?: string;
+  /** Site User.id when the widget is used by a logged-in customer — mirrors
+   *  ChatController's REST POST /chat/messages (storeUserId), which links
+   *  the conversation to the account. This socket handler used to drop it
+   *  silently, so any customer using the (default, socket-first) widget
+   *  path never got their conversation linked to their account at all. */
+  storeUserId?: number;
 }
 
 // ----------------------------------------------------------------------------
@@ -62,6 +68,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayInit {
         channel: "WEBSITE",
         externalCustomerId: guestToken,
         displayName: payload.displayName,
+        storeUserId: payload.storeUserId,
         text,
       });
 
