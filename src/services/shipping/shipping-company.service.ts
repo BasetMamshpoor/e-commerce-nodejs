@@ -44,11 +44,20 @@ export async function getShippingCompanyById(id: number) {
 
 export function calculateShippingCost(
   company: { pricingType: string; baseCost: number; pricePerKg: number | null; pricePerKm: number | null },
-  weight?: number,
+  /** Grams — see Order.shippingWeight in schema.prisma ("وزن کل (گرم)").
+   *  pricePerKg is priced per KILOGRAM, so this must be converted before
+   *  multiplying. This was previously missing: the value arriving here
+   *  was multiplied by pricePerKg as if it were already kilograms, which
+   *  overcharged (or, depending on values entered, misvalued) every
+   *  WEIGHT_DISTANCE order's shipping cost by a factor of 1000 relative
+   *  to the exact same formula the checkout page uses client-side to show
+   *  the customer a price preview — so the order actually created had a
+   *  wildly different shippingCost than what was shown at checkout. */
+  weightGrams?: number,
   distance?: number,
 ): number {
   if (company.pricingType === "WEIGHT_DISTANCE") {
-    const kg = weight ?? 0;
+    const kg = (weightGrams ?? 0) / 1000;
     const km = distance ?? 0;
     return (company.pricePerKg ?? 0) * kg + (company.pricePerKm ?? 0) * km;
   }
