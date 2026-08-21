@@ -115,7 +115,21 @@ export async function getCategoryById(id: number) {
 }
 
 export async function getCategoryBySlug(slug: string) {
-  const category = await prisma.category.findUnique({ where: { slug } });
+  const category = await prisma.category.findUnique({
+    where: { slug },
+    // Direct children only (one level) — the category detail page uses
+    // these to let the customer drill down further (clicking a category
+    // shows its subcategories, clicking one of those shows its own
+    // subcategories in turn, recursively via navigation). Previously this
+    // returned a flat record with no children at all, so there was no way
+    // to browse into subcategories from here.
+    include: {
+      children: {
+        where: { isActive: true },
+        orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+      },
+    },
+  });
   if (!category) throw ApiError.notFound("دسته‌بندی پیدا نشد");
   return category;
 }
