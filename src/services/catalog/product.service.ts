@@ -87,7 +87,7 @@ export async function recomputeProductAggregates(productId: number): Promise<voi
     where: { id: productId },
     select: {
       basePrice: true, pricingMode: true, currentPriceIRT: true, sourcePrice: true,
-      priceBufferPercent: true, currencyId: true,
+      priceBufferPercent: true, currencyId: true, discountType: true, discountValue: true,
       currency: { select: { currentRate: true } },
     },
   });
@@ -97,6 +97,13 @@ export async function recomputeProductAggregates(productId: number): Promise<voi
     where: { productId, isActive: true },
     include: { attributeValues: { select: { modifierType: true, modifierValue: true } } },
   });
+
+  // Whether the product's configured discount is actually "on" — same
+  // gate pricingEngine.applyProductDiscount uses internally, mirrored
+  // here since this flag is stored separately for filtering
+  // ("فقط تخفیف‌دارها") and badge display, not recomputed from
+  // discountType/discountValue on every read.
+  const hasActiveDiscount = Boolean(product.discountType && product.discountValue && product.discountValue > 0);
 
   if (variants.length === 0) {
     await prisma.product.update({
@@ -110,6 +117,11 @@ export async function recomputeProductAggregates(productId: number): Promise<voi
   // modifierValue های ویژگی‌های همان تنوع محاسبه می‌کنیم — نه فقط
   // priceAdjustment (که باعث می‌شد تنوع‌های با مدیفایر ویژگی، در بازه‌ی
   // قیمتی محصول (minPrice/maxPrice) اصلاً دیده نشوند).
+  //
+  // discountType/discountValue هم اینجا پاس داده می‌شوند تا minPrice/
+  // maxPrice قیمت واقعیِ نهاییِ قابل‌خرید (پس از تخفیف) را نشان دهند —
+  // قبلاً این دو فیلد اصلاً به calculateVariantPrice داده نمی‌شدند، پس
+  // تخفیف تنظیم‌شده در پنل ادمین هیچ اثری روی قیمت محاسبه‌شده نداشت.
   const prices = variants.map((v) =>
     calculateVariantPrice(
       {
@@ -117,6 +129,8 @@ export async function recomputeProductAggregates(productId: number): Promise<voi
         basePrice: product.basePrice,
         sourcePrice: product.sourcePrice,
         priceBufferPercent: product.priceBufferPercent,
+        discountType: product.discountType,
+        discountValue: product.discountValue,
       },
       product.currency,
       {
@@ -133,7 +147,7 @@ export async function recomputeProductAggregates(productId: number): Promise<voi
       minPrice: Math.min(...prices),
       maxPrice: Math.max(...prices),
       isInStock,
-      hasActiveDiscount: false,
+      hasActiveDiscount,
     },
   });
 }
@@ -452,11 +466,12 @@ const PRODUCT_DETAIL_INCLUDE = {
   displayAttributeValues: { include: { attribute: true } },
 } satisfies Prisma.ProductInclude;
 
-// قیمت نهایی هر تنوع (finalPrice، پیش از تخفیف محصول) را مستقیماً روی
-// خودش محاسبه و اضافه می‌کند — تا فرانت مجبور نباشد فرمول قیمت‌گذاری
-// (priceAdjustment + modifierValue های ویژگی‌ها + تبدیل ارز) را خودش
-// دوباره پیاده‌سازی کند و به‌جایش دقیقاً همین عددی را نشان دهد که در سبد
-// خرید/سفارش هم استفاده می‌شود.
+// قیمت نهایی هر تنوع (finalPrice، پس از تخفیف محصول در صورت فعال بودن)
+// را مستقیماً روی خودش محاسبه و اضافه می‌کند — تا فرانت مجبور نباشد
+// فرمول قیمت‌گذاری (priceAdjustment + modifierValue های ویژگی‌ها + تبدیل
+// ارز + تخفیف) را خودش دوباره پیاده‌سازی کند و به‌جایش دقیقاً همین عددی
+// را نشان دهد که در سبد خرید/سفارش هم استفاده می‌شود. originalPrice
+// (پیش از تخفیف) هم برای نمایش قیمت خط‌خورده اضافه شده.
 function attachVariantPrices(product: Record<string, unknown>): Record<string, unknown> {
   const variants = product.variants as Array<Record<string, unknown>> | undefined;
   if (!variants) return product;
@@ -466,21 +481,27 @@ function attachVariantPrices(product: Record<string, unknown>): Record<string, u
     basePrice: product.basePrice as number,
     sourcePrice: product.sourcePrice as number | null,
     priceBufferPercent: product.priceBufferPercent as number | null,
+    discountType: product.discountType as "PERCENT" | "FIXED" | null,
+    discountValue: product.discountValue as number | null,
   };
   const currency = (product.currency as { currentRate: number | null } | null) ?? null;
 
   return {
     ...product,
-    variants: variants.map((v) => ({
-      ...v,
-      finalPrice: calculateVariantPrice(pricingInput, currency, {
+    variants: variants.map((v) => {
+      const breakdown = calculateVariantPrice(pricingInput, currency, {
         priceAdjustment: v.priceAdjustment as number,
         attributeValues: (v.attributeValues as Array<Record<string, unknown>>).map((av) => ({
           modifierType: (av.modifierType ?? null) as never,
           modifierValue: (av.modifierValue ?? null) as number | null,
         })),
-      }).finalPriceIRT,
-    })),
+      });
+      return {
+        ...v,
+        finalPrice: breakdown.finalPriceIRT,
+        originalPrice: breakdown.originalPriceIRT,
+      };
+    }),
   };
 }
 

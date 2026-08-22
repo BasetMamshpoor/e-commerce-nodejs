@@ -1,4 +1,4 @@
-import { PricingMode, ModifierType } from "../generated/prisma";
+import { PricingMode, ModifierType, DiscountType } from "../generated/prisma";
 
 export interface AttributeValueModifier {
   modifierType: ModifierType | null;
@@ -10,6 +10,17 @@ export interface ProductPricingInput {
   basePrice: number;
   sourcePrice: number | null;
   priceBufferPercent: number | null;
+  /** Product-level markdown/sale ("X% off" or "Y تومان تخفیف"), applied
+   *  as the final step on top of the variant-adjusted price (base +
+   *  attribute/priceAdjustment modifiers). These two fields exist on the
+   *  Product model and are fully configurable from the admin panel, but
+   *  until now were never referenced anywhere in this file — every price
+   *  this engine produced (cart, checkout, product aggregates, the
+   *  admin's own price-preview endpoint) silently ignored any discount
+   *  the admin had configured, and recomputeProductAggregates hardcoded
+   *  hasActiveDiscount to false regardless of these fields' values. */
+  discountType?: DiscountType | null;
+  discountValue?: number | null;
 }
 
 export interface CurrencyRateInput {
@@ -18,11 +29,34 @@ export interface CurrencyRateInput {
 
 export interface PriceBreakdown {
   finalPriceIRT: number;
+  /** Price before the product-level discount (still after variant
+   *  modifiers) — equals finalPriceIRT when no discount is active. Use
+   *  this as the "compare at" / strikethrough price. */
+  originalPriceIRT: number;
+  /** Amount actually subtracted by the discount (0 if none is active). */
+  discountAmount: number;
   sourceAmount: number;
   rateUsed: number | null;
   bufferApplied: number | null;
   fixedIrtAdjustments: number;
   totalAdjustments: number;
+}
+
+/** Applies a product-level discount to an already-computed (pre-discount)
+ *  IRT price. Clamped so a badly-configured discount (e.g. a FIXED
+ *  amount larger than the price) can never produce a negative price. */
+function applyProductDiscount(
+  priceIRT: number,
+  discountType?: DiscountType | null,
+  discountValue?: number | null
+): { finalPriceIRT: number; discountAmount: number } {
+  if (!discountType || !discountValue || discountValue <= 0) {
+    return { finalPriceIRT: Math.round(priceIRT), discountAmount: 0 };
+  }
+  const rawDiscount =
+    discountType === "PERCENT" ? priceIRT * (Math.min(discountValue, 100) / 100) : discountValue;
+  const discountAmount = Math.round(Math.max(0, Math.min(rawDiscount, priceIRT)));
+  return { finalPriceIRT: Math.round(priceIRT) - discountAmount, discountAmount };
 }
 
 export function calculateFinalPrice(
@@ -49,9 +83,16 @@ export function calculateFinalPrice(
 
     const percentAdjustment = product.basePrice * (percentSum / 100);
     const finalPrice = product.basePrice + fixedIrtAdjustments + percentAdjustment;
+    const { finalPriceIRT, discountAmount } = applyProductDiscount(
+      finalPrice,
+      product.discountType,
+      product.discountValue
+    );
 
     return {
-      finalPriceIRT: Math.round(finalPrice),
+      finalPriceIRT,
+      originalPriceIRT: Math.round(finalPrice),
+      discountAmount,
       sourceAmount: product.basePrice,
       rateUsed: null,
       bufferApplied: null,
@@ -95,8 +136,16 @@ export function calculateFinalPrice(
       }
     }
 
+    const { finalPriceIRT, discountAmount } = applyProductDiscount(
+      convertedIRT,
+      product.discountType,
+      product.discountValue
+    );
+
     return {
-      finalPriceIRT: Math.round(convertedIRT),
+      finalPriceIRT,
+      originalPriceIRT: Math.round(convertedIRT),
+      discountAmount,
       sourceAmount,
       rateUsed: rate,
       bufferApplied,
