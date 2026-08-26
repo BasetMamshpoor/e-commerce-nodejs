@@ -18,8 +18,12 @@ export async function remove(req: Request, res: Response) {
   return ApiResponse.ok(res, null, "ویژگی حذف شد");
 }
 
-export async function list(_req: Request, res: Response) {
-  return ApiResponse.ok(res, await attributeService.listAttributes());
+export async function list(req: Request, res: Response) {
+  const categoryIdsParam = typeof req.query.categoryIds === "string" ? req.query.categoryIds : undefined;
+  const categoryIds = categoryIdsParam
+    ? categoryIdsParam.split(",").map(Number).filter((n) => Number.isFinite(n))
+    : undefined;
+  return ApiResponse.ok(res, await attributeService.listAttributes(categoryIds));
 }
 
 export async function getById(req: Request, res: Response) {

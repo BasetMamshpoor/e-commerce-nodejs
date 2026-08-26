@@ -30,7 +30,11 @@ export async function createAttribute(input: CreateAttributeInput) {
       isFilterable: input.isFilterable,
       isVariant: input.isVariant,
       isDisplay: input.isDisplay ?? false,
+      categories: input.categoryIds?.length
+        ? { create: input.categoryIds.map((categoryId) => ({ categoryId })) }
+        : undefined,
     },
+    include: { categories: { select: { categoryId: true } } },
   });
 }
 
@@ -46,7 +50,28 @@ export async function updateAttribute(id: number, input: UpdateAttributeInput) {
     }
   }
 
-  return prisma.attribute.update({ where: { id }, data: { ...input, slug } });
+  const { categoryIds, ...rest } = input;
+
+  return prisma.attribute.update({
+    where: { id },
+    data: {
+      ...rest,
+      slug,
+      // undefined categoryIds (key omitted entirely) means "don't touch
+      // category associations" — only an explicit array (including an
+      // empty one, meaning "applies to all categories again") replaces
+      // them, via full delete+recreate since this is a small join table.
+      ...(categoryIds !== undefined
+        ? {
+            categories: {
+              deleteMany: {},
+              create: categoryIds.map((categoryId) => ({ categoryId })),
+            },
+          }
+        : {}),
+    },
+    include: { categories: { select: { categoryId: true } } },
+  });
 }
 
 export async function deleteAttribute(id: number): Promise<void> {
@@ -63,9 +88,28 @@ export async function deleteAttribute(id: number): Promise<void> {
   await prisma.attribute.delete({ where: { id } });
 }
 
-export async function listAttributes() {
+export async function listAttributes(categoryIds?: number[]) {
   return prisma.attribute.findMany({
-    include: { values: { orderBy: { order: "asc" } } },
+    where:
+      categoryIds && categoryIds.length > 0
+        ? {
+            OR: [
+              // Applies to (at least one of) the given categories...
+              { categories: { some: { categoryId: { in: categoryIds } } } },
+              // ...or has no category restriction at all (applies everywhere).
+              { categories: { none: {} } },
+            ],
+          }
+        : undefined,
+    include: {
+      values: { orderBy: { order: "asc" } },
+      // Needed by the admin attributes page (to show/edit which categories
+      // an attribute applies to) and by product create/edit (to filter the
+      // variant/display attribute pickers down to the product's selected
+      // categories) — previously never included, so both consumers had no
+      // way to know this without fetching categories one-by-one.
+      categories: { select: { categoryId: true } },
+    },
     orderBy: { name: "asc" },
   });
 }

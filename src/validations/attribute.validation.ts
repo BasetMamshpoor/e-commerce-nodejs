@@ -7,6 +7,10 @@ export const createAttributeSchema = z.object({
   isFilterable: z.coerce.boolean().optional().default(true),
   isVariant: z.coerce.boolean().optional().default(true),
   isDisplay: z.coerce.boolean().optional().default(false),
+  // Categories this attribute applies to. Omitted/empty means "applies to
+  // every category" (the pre-existing, unrestricted default), so existing
+  // attributes created before this field is used everywhere unchanged.
+  categoryIds: z.array(z.coerce.number().int().positive()).optional(),
 });
 export const updateAttributeSchema = createAttributeSchema.partial();
 
