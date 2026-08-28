@@ -13,6 +13,14 @@ export async function unsubscribe(req: Request, res: Response) {
 }
 
 export async function listSubscribers(req: Request, res: Response) {
-  const { page, limit } = req.query as { page?: string; limit?: string };
-  return ApiResponse.ok(res, await newsletterService.listSubscribers(page ? Number(page) : undefined, limit ? Number(limit) : undefined));
+  const { page, limit, search } = req.query as { page?: string; limit?: string; search?: string };
+  return ApiResponse.ok(
+    res,
+    await newsletterService.listSubscribers(page ? Number(page) : undefined, limit ? Number(limit) : undefined, search)
+  );
+}
+
+export async function exportSubscribers(req: Request, res: Response) {
+  const { search } = req.query as { search?: string };
+  return ApiResponse.ok(res, await newsletterService.listAllSubscribersForExport(search));
 }

@@ -10,5 +10,6 @@ router.post("/subscribe", validate(z.object({ email: z.string().email() })), new
 router.post("/unsubscribe", validate(z.object({ email: z.string().email() })), newsletterController.unsubscribe);
 
 router.get("/admin/subscribers", authenticate, authorize("ADMIN"), newsletterController.listSubscribers);
+router.get("/admin/subscribers/export", authenticate, authorize("ADMIN"), newsletterController.exportSubscribers);
 
 export default router;
