@@ -82,6 +82,27 @@ export async function verifyOrderPayment(
   });
   if (!gatewayRecord) throw ApiError.notFound("درگاه پرداخت پیدا نشد");
 
+  // Atomically claim this transaction BEFORE calling out to the gateway —
+  // updateMany's WHERE clause (status: "PENDING") makes this a
+  // compare-and-swap: if two verify requests arrive concurrently (double-
+  // click, a retried request, or the effect on the frontend page firing
+  // twice), only one can actually flip PENDING -> FAILED here; the other
+  // gets claim.count === 0 and bails out immediately instead of both
+  // proceeding to call gateway.verifyPayment (a network round-trip to the
+  // actual payment gateway, which widens the race window a lot) and racing
+  // to update the order's status. Provisionally marks FAILED; flipped to
+  // SUCCESS below once the gateway actually confirms. If the gateway call
+  // throws or the process dies before that, the transaction correctly
+  // stays FAILED — same end state as the existing failure path — rather
+  // than being left claimed-but-never-finished.
+  const claim = await prisma.transaction.updateMany({
+    where: { id: transaction.id, status: "PENDING" },
+    data: { status: "FAILED" },
+  });
+  if (claim.count === 0) {
+    throw ApiError.conflict("این تراکنش هم‌اکنون در حال بررسی یا قبلاً بررسی شده است");
+  }
+
   const gateway = getGateway(gatewayRecord.slug);
   const result = await gateway.verifyPayment({
     orderId: String(order.id),
@@ -90,7 +111,7 @@ export async function verifyOrderPayment(
   });
 
   if (!result.success) {
-    await prisma.transaction.update({ where: { id: transaction.id }, data: { status: "FAILED" } });
+    // Already marked FAILED by the claim above — nothing further to do.
     throw ApiError.badRequest("پرداخت ناموفق بود؛ می‌توانید دوباره تلاش کنید");
   }
 
