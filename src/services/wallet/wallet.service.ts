@@ -72,6 +72,27 @@ export async function verifyWalletCharge(
   });
   if (!gatewayRecord) throw ApiError.notFound("درگاه پرداخت پیدا نشد");
 
+  // Atomically claim this transaction BEFORE calling out to the gateway.
+  // The status==="SUCCESS" check above only protects against a SECOND
+  // call arriving after the FIRST has already fully committed — it does
+  // nothing for two concurrent calls that both read a not-yet-SUCCESS
+  // status before either commits (double-click, a retried request, a
+  // page effect firing twice), which could both pass the check, both
+  // call the actual payment gateway (a real network round-trip that
+  // widens this window a lot), and both reach the wallet increment below
+  // — a genuine double-credit of real money into the wallet balance, not
+  // just a duplicated status transition. updateMany's WHERE clause
+  // (status: "PENDING") makes claiming this transaction a compare-and-
+  // swap: only one concurrent request can succeed; the other gets
+  // claim.count === 0 and bails out immediately.
+  const claim = await prisma.transaction.updateMany({
+    where: { id: transaction.id, status: "PENDING" },
+    data: { status: "FAILED" },
+  });
+  if (claim.count === 0) {
+    throw ApiError.conflict("این تراکنش هم‌اکنون در حال بررسی یا قبلاً بررسی شده است");
+  }
+
   const gateway = getGateway(gatewayRecord.slug);
   const result = await gateway.verifyPayment({
     orderId: String(transaction.id),
@@ -80,7 +101,7 @@ export async function verifyWalletCharge(
   });
 
   if (!result.success) {
-    await prisma.transaction.update({ where: { id: transaction.id }, data: { status: "FAILED" } });
+    // Already marked FAILED by the claim above — nothing further to do.
     throw ApiError.badRequest("پرداخت ناموفق بود");
   }
 
